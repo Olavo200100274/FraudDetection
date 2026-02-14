@@ -1,0 +1,13 @@
+stage,seconds
+Prepare output dirs,0.00017179999849759042
+CSV loading + dedup/cleanup,1.2103940000233706
+Prepare X/y,0.01641490001929924
+Split (stratified),0.18883649999042973
+Build pipeline (preprocessor + model),3.6999990697950125e-05
+Train (fit),24.181904800003394
+Predictions + threshold sweep (validation),0.8800561999960337
+Test evaluation (metrics + confusion matrix),0.013841500011039898
+Build PR curve points (test),0.0014660999877378345
+Save CSV artifacts,0.005520600010640919
+Generate plots,0.4153633000096306
+TOTAL,26.914006700040773
