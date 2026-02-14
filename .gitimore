@@ -1,0 +1,12 @@
+# python
+__pycache__/
+*.pyc
+
+# data & generated artifacts
+data/raw/
+results/
+figures/
+catboost_info/
+
+# local env
+.env
