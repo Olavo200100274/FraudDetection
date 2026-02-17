@@ -1,0 +1,13 @@
+stage,seconds
+Prepare output dirs,0.00021600001491606236
+CSV loading + dedup/cleanup,1.2637997000128962
+Prepare X/y,0.019591700023738667
+Split (stratified),0.20231500000227243
+"Preprocessing (fit on train, transform all)",0.14523260001442395
+Train CatBoost (fit),25.911908999987645
+Predictions + threshold sweep (validation),0.7024246000219136
+Test evaluation (metrics + confusion matrix),0.01779839998926036
+Build PR curve points (test),0.004958200006512925
+Save CSV artifacts,0.08214890002273023
+Generate plots,0.3446515000250656
+TOTAL,28.695045600121375
