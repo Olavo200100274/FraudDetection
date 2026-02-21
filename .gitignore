@@ -1,0 +1,23 @@
+# data: ignorar por defeito, exceto o ULB2013 em LFS
+data/*
+!data/creditcard_2013.csv
+
+# runs e reports (não versionar)
+runs/
+reports/
+
+# outputs de libs
+catboost_info/
+**/__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# envs
+.venv/
+venv/
+.env
+
+# OS/IDE
+.DS_Store
+Thumbs.db
+.vscode/
