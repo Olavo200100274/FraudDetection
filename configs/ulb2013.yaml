@@ -1,0 +1,28 @@
+dataset:
+  name: ulb2013
+  path: data/creditcard_2013.csv
+  target_col: Class
+
+split:
+  test_size: 0.2
+  seed: 42
+  stratify: true
+  temporal: false  # ULB2013 não tem timestamp real; deixa false
+
+cv:
+  n_splits: 5
+  shuffle: true
+  seed: 42
+
+thresholding:
+  rule: max_fbeta
+  betas: [1.0, 2.0]   # F1 e F2
+  aggregate: median   # median (recomendado) ou mean
+
+tuning:
+  enabled: false      # começa em false para validar pipeline
+  n_iter: 30
+  seed: 42
+
+output:
+  runs_dir: runs
