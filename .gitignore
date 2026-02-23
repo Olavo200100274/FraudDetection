@@ -1,10 +1,12 @@
-# data: ignorar por defeito, exceto o ULB2013 em LFS
-data/*
-!data/creditcard_2013.csv
-
-# runs e reports (não versionar)
+# runs e reports antigos (não versionar)
 runs/
 reports/
+
+# datasets (too large for git)
+datasets/*.csv
+
+# trained model artefacts (large binaries)
+results/**/model.joblib
 
 # outputs de libs
 catboost_info/
@@ -12,12 +14,12 @@ catboost_info/
 *.pyc
 .ipynb_checkpoints/
 
-# envs
-.venv/
-venv/
-.env
-
-# OS/IDE
+# OS / editor
 .DS_Store
 Thumbs.db
+*.swp
 .vscode/
+
+# Thesis backups
+thesis/Results_old*.tex
+
