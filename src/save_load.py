@@ -81,6 +81,10 @@ def save_run(
     # 7. PR curve raw data
     _save_pr_data(y_test, y_test_scores, run_dir)
 
+    # 8. Raw predictions (for threshold study, DeLong tests, etc.)
+    np.save(os.path.join(run_dir, "y_test.npy"), np.asarray(y_test))
+    np.save(os.path.join(run_dir, "y_test_scores.npy"), np.asarray(y_test_scores))
+
     print(f"  Run saved → {run_dir}")
     return run_dir
 

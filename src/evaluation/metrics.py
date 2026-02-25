@@ -43,6 +43,57 @@ def find_threshold_maximizing_f2(y_true, y_scores):
     return float(thresholds[best_idx]), float(f2_scores[best_idx])
 
 
+def find_threshold_maximizing_f1(y_true, y_scores):
+    """
+    Find the decision threshold that maximises the F1 score.
+
+    Returns
+    -------
+    best_threshold : float
+    best_f1 : float
+    """
+    precisions, recalls, thresholds = precision_recall_curve(y_true, y_scores)
+
+    p = precisions[:-1]
+    r = recalls[:-1]
+
+    numerator = 2 * p * r
+    denominator = p + r
+    with np.errstate(divide="ignore", invalid="ignore"):
+        f1_scores = np.where(denominator > 0, numerator / denominator, 0.0)
+
+    best_idx = np.argmax(f1_scores)
+    return float(thresholds[best_idx]), float(f1_scores[best_idx])
+
+
+def find_threshold_at_min_precision(y_true, y_scores, min_precision=0.5):
+    """
+    Find the lowest threshold that ensures Precision >= min_precision.
+
+    Sweeps thresholds from precision_recall_curve (sorted ascending) and
+    returns the lowest one whose precision meets the constraint.
+
+    Returns
+    -------
+    best_threshold : float   (or np.inf if no threshold satisfies the constraint)
+    precision_at_threshold : float
+    """
+    precisions, recalls, thresholds = precision_recall_curve(y_true, y_scores)
+
+    # precision_recall_curve returns thresholds in ascending order.
+    # precisions[:-1] and recalls[:-1] correspond to thresholds.
+    p = precisions[:-1]
+
+    # Find indices where precision >= min_precision
+    valid = np.where(p >= min_precision)[0]
+    if len(valid) == 0:
+        return float("inf"), 0.0
+
+    # Lowest threshold that meets the constraint
+    best_idx = valid[0]
+    return float(thresholds[best_idx]), float(p[best_idx])
+
+
 def compute_all_metrics(y_true, y_scores, threshold):
     """
     Compute every evaluation metric required by the thesis protocol.

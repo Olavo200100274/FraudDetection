@@ -1,0 +1,16 @@
+\begin{table}[ht]
+\centering
+\caption{PR-AUC by model $\times$ strategy on ULB 2013.}
+\label{tab:factorial_ulb_prauc}
+\begin{tabular}{l c c c c c c c}
+\toprule
+Model & None & RUS & ROS & SMOTE & SM+T & SMOTEENN & Weights \\
+\midrule
+LR         & \textbf{0.742} & 0.673 & 0.714 & 0.723 & 0.723 & 0.732 & 0.709 \\
+RF         & \textbf{0.871} & 0.693 & 0.857 & 0.859 & 0.859 & 0.841 & 0.858 \\
+LGBM       & 0.865 & 0.677 & 0.881 & \textbf{0.884} & \textbf{0.884} & 0.862 & 0.878 \\
+CatBoost   & \textbf{0.886} & 0.632 & 0.874 & 0.859 & 0.859 & 0.840 & 0.878 \\
+% FT-Trans. & --- & --- & --- & --- & --- & --- & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
