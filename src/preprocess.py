@@ -1,25 +1,55 @@
-from sklearn.preprocessing import StandardScaler
+"""
+Preprocessing module — builds a ColumnTransformer appropriate for the
+features present in the training data.
+
+- Numeric features → mean imputation + StandardScaler
+- Categorical features (if any) → most-frequent imputation + OneHotEncoder
+"""
+
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.impute import SimpleImputer
 import sklearn
 sklearn.set_config(transform_output="pandas")
 
-def get_preprocessor(X_train):
-    # Identificar features numéricas
-    numeric_features = X_train.select_dtypes(include=['float64', 'int64']).columns.tolist()
 
-    # Criar um pré-processador para as features numéricas
+def get_preprocessor(X_train):
+    """
+    Build a ColumnTransformer that handles both numeric and categorical
+    features.  If the data has no categorical columns (e.g. ULB), only
+    the numeric branch is created.
+    """
+    numeric_features = X_train.select_dtypes(
+        include=["float64", "int64"]
+    ).columns.tolist()
+
+    categorical_features = X_train.select_dtypes(
+        include=["object", "category"]
+    ).columns.tolist()
+
+    # Numeric branch: impute + scale
     numeric_transformer = Pipeline(steps=[
-        ('imputer', SimpleImputer(strategy='mean')),
-        ('scaler', StandardScaler())
+        ("imputer", SimpleImputer(strategy="mean")),
+        ("scaler", StandardScaler()),
     ])
 
-    # Aplicar o preprocessor (verbose_feature_names_out=False keeps original names)
+    transformers = [
+        ("num", numeric_transformer, numeric_features),
+    ]
+
+    # Categorical branch (only if categorical columns exist)
+    if categorical_features:
+        categorical_transformer = Pipeline(steps=[
+            ("imputer", SimpleImputer(strategy="most_frequent")),
+            ("encoder", OneHotEncoder(handle_unknown="ignore", sparse_output=False)),
+        ])
+        transformers.append(
+            ("cat", categorical_transformer, categorical_features)
+        )
+
     preprocessor = ColumnTransformer(
-        transformers=[
-            ('num', numeric_transformer, numeric_features)
-        ],
+        transformers=transformers,
         verbose_feature_names_out=False,
     )
     return preprocessor

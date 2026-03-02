@@ -6,7 +6,7 @@ Usage:
     python generate_results.py
 
 Reads from:  ../results/ulb_2013/<model>/none/<run>/
-Writes to:   ../thesis/tables/  and  ../thesis/figures/
+Writes to:   ../thesis/tables/{ulb,baf}/  and  ../thesis/figures/{ulb,baf}/
 """
 
 import json
@@ -23,10 +23,18 @@ import numpy as np
 # ── paths ────────────────────────────────────────────────────────────────
 ROOT = Path(__file__).resolve().parent.parent
 RESULTS_DIR = ROOT / "results"
-TABLES_DIR = ROOT / "thesis" / "tables"
-FIGURES_DIR = ROOT / "thesis" / "figures"
-TABLES_DIR.mkdir(parents=True, exist_ok=True)
-FIGURES_DIR.mkdir(parents=True, exist_ok=True)
+TABLES_BASE = ROOT / "thesis" / "tables"
+FIGURES_BASE = ROOT / "thesis" / "figures"
+
+def _tables_dir(filename):
+    d = TABLES_BASE / filename
+    d.mkdir(parents=True, exist_ok=True)
+    return d
+
+def _figures_dir(filename):
+    d = FIGURES_BASE / filename
+    d.mkdir(parents=True, exist_ok=True)
+    return d
 
 # ── display ordering & names ─────────────────────────────────────────────
 MODEL_ORDER = ["logreg", "rf", "lgbm", "catboost", "ocsvm"]
@@ -137,7 +145,7 @@ def generate_baseline_table(data, dataset_label, filename):
     lines.append(r"\end{tabular}")
     lines.append(r"\end{table}")
 
-    out = TABLES_DIR / f"baseline_{filename}.tex"
+    out = _tables_dir(filename) / "baseline.tex"
     out.write_text("\n".join(lines), encoding="utf-8")
     print(f"  → {out}")
 
@@ -181,7 +189,7 @@ def generate_ops_table(data, dataset_label, filename):
     lines.append(r"\end{tabular}")
     lines.append(r"\end{table}")
 
-    out = TABLES_DIR / f"ops_{filename}.tex"
+    out = _tables_dir(filename) / "ops.tex"
     out.write_text("\n".join(lines), encoding="utf-8")
     print(f"  → {out}")
 
@@ -221,7 +229,7 @@ def generate_ci_table(data, dataset_label, filename):
     lines.append(r"\end{tabular}")
     lines.append(r"\end{table}")
 
-    out = TABLES_DIR / f"ci_{filename}.tex"
+    out = _tables_dir(filename) / "ci.tex"
     out.write_text("\n".join(lines), encoding="utf-8")
     print(f"  → {out}")
 
@@ -268,7 +276,7 @@ def generate_cost_table(data, dataset_label, filename):
     lines.append(r"\end{tabular}")
     lines.append(r"\end{table}")
 
-    out = TABLES_DIR / f"cost_{filename}.tex"
+    out = _tables_dir(filename) / "cost.tex"
     out.write_text("\n".join(lines), encoding="utf-8")
     print(f"  → {out}")
 
@@ -312,7 +320,7 @@ def generate_pr_curve(data, dataset_label, filename, fraud_rate=0.0017):
     ax.legend(loc="upper right", fontsize=9, framealpha=0.9)
     ax.grid(True, alpha=0.3)
 
-    out = FIGURES_DIR / f"pr_curves_{filename}_baseline.pdf"
+    out = _figures_dir(filename) / "pr_curves_baseline.pdf"
     fig.savefig(out, bbox_inches="tight", dpi=150)
     plt.close(fig)
     print(f"  → {out}")
@@ -353,7 +361,7 @@ def generate_prauc_bar(data, dataset_label, filename):
     for i, (v, hi) in enumerate(zip(praucs, ci_high)):
         ax.text(hi + 0.01, i, f"{v:.3f}", va="center", fontsize=10)
 
-    out = FIGURES_DIR / f"prauc_bar_{filename}_baseline.pdf"
+    out = _figures_dir(filename) / "prauc_bar_baseline.pdf"
     fig.savefig(out, bbox_inches="tight", dpi=150)
     plt.close(fig)
     print(f"  → {out}")
@@ -394,7 +402,7 @@ def generate_confusion_grid(data, dataset_label, filename):
 
     fig.suptitle(f"Confusion Matrices — {dataset_label} (strategy = None)",
                  fontsize=13, y=1.02)
-    out = FIGURES_DIR / f"confusion_grid_{filename}_baseline.pdf"
+    out = _figures_dir(filename) / "confusion_grid_baseline.pdf"
     fig.savefig(out, bbox_inches="tight", dpi=150)
     plt.close(fig)
     print(f"  → {out}")
@@ -451,7 +459,7 @@ def _generate_threshold_table(ts_data, metric_key, dataset_label, filename,
     lines.append(r"\end{tabular}")
     lines.append(r"\end{table}")
 
-    out = TABLES_DIR / f"threshold_{filename}_{label_suffix}.tex"
+    out = _tables_dir(filename) / f"threshold_{label_suffix}.tex"
     out.write_text("\n".join(lines), encoding="utf-8")
     print(f"  → {out}")
 
@@ -569,7 +577,7 @@ def generate_factorial_table(fdata, metric_key, dataset_label, filename,
     lines.append(r"\end{tabular}")
     lines.append(r"\end{table}")
 
-    out = TABLES_DIR / f"factorial_{filename}_{label_suffix}.tex"
+    out = _tables_dir(filename) / f"factorial_{label_suffix}.tex"
     out.write_text("\n".join(lines), encoding="utf-8")
     print(f"  → {out}")
 
@@ -642,7 +650,7 @@ def generate_factorial_heatmap(fdata, dataset_label, filename):
         )
         ax.set_ylabel("")
 
-        out = FIGURES_DIR / f"heatmap_{filename}_{suffix}.pdf"
+        out = _figures_dir(filename) / f"heatmap_{suffix}.pdf"
         fig.savefig(out, bbox_inches="tight", dpi=150)
         plt.close(fig)
         print(f"  → {out}")
@@ -704,7 +712,7 @@ def main():
         print("  No BAF results found yet — skipping.")
 
     print("\n" + "=" * 60)
-    print("  Done! Check thesis/tables/ and thesis/figures/")
+    print("  Done! Check thesis/tables/{ulb,baf}/ and thesis/figures/{ulb,baf}/")
     print("=" * 60)
 
 

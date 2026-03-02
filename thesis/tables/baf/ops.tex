@@ -1,0 +1,16 @@
+\begin{table}[ht]
+\centering
+\caption{Operational metrics on BAF Base (strategy\,=\,None, threshold\,=\,max-$F_2$).}
+\label{tab:ops_baf}
+\begin{tabular}{l c c c c c}
+\toprule
+Model & Alert Rate & FP/TP & P@$k$ & R@$k$ & $k$ \\
+\midrule
+LR         & 3.99\% & 7.29 & 0.272 & 0.123 & 1,000 \\
+RF         & 3.60\% & 6.84 & 0.303 & 0.137 & 1,000 \\
+LGBM       & 4.13\% & 6.75 & 0.327 & 0.148 & 1,000 \\
+CatBoost   & 3.80\% & 6.30 & 0.341 & 0.155 & 1,000 \\
+OCSVM      & 7.32\% & 37.73 & 0.030 & 0.014 & 1,000 \\
+\bottomrule
+\end{tabular}
+\end{table}

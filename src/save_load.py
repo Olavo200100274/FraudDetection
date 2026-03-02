@@ -4,6 +4,9 @@ import os
 import platform
 import sys
 from datetime import datetime
+from pathlib import Path
+
+_PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
 import matplotlib
 matplotlib.use("Agg")  # non-interactive backend
@@ -45,7 +48,7 @@ def save_run(
     """
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     run_dir = os.path.join(
-        "results", dataset, model_name, strategy, f"run_{timestamp}"
+        str(_PROJECT_ROOT), "results", dataset, model_name, strategy, f"run_{timestamp}"
     )
     os.makedirs(run_dir, exist_ok=True)
 

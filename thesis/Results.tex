@@ -58,47 +58,15 @@ where alternative threshold strategies are applied \emph{without retraining}.
 
 \subsubsection{ULB Credit Card 2013}
 
-\begin{table}[ht]
-\centering
-\caption{Baseline comparison on ULB 2013 (strategy\,=\,None, threshold\,=\,max-$F_2$).}
-\label{tab:baseline_ulb}
-\begin{tabular}{l c c c c c c c}
-\toprule
-Model & PR-AUC & $F_1$ & $F_2$ & Precision & Recall & $\tau$ & Brier \\
-\midrule
-LR        & 0.742 & 0.758 & 0.809 & 0.686 & 0.847 & 0.048 & 0.0008 \\
-RF        & 0.871 & 0.839 & 0.862 & 0.804 & 0.878 & 0.210 & 0.0004 \\
-LGBM      & 0.865 & 0.863 & 0.847 & 0.891 & 0.837 & 0.051 & 0.0004 \\
-CatBoost  & 0.886 & 0.837 & 0.855 & 0.810 & 0.867 & 0.049 & 0.0003 \\
-% FT-Trans. — not yet run; row will be added after FT-Transformer experiment \\
-OCSVM     & 0.335 & 0.414 & 0.527 & 0.306 & 0.643 & 2.49  & ---    \\
-\bottomrule
-\end{tabular}
-\end{table}
+\input{tables/ulb/baseline}
 
-\begin{table}[ht]
-\centering
-\caption{Operational metrics on ULB 2013 (strategy\,=\,None, threshold\,=\,max-$F_2$).}
-\label{tab:baseline_ulb_ops}
-\begin{tabular}{l c c c c c}
-\toprule
-Model & Alert Rate & FP/TP & P@$k$ & R@$k$ & $k$ \\
-\midrule
-LR        & 0.21\% & 0.46 & 0.306 & 0.888 & 284 \\
-RF        & 0.19\% & 0.24 & 0.310 & 0.898 & 284 \\
-LGBM      & 0.16\% & 0.12 & 0.306 & 0.888 & 284 \\
-CatBoost  & 0.18\% & 0.24 & 0.310 & 0.898 & 284 \\
-% FT-Trans. — not yet run \\
-OCSVM     & 0.36\% & 2.27 & 0.243 & 0.704 & 284 \\
-\bottomrule
-\end{tabular}
-\end{table}
+\input{tables/ulb/ops}
 
 % ── PR Curve — ULB 2013 Baseline (generated from real data) ──
 
 \begin{figure}[ht]
   \centering
-  \includegraphics[width=0.88\textwidth]{figures/pr_curves_ulb_baseline.pdf}
+  \includegraphics[width=0.88\textwidth]{figures/ulb/pr_curves_baseline.pdf}
   \caption{Precision--Recall curves for all models on ULB 2013
     (strategy\,=\,None).
     PR-AUC values in parentheses.
@@ -111,51 +79,22 @@ OCSVM     & 0.36\% & 2.27 & 0.243 & 0.704 & 284 \\
 
 \subsubsection{BAF Base}
 
-\begin{table}[ht]
-\centering
-\caption{Baseline comparison on BAF Base (strategy\,=\,None, threshold\,=\,max-$F_2$).}
-\label{tab:baseline_baf_base}
-\begin{tabular}{l c c c c c c c}
-\toprule
-Model & PR-AUC & $F_1$ & $F_2$ & Precision & Recall & $\tau$ & Brier \\
-\midrule
-LR        & --- & --- & --- & --- & --- & --- & --- \\
-RF        & --- & --- & --- & --- & --- & --- & --- \\
-LGBM      & --- & --- & --- & --- & --- & --- & --- \\
-CatBoost  & --- & --- & --- & --- & --- & --- & --- \\
-FT-Trans. & --- & --- & --- & --- & --- & --- & --- \\
-OCSVM     & --- & --- & --- & --- & --- & --- & --- \\
-\bottomrule
-\end{tabular}
-\end{table}
+\input{tables/baf/baseline}
 
-\begin{table}[ht]
-\centering
-\caption{Operational metrics on BAF Base (strategy\,=\,None, threshold\,=\,max-$F_2$).}
-\label{tab:baseline_baf_ops}
-\begin{tabular}{l c c c c c}
-\toprule
-Model & Alert Rate & FP/TP & P@$k$ & R@$k$ & $k$ \\
-\midrule
-LR        & --- & --- & --- & --- & --- \\
-RF        & --- & --- & --- & --- & --- \\
-LGBM      & --- & --- & --- & --- & --- \\
-CatBoost  & --- & --- & --- & --- & --- \\
-FT-Trans. & --- & --- & --- & --- & --- \\
-OCSVM     & --- & --- & --- & --- & --- \\
-\bottomrule
-\end{tabular}
-\end{table}
+\input{tables/baf/ops}
 
-% ── PR Curve — BAF Base Baseline ──
-% TODO: Will be generated from real data once BAF experiments are complete.
-% \begin{figure}[ht]
-%   \centering
-%   \includegraphics[width=0.88\textwidth]{figures/pr_curves_baf_baseline.pdf}
-%   \caption{Precision--Recall curves for all models on BAF Base
-%     (strategy\,=\,None). PR-AUC values in parentheses.}
-%   \label{fig:pr_curves_baf_base}
-% \end{figure}
+% ── PR Curve — BAF Base Baseline (generated from real data) ──
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.88\textwidth]{figures/baf/pr_curves_baseline.pdf}
+  \caption{Precision--Recall curves for all models on BAF Base
+    (strategy\,=\,None).
+    PR-AUC values in parentheses.
+    The dashed horizontal line marks the precision of a random classifier
+    ($\approx 1.10\%$).}
+  \label{fig:pr_curves_baf_base}
+\end{figure}
 
 \paragraph{Discussion.}
 On ULB~2013, CatBoost achieves the highest PR-AUC (0.886),
@@ -167,8 +106,28 @@ unsupervised anomaly detection is a weak baseline when labelled data is availabl
 All bootstrap 95\,\% CIs for tree-based models overlap,
 suggesting the performance differences among them are not statistically significant
 at this sample size.
-BAF~Base results (with dummy values) will be updated once the BAF pipeline is completed.
-FT-Transformer results will likewise be added once that model is implemented.
+
+On BAF~Base (Tables~\ref{tab:baseline_baf_base}--\ref{tab:baseline_baf_ops},
+Figure~\ref{fig:pr_curves_baf_base}),
+the same ranking holds---CatBoost (0.179), LGBM (0.173), RF (0.154), LR (0.143)---but
+all PR-AUC values are dramatically lower than on ULB~2013.
+Three factors explain this gap:
+(i)~the ULB features are PCA-transformed principal components that already
+capture the most discriminative variance;
+(ii)~BAF is a synthetic benchmark (CTGAN-generated) specifically designed
+to be a harder, more realistic task;
+and (iii)~BAF contains five categorical features that, once one-hot encoded,
+produce sparse binary columns that dilute the signal for linear models.
+Precision is uniformly low ($\leq$~0.14 for all supervised models),
+resulting in FP/TP ratios of 6--7 (vs.\ $<$~1 on ULB).
+The best Recall@$k$ is only 0.155 (CatBoost, $k{=}1000$),
+reflecting the difficulty of concentrating fraud at the top of a
+one-million-row ranking.
+OCSVM collapses almost entirely (PR-AUC\,=\,0.019), producing an
+alert rate of 7.3\,\% with 37.7 false positives per true positive---
+effectively unusable in an operational setting.
+
+FT-Transformer results will be added once that model is implemented.
 
 
 % ══════════════════════════════════════════════════════════════════════════
@@ -393,9 +352,9 @@ OCSVM is excluded because it does not use labelled fraud examples during trainin
 
 \subsubsection{ULB Credit Card 2013}
 
-\input{tables/factorial_ulb_prauc}
+\input{tables/ulb/factorial_prauc}
 
-\input{tables/factorial_ulb_f2}
+\input{tables/ulb/factorial_f2}
 
 % ─────── BAF Base — Factorial ───────
 
@@ -409,10 +368,10 @@ OCSVM is excluded because it does not use labelled fraud examples during trainin
 \toprule
 Model & None & RUS & ROS & SMOTE & SM+T & SMOTEENN & Weights \\
 \midrule
-LR        & --- & --- & --- & --- & --- & --- & --- \\
-RF        & --- & --- & --- & --- & --- & --- & --- \\
-LGBM      & --- & --- & --- & --- & --- & --- & --- \\
-CatBoost  & --- & --- & --- & --- & --- & --- & --- \\
+LR        & 0.143 & --- & --- & --- & --- & --- & --- \\
+RF        & 0.154 & --- & --- & --- & --- & --- & --- \\
+LGBM      & 0.173 & --- & --- & --- & --- & --- & --- \\
+CatBoost  & 0.179 & --- & --- & --- & --- & --- & --- \\
 FT-Trans. & --- & --- & --- & --- & --- & --- & --- \\
 \bottomrule
 \end{tabular}
@@ -426,10 +385,10 @@ FT-Trans. & --- & --- & --- & --- & --- & --- & --- \\
 \toprule
 Model & None & RUS & ROS & SMOTE & SM+T & SMOTEENN & Weights \\
 \midrule
-LR        & --- & --- & --- & --- & --- & --- & --- \\
-RF        & --- & --- & --- & --- & --- & --- & --- \\
-LGBM      & --- & --- & --- & --- & --- & --- & --- \\
-CatBoost  & --- & --- & --- & --- & --- & --- & --- \\
+LR        & 0.286 & --- & --- & --- & --- & --- & --- \\
+RF        & 0.287 & --- & --- & --- & --- & --- & --- \\
+LGBM      & 0.312 & --- & --- & --- & --- & --- & --- \\
+CatBoost  & 0.317 & --- & --- & --- & --- & --- & --- \\
 FT-Trans. & --- & --- & --- & --- & --- & --- & --- \\
 \bottomrule
 \end{tabular}
@@ -440,14 +399,14 @@ FT-Trans. & --- & --- & --- & --- & --- & --- & --- \\
 % ── Heatmap ULB (code-generated) ──
 \begin{figure}[ht]
   \centering
-  \includegraphics[width=0.85\textwidth]{figures/heatmap_ulb_prauc.pdf}
+  \includegraphics[width=0.85\textwidth]{figures/ulb/heatmap_prauc.pdf}
   \caption{$\Delta$PR-AUC (strategy $-$ None) per model on ULB 2013.}
   \label{fig:heatmap_ulb_prauc}
 \end{figure}
 
 \begin{figure}[ht]
   \centering
-  \includegraphics[width=0.85\textwidth]{figures/heatmap_ulb_f2.pdf}
+  \includegraphics[width=0.85\textwidth]{figures/ulb/heatmap_f2.pdf}
   \caption{$\Delta F_2$ (strategy $-$ None) per model on ULB 2013.}
   \label{fig:heatmap_ulb_f2}
 \end{figure}
@@ -455,7 +414,7 @@ FT-Trans. & --- & --- & --- & --- & --- & --- & --- \\
 % TODO: BAF heatmaps will be added once BAF experiments are complete.
 % \begin{figure}[ht]
 %   \centering
-%   \includegraphics[width=0.85\textwidth]{figures/heatmap_baf_prauc.pdf}
+%   \includegraphics[width=0.85\textwidth]{figures/baf/heatmap_prauc.pdf}
 %   \caption{$\Delta$PR-AUC (strategy $-$ None) per model on BAF Base.}
 %   \label{fig:heatmap_baf}
 % \end{figure}
@@ -725,7 +684,7 @@ OCSVM     & --- & --- & --- & --- & --- & --- \\
 % TODO: Will be generated from real data once BAF variant experiments are complete.
 % \begin{figure}[ht]
 %   \centering
-%   \includegraphics[width=0.88\textwidth]{figures/baf_variants_comparison.pdf}
+%   \includegraphics[width=0.88\textwidth]{figures/baf/variants_comparison.pdf}
 %   \caption{PR-AUC across BAF Variants for the top-3 models
 %     (in-domain, best strategy).}
 %   \label{fig:baf_variants_comparison}

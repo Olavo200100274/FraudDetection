@@ -1,0 +1,16 @@
+\begin{table}[ht]
+\centering
+\caption{Computational cost on BAF Base (strategy\,=\,None). Tuning includes GridSearchCV (5-fold).}
+\label{tab:cost_baf}
+\begin{tabular}{l r r r}
+\toprule
+Model & Tuning (s) & Train (s) & Inference (s) \\
+\midrule
+LR         & 5,161 & 67.6 & 0.298 \\
+RF         & 6,534 & 480.4 & 6.204 \\
+LGBM       & 1,488 & 4.8 & 0.522 \\
+CatBoost   & 6,835 & 14.8 & 0.298 \\
+OCSVM      & --- & 931.1 & 73.156 \\
+\bottomrule
+\end{tabular}
+\end{table}

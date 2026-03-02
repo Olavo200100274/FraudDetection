@@ -2,7 +2,7 @@
 Fraud Detection Pipeline — Leakage-Free Evaluation Protocol
 ============================================================
 Supports baseline (strategy=None) and imbalance handling strategies
-on the ULB Credit Card 2013 dataset.
+on multiple fraud detection datasets (ULB 2013, BAF Base, etc.).
 
 For each supervised model:
   strategy=none (baseline):
@@ -43,7 +43,7 @@ from sklearn.base import clone
 from sklearn.model_selection import GridSearchCV, StratifiedKFold
 from sklearn.pipeline import Pipeline
 
-from data import load_ulb_data
+from data import load_dataset, get_dataset_info, DATASET_REGISTRY
 from preprocess import get_preprocessor
 from models.logreg import get_pipeline_and_params as get_logreg
 from models.rf import get_pipeline_and_params as get_rf
@@ -65,8 +65,6 @@ from strategies.balancing import (
 
 
 # ── Constants ─────────────────────────────────────────────────────────────
-DATASET_NAME = "ulb_2013"
-DATASET_FILE = "datasets/creditcard_2013.csv"
 SPLIT_SEED = 42
 CV_SPLITS = 5
 BOOTSTRAP_ITERATIONS = 1000
@@ -88,6 +86,13 @@ def parse_args():
         description="Fraud Detection — Leakage-Free Evaluation Pipeline"
     )
     parser.add_argument(
+        "--dataset",
+        type=str,
+        choices=list(DATASET_REGISTRY.keys()),
+        required=True,
+        help="Dataset to use: " + " | ".join(DATASET_REGISTRY.keys()),
+    )
+    parser.add_argument(
         "--models",
         type=str,
         nargs="+",
@@ -105,6 +110,16 @@ def parse_args():
             "'none' = baseline (default). "
             "'all' = run every non-baseline strategy. "
             "OCSVM is always run with strategy=none regardless."
+        ),
+    )
+    parser.add_argument(
+        "--sample",
+        type=float,
+        default=None,
+        help=(
+            "Stratified subsample fraction (0 < sample <= 1). "
+            "E.g. --sample 0.01 uses 1%% of the dataset (preserving "
+            "fraud prevalence). Useful for smoke-testing the pipeline."
         ),
     )
     return parser.parse_args()
@@ -125,7 +140,7 @@ def _file_hash(path, algorithm="sha256"):
 
 # ── supervised models ─────────────────────────────────────────────────────
 def run_supervised(model_name, X_train, X_test, y_train, y_test,
-                   preprocessor, dataset_hash):
+                   preprocessor, dataset_hash, dataset_name, dataset_file):
     """Full leakage-free protocol for a supervised classifier (strategy=None)."""
 
     get_fn = SUPERVISED_MODELS[model_name]
@@ -228,8 +243,8 @@ def run_supervised(model_name, X_train, X_test, y_train, y_test,
 
     # ── Config (full reproducibility record) ──────────────────────────
     config = {
-        "dataset": DATASET_NAME,
-        "dataset_file": DATASET_FILE,
+        "dataset": dataset_name,
+        "dataset_file": dataset_file,
         "dataset_hash_sha256": dataset_hash,
         "split_seed": SPLIT_SEED,
         "split_ratio": "80/20 stratified",
@@ -258,7 +273,7 @@ def run_supervised(model_name, X_train, X_test, y_train, y_test,
         config=config,
         model_name=model_name,
         strategy="none",
-        dataset=DATASET_NAME,
+        dataset=dataset_name,
         bootstrap_ci=ci,
     )
 
@@ -266,14 +281,16 @@ def run_supervised(model_name, X_train, X_test, y_train, y_test,
 
 
 # ── Load baseline best_params ─────────────────────────────────────────────
-def _load_baseline_params(model_name, dataset=DATASET_NAME):
+def _load_baseline_params(model_name, dataset):
     """
     Load best hyperparameters from the most recent baseline run.
 
     Looks for results/<dataset>/<model_name>/none/run_*/config.json
     and returns the 'best_params' dict from the latest run.
     """
-    base_dir = os.path.join("results", dataset, model_name, "none")
+    base_dir = os.path.join(
+        str(Path(__file__).resolve().parent.parent), "results", dataset, model_name, "none"
+    )
     if not os.path.isdir(base_dir):
         raise FileNotFoundError(
             f"No baseline run found at {base_dir}. "
@@ -303,7 +320,8 @@ def _load_baseline_params(model_name, dataset=DATASET_NAME):
 
 # ── Supervised model with imbalance strategy ──────────────────────────────
 def run_supervised_strategy(model_name, strategy, X_train, X_test,
-                            y_train, y_test, preprocessor, dataset_hash):
+                            y_train, y_test, preprocessor, dataset_hash,
+                            dataset_name, dataset_file):
     """
     Leakage-free protocol for a supervised classifier with an imbalance
     handling strategy (resampling or class weights).
@@ -316,7 +334,7 @@ def run_supervised_strategy(model_name, strategy, X_train, X_test,
 
     get_fn = SUPERVISED_MODELS[model_name]
     pipeline, _ = get_fn(preprocessor)
-    best_params = _load_baseline_params(model_name)
+    best_params = _load_baseline_params(model_name, dataset=dataset_name)
 
     # Set baseline hyperparameters (no re-tuning)
     pipeline.set_params(**best_params)
@@ -441,8 +459,8 @@ def run_supervised_strategy(model_name, strategy, X_train, X_test,
 
     # ── Config (full reproducibility record) ──────────────────────────
     config = {
-        "dataset": DATASET_NAME,
-        "dataset_file": DATASET_FILE,
+        "dataset": dataset_name,
+        "dataset_file": dataset_file,
         "dataset_hash_sha256": dataset_hash,
         "split_seed": SPLIT_SEED,
         "split_ratio": "80/20 stratified",
@@ -471,12 +489,13 @@ def run_supervised_strategy(model_name, strategy, X_train, X_test,
         config=config,
         model_name=model_name,
         strategy=strategy,
-        dataset=DATASET_NAME,
+        dataset=dataset_name,
         bootstrap_ci=ci,
     )
 
     return final_model, metrics_test
-def run_ocsvm(X_train, X_test, y_train, y_test, preprocessor, dataset_hash):
+def run_ocsvm(X_train, X_test, y_train, y_test, preprocessor, dataset_hash,
+              dataset_name, dataset_file):
     """
     Leakage-free protocol for One-Class SVM.
 
@@ -565,8 +584,8 @@ def run_ocsvm(X_train, X_test, y_train, y_test, preprocessor, dataset_hash):
     _print_results(metrics_test, ci)
 
     config = {
-        "dataset": DATASET_NAME,
-        "dataset_file": DATASET_FILE,
+        "dataset": dataset_name,
+        "dataset_file": dataset_file,
         "dataset_hash_sha256": dataset_hash,
         "split_seed": SPLIT_SEED,
         "split_ratio": "80/20 stratified",
@@ -593,7 +612,7 @@ def run_ocsvm(X_train, X_test, y_train, y_test, preprocessor, dataset_hash):
         config=config,
         model_name="ocsvm",
         strategy="none",
-        dataset=DATASET_NAME,
+        dataset=dataset_name,
         bootstrap_ci=ci,
     )
 
@@ -626,8 +645,10 @@ def _print_results(m, ci=None):
 # ── entry point ───────────────────────────────────────────────────────────
 def main():
     args = parse_args()
+    dataset_arg = args.dataset
     models = args.models
     strategy_arg = args.strategy
+    sample_frac = args.sample
 
     if "all" in models:
         models = ["logreg", "rf", "lgbm", "catboost", "ocsvm"]
@@ -639,12 +660,13 @@ def main():
         strategies = [strategy_arg]
 
     # ── Load data ─────────────────────────────────────────────────────
-    print("Loading ULB 2013 dataset ...")
-    X_train, X_test, y_train, y_test = load_ulb_data()
+    dataset_file, dataset_name = get_dataset_info(dataset_arg)
+    print(f"Loading {dataset_name} dataset ...")
+    X_train, X_test, y_train, y_test = load_dataset(dataset_arg, sample=sample_frac)
     print(f"  Train : {len(X_train):,} samples  ({y_train.sum()} fraud)")
     print(f"  Test  : {len(X_test):,} samples   ({y_test.sum()} fraud)")
 
-    dataset_hash = _file_hash(DATASET_FILE)
+    dataset_hash = _file_hash(dataset_file)
     print(f"  SHA-256 : {dataset_hash[:16]}...")
 
     # ── Preprocessor ──────────────────────────────────────────────────
@@ -659,7 +681,8 @@ def main():
                 if strategy == "none":
                     _, metrics = run_ocsvm(
                         X_train, X_test, y_train, y_test,
-                        preprocessor, dataset_hash
+                        preprocessor, dataset_hash,
+                        dataset_name, dataset_file
                     )
                     results[("ocsvm", "none")] = metrics
                 else:
@@ -670,18 +693,20 @@ def main():
             if strategy == "none":
                 _, metrics = run_supervised(
                     name, X_train, X_test, y_train, y_test,
-                    preprocessor, dataset_hash
+                    preprocessor, dataset_hash,
+                    dataset_name, dataset_file
                 )
             else:
                 _, metrics = run_supervised_strategy(
                     name, strategy, X_train, X_test, y_train, y_test,
-                    preprocessor, dataset_hash
+                    preprocessor, dataset_hash,
+                    dataset_name, dataset_file
                 )
             results[(name, strategy)] = metrics
 
     # ── Summary table ─────────────────────────────────────────────────
     print(f"\n\n{'=' * 110}")
-    print(f"  SUMMARY — ULB 2013")
+    print(f"  SUMMARY — {dataset_name.upper()}")
     print(f"{'=' * 110}")
     header = (
         f"{'Model':<10} {'Strategy':<12} {'PR-AUC':>8} {'F1':>8} {'F2':>8} "
