@@ -1,0 +1,54 @@
+\chapter{Models}
+\label{chap:models}
+This Chapter divides in 3 main parts. First .. 
+
+%general intro
+% ------------------------------------------------------------
+\section{Problem Formulation and Notation}
+\label{sec:models_formulation}
+\begin{itemize}
+  \item Binary classification (fraud vs.\ legitimate) on tabular transaction data.
+  \item Notation for numerical/categorical features, target label, and model score vs.\ probability output.
+  \item Decision threshold concept to support later precision/recall trade-offs and operational comparison.
+\end{itemize}
+
+\section{Classical Machine Learning Baselines}
+\label{sec:models_classical_baselines}
+\begin{itemize}
+  \item Baselines: Logistic Regression, Decision Tree, and Random Forest.
+  \item High-level learning principle and key hyperparameters (kept minimal, implementation-oriented).
+  \item Required preprocessing assumptions (e.g., encoding for categoricals; scaling for linear models).
+  \item Intrinsic interpretability hooks (LR coefficients; tree logic and feature importance).
+\end{itemize}
+
+\section{Neural Baseline: Multi-Layer Perceptron (MLP)}
+\label{sec:models_mlp}
+\begin{itemize}
+  \item MLP architecture for tabular data (input $\rightarrow$ hidden layers $\rightarrow$ output).
+  \item Training setup for binary classification and regularization (e.g., dropout, weight decay, early stopping).
+  \item Role of the MLP as a simple deep baseline before tabular Transformers.
+\end{itemize}
+
+\section{Transformer-based Models for Tabular Data}
+\label{sec:models_tabular_transformers}
+\begin{itemize}
+  \item How tabular Transformers represent features (embeddings and feature mixing).
+  \item Core mechanism: self-attention for learning feature interactions.
+  \item Practical distinction between TabTransformer and FT-Transformer (what changes in representation and training).
+  \item Classification head producing a fraud probability.
+\end{itemize}
+
+\section{Imbalance-aware Learning: Model-side Objectives}
+\label{sec:models_imbalance_objectives}
+\begin{itemize}
+  \item Class-weighted objective for deep models/Transformers to improve minority-class learning.
+  \item Rationale and implications for learning stability and probability outputs.
+  \item Boundary with Chapter~4: resampling strategies are defined in the experimental methodology, not here.
+\end{itemize}
+
+\section{Comparative Summary for Experimental Use}
+\label{sec:models_comparative_summary}
+\begin{itemize}
+  \item Compact comparison across all models: assumptions/inductive bias, strengths/limitations, computational cost, interpretability implications.
+  \item What will be compared later: PR-AUC/AUPRC, threshold-dependent precision/recall/F1, and compatibility with post-hoc explainability.
+\end{itemize}

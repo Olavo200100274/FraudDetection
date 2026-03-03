@@ -26,6 +26,28 @@ RESULTS_DIR = ROOT / "results"
 TABLES_BASE = ROOT / "thesis" / "tables"
 FIGURES_BASE = ROOT / "thesis" / "figures"
 
+# Overleaf project mirror — generated artifacts are copied here automatically
+OVERLEAF_ROOT = ROOT / "2026.Thesis.MSc.Olavo"
+OVERLEAF_TABLES = OVERLEAF_ROOT / "tables"
+OVERLEAF_FIGURES = OVERLEAF_ROOT / "figures"
+
+import shutil
+
+def _mirror_to_overleaf(src: Path):
+    """Copy a thesis/ artifact into the Overleaf project at the same relative path."""
+    # Determine if it's under tables/ or figures/
+    try:
+        rel = src.relative_to(TABLES_BASE)
+        dst = OVERLEAF_TABLES / rel
+    except ValueError:
+        try:
+            rel = src.relative_to(FIGURES_BASE)
+            dst = OVERLEAF_FIGURES / rel
+        except ValueError:
+            return  # not a tables/figures file
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(src, dst)
+
 def _tables_dir(filename):
     d = TABLES_BASE / filename
     d.mkdir(parents=True, exist_ok=True)
@@ -35,6 +57,11 @@ def _figures_dir(filename):
     d = FIGURES_BASE / filename
     d.mkdir(parents=True, exist_ok=True)
     return d
+
+def _emit(out: Path):
+    """Print path and mirror the file to the Overleaf project."""
+    _mirror_to_overleaf(out)
+    print(f"  → {out}")
 
 # ── display ordering & names ─────────────────────────────────────────────
 MODEL_ORDER = ["logreg", "rf", "lgbm", "catboost", "ocsvm"]
@@ -147,7 +174,7 @@ def generate_baseline_table(data, dataset_label, filename):
 
     out = _tables_dir(filename) / "baseline.tex"
     out.write_text("\n".join(lines), encoding="utf-8")
-    print(f"  → {out}")
+    _emit(out)
 
 
 # ══════════════════════════════════════════════════════════════════════════
@@ -191,7 +218,7 @@ def generate_ops_table(data, dataset_label, filename):
 
     out = _tables_dir(filename) / "ops.tex"
     out.write_text("\n".join(lines), encoding="utf-8")
-    print(f"  → {out}")
+    _emit(out)
 
 
 # ══════════════════════════════════════════════════════════════════════════
@@ -231,7 +258,7 @@ def generate_ci_table(data, dataset_label, filename):
 
     out = _tables_dir(filename) / "ci.tex"
     out.write_text("\n".join(lines), encoding="utf-8")
-    print(f"  → {out}")
+    _emit(out)
 
 
 # ══════════════════════════════════════════════════════════════════════════
@@ -278,7 +305,7 @@ def generate_cost_table(data, dataset_label, filename):
 
     out = _tables_dir(filename) / "cost.tex"
     out.write_text("\n".join(lines), encoding="utf-8")
-    print(f"  → {out}")
+    _emit(out)
 
 
 # ══════════════════════════════════════════════════════════════════════════
@@ -323,7 +350,7 @@ def generate_pr_curve(data, dataset_label, filename, fraud_rate=0.0017):
     out = _figures_dir(filename) / "pr_curves_baseline.pdf"
     fig.savefig(out, bbox_inches="tight", dpi=150)
     plt.close(fig)
-    print(f"  → {out}")
+    _emit(out)
 
 
 # ══════════════════════════════════════════════════════════════════════════
@@ -364,7 +391,7 @@ def generate_prauc_bar(data, dataset_label, filename):
     out = _figures_dir(filename) / "prauc_bar_baseline.pdf"
     fig.savefig(out, bbox_inches="tight", dpi=150)
     plt.close(fig)
-    print(f"  → {out}")
+    _emit(out)
 
 
 # ══════════════════════════════════════════════════════════════════════════
@@ -405,7 +432,7 @@ def generate_confusion_grid(data, dataset_label, filename):
     out = _figures_dir(filename) / "confusion_grid_baseline.pdf"
     fig.savefig(out, bbox_inches="tight", dpi=150)
     plt.close(fig)
-    print(f"  → {out}")
+    _emit(out)
 
 
 # ══════════════════════════════════════════════════════════════════════════
@@ -461,7 +488,7 @@ def _generate_threshold_table(ts_data, metric_key, dataset_label, filename,
 
     out = _tables_dir(filename) / f"threshold_{label_suffix}.tex"
     out.write_text("\n".join(lines), encoding="utf-8")
-    print(f"  → {out}")
+    _emit(out)
 
 
 def generate_threshold_tables(ts_data, dataset_label, filename):
@@ -579,7 +606,7 @@ def generate_factorial_table(fdata, metric_key, dataset_label, filename,
 
     out = _tables_dir(filename) / f"factorial_{label_suffix}.tex"
     out.write_text("\n".join(lines), encoding="utf-8")
-    print(f"  → {out}")
+    _emit(out)
 
 
 def generate_factorial_tables(fdata, dataset_label, filename):
@@ -653,7 +680,7 @@ def generate_factorial_heatmap(fdata, dataset_label, filename):
         out = _figures_dir(filename) / f"heatmap_{suffix}.pdf"
         fig.savefig(out, bbox_inches="tight", dpi=150)
         plt.close(fig)
-        print(f"  → {out}")
+        _emit(out)
 
 
 # ══════════════════════════════════════════════════════════════════════════

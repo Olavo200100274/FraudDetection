@@ -157,7 +157,8 @@ OCSVM      & 7.32\% & 37.73 & 0.030 & 0.014 & 1,000 \\
 \end{figure}
 
 \paragraph{Discussion.}
-On ULB~2013, CatBoost achieves the highest PR-AUC (0.886),
+On ULB~2013 (Tables~\ref{tab:baseline_ulb}--\ref{tab:ops_ulb},
+Figure~\ref{fig:pr_curves_ulb}), CatBoost achieves the highest PR-AUC (0.886),
 followed closely by RF (0.871) and LGBM (0.865), while LR lags behind (0.742).
 LGBM stands out operationally with the lowest FP/TP ratio (0.12) and
 lowest alert rate (0.16\,\%), meaning fewer false alarms per true positive.
@@ -167,7 +168,7 @@ All bootstrap 95\,\% CIs for tree-based models overlap,
 suggesting the performance differences among them are not statistically significant
 at this sample size.
 
-On BAF~Base (Tables~\ref{tab:baseline_baf_base}--\ref{tab:baseline_baf_ops},
+On BAF~Base (Tables~\ref{tab:baseline_baf}--\ref{tab:ops_baf},
 Figure~\ref{fig:pr_curves_baf_base}),
 the same ranking holds---CatBoost (0.179), LGBM (0.173), RF (0.154), LR (0.143)---but
 all PR-AUC values are dramatically lower than on ULB~2013.
@@ -295,7 +296,9 @@ OCSVM      & 1.01\% & 0.30\% & 0.36\% & 0.22\% \\
 \end{table}
 
 \paragraph{Discussion.}
-The threshold sensitivity analysis reveals three key findings on ULB~2013.
+The threshold sensitivity analysis
+(Tables~\ref{tab:threshold_ulb_f2}--\ref{tab:threshold_ulb_alert})
+reveals three key findings on ULB~2013.
 
 \textit{Fixed $\tau=0.5$ is catastrophic for low-calibrated models.}
 Logistic Regression, whose optimal thresholds lie around $\tau\approx0.048$,
