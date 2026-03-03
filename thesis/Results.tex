@@ -58,9 +58,39 @@ where alternative threshold strategies are applied \emph{without retraining}.
 
 \subsubsection{ULB Credit Card 2013}
 
-\input{tables/ulb/baseline}
+\begin{table}[ht]
+\centering
+\caption{Baseline comparison on ULB 2013 (strategy\,=\,None, threshold\,=\,max-$F_2$).}
+\label{tab:baseline_ulb}
+\begin{tabular}{l c c c c c c c}
+\toprule
+Model & PR-AUC & $F_1$ & $F_2$ & Precision & Recall & $\tau$ & Brier \\
+\midrule
+LR         & 0.742 & 0.758 & 0.809 & 0.686 & 0.847 & 0.048 & 0.0008 \\
+RF         & 0.871 & 0.839 & 0.862 & 0.804 & 0.878 & 0.210 & 0.0004 \\
+LGBM       & 0.865 & 0.863 & 0.847 & 0.891 & 0.837 & 0.051 & 0.0004 \\
+CatBoost   & 0.886 & 0.837 & 0.855 & 0.810 & 0.867 & 0.049 & 0.0003 \\
+OCSVM      & 0.335 & 0.414 & 0.527 & 0.306 & 0.643 & 2.49 & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-\input{tables/ulb/ops}
+\begin{table}[ht]
+\centering
+\caption{Operational metrics on ULB 2013 (strategy\,=\,None, threshold\,=\,max-$F_2$).}
+\label{tab:ops_ulb}
+\begin{tabular}{l c c c c c}
+\toprule
+Model & Alert Rate & FP/TP & P@$k$ & R@$k$ & $k$ \\
+\midrule
+LR         & 0.21\% & 0.46 & 0.306 & 0.888 & 284 \\
+RF         & 0.19\% & 0.24 & 0.310 & 0.898 & 284 \\
+LGBM       & 0.16\% & 0.12 & 0.306 & 0.888 & 284 \\
+CatBoost   & 0.18\% & 0.24 & 0.310 & 0.898 & 284 \\
+OCSVM      & 0.36\% & 2.27 & 0.243 & 0.704 & 284 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 % ── PR Curve — ULB 2013 Baseline (generated from real data) ──
 
@@ -79,9 +109,39 @@ where alternative threshold strategies are applied \emph{without retraining}.
 
 \subsubsection{BAF Base}
 
-\input{tables/baf/baseline}
+\begin{table}[ht]
+\centering
+\caption{Baseline comparison on BAF Base (strategy\,=\,None, threshold\,=\,max-$F_2$).}
+\label{tab:baseline_baf}
+\begin{tabular}{l c c c c c c c}
+\toprule
+Model & PR-AUC & $F_1$ & $F_2$ & Precision & Recall & $\tau$ & Brier \\
+\midrule
+LR         & 0.143 & 0.189 & 0.286 & 0.121 & 0.436 & 0.054 & 0.0101 \\
+RF         & 0.154 & 0.195 & 0.287 & 0.128 & 0.417 & 0.062 & 0.0101 \\
+LGBM       & 0.173 & 0.204 & 0.312 & 0.129 & 0.484 & 0.051 & 0.0099 \\
+CatBoost   & 0.179 & 0.213 & 0.317 & 0.137 & 0.473 & 0.057 & 0.0098 \\
+OCSVM      & 0.019 & 0.045 & 0.081 & 0.026 & 0.171 & -40.26 & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-\input{tables/baf/ops}
+\begin{table}[ht]
+\centering
+\caption{Operational metrics on BAF Base (strategy\,=\,None, threshold\,=\,max-$F_2$).}
+\label{tab:ops_baf}
+\begin{tabular}{l c c c c c}
+\toprule
+Model & Alert Rate & FP/TP & P@$k$ & R@$k$ & $k$ \\
+\midrule
+LR         & 3.99\% & 7.29 & 0.272 & 0.123 & 1,000 \\
+RF         & 3.60\% & 6.84 & 0.303 & 0.137 & 1,000 \\
+LGBM       & 4.13\% & 6.75 & 0.327 & 0.148 & 1,000 \\
+CatBoost   & 3.80\% & 6.30 & 0.341 & 0.155 & 1,000 \\
+OCSVM      & 7.32\% & 37.73 & 0.030 & 0.014 & 1,000 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 % ── PR Curve — BAF Base Baseline (generated from real data) ──
 
@@ -352,9 +412,39 @@ OCSVM is excluded because it does not use labelled fraud examples during trainin
 
 \subsubsection{ULB Credit Card 2013}
 
-\input{tables/ulb/factorial_prauc}
+\begin{table}[ht]
+\centering
+\caption{PR-AUC by model $\times$ strategy on ULB 2013.}
+\label{tab:factorial_ulb_prauc}
+\begin{tabular}{l c c c c c c c}
+\toprule
+Model & None & RUS & ROS & SMOTE & SM+T & SMOTEENN & Weights \\
+\midrule
+LR         & \textbf{0.742} & 0.673 & 0.714 & 0.723 & 0.723 & 0.732 & 0.709 \\
+RF         & \textbf{0.871} & 0.693 & 0.857 & 0.859 & 0.859 & 0.841 & 0.858 \\
+LGBM       & 0.865 & 0.677 & 0.881 & \textbf{0.884} & \textbf{0.884} & 0.862 & 0.878 \\
+CatBoost   & \textbf{0.886} & 0.632 & 0.874 & 0.859 & 0.859 & 0.840 & 0.878 \\
+% FT-Trans. & --- & --- & --- & --- & --- & --- & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-\input{tables/ulb/factorial_f2}
+\begin{table}[ht]
+\centering
+\caption{$F_2$ by model $\times$ strategy on ULB 2013.}
+\label{tab:factorial_ulb_f2}
+\begin{tabular}{l c c c c c c c}
+\toprule
+Model & None & RUS & ROS & SMOTE & SM+T & SMOTEENN & Weights \\
+\midrule
+LR         & 0.809 & 0.738 & 0.817 & \textbf{0.818} & \textbf{0.818} & 0.817 & 0.815 \\
+RF         & \textbf{0.862} & 0.764 & 0.828 & 0.818 & 0.818 & 0.825 & 0.838 \\
+LGBM       & 0.847 & 0.668 & \textbf{0.866} & 0.850 & 0.850 & 0.814 & 0.855 \\
+CatBoost   & 0.855 & 0.675 & \textbf{0.867} & 0.814 & 0.814 & 0.818 & 0.848 \\
+% FT-Trans. & --- & --- & --- & --- & --- & --- & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 % ─────── BAF Base — Factorial ───────
 
@@ -368,10 +458,10 @@ OCSVM is excluded because it does not use labelled fraud examples during trainin
 \toprule
 Model & None & RUS & ROS & SMOTE & SM+T & SMOTEENN & Weights \\
 \midrule
-LR        & 0.143 & --- & --- & --- & --- & --- & --- \\
-RF        & 0.154 & --- & --- & --- & --- & --- & --- \\
-LGBM      & 0.173 & --- & --- & --- & --- & --- & --- \\
-CatBoost  & 0.179 & --- & --- & --- & --- & --- & --- \\
+LR        & \textbf{0.143} & 0.137 & 0.137 & 0.135 & 0.135 & 0.136 & 0.118 \\
+RF        & \textbf{0.154} & 0.131 & 0.112 & 0.111 & 0.111 & 0.112 & 0.114 \\
+LGBM      & 0.173 & 0.165 & 0.177 & 0.147 & 0.147 & 0.158 & \textbf{0.177} \\
+CatBoost  & 0.179 & 0.175 & 0.184 & 0.152 & 0.152 & 0.166 & \textbf{0.185} \\
 FT-Trans. & --- & --- & --- & --- & --- & --- & --- \\
 \bottomrule
 \end{tabular}
@@ -385,10 +475,10 @@ FT-Trans. & --- & --- & --- & --- & --- & --- & --- \\
 \toprule
 Model & None & RUS & ROS & SMOTE & SM+T & SMOTEENN & Weights \\
 \midrule
-LR        & 0.286 & --- & --- & --- & --- & --- & --- \\
-RF        & 0.287 & --- & --- & --- & --- & --- & --- \\
-LGBM      & 0.312 & --- & --- & --- & --- & --- & --- \\
-CatBoost  & 0.317 & --- & --- & --- & --- & --- & --- \\
+LR        & \textbf{0.286} & 0.282 & 0.283 & 0.280 & 0.280 & 0.282 & 0.257 \\
+RF        & 0.287 & \textbf{0.287} & 0.269 & 0.268 & 0.268 & 0.272 & 0.273 \\
+LGBM      & 0.312 & 0.307 & \textbf{0.318} & 0.295 & 0.295 & 0.302 & 0.316 \\
+CatBoost  & 0.317 & 0.317 & \textbf{0.318} & 0.302 & 0.302 & 0.310 & 0.316 \\
 FT-Trans. & --- & --- & --- & --- & --- & --- & --- \\
 \bottomrule
 \end{tabular}
@@ -411,44 +501,61 @@ FT-Trans. & --- & --- & --- & --- & --- & --- & --- \\
   \label{fig:heatmap_ulb_f2}
 \end{figure}
 
-% TODO: BAF heatmaps will be added once BAF experiments are complete.
-% \begin{figure}[ht]
-%   \centering
-%   \includegraphics[width=0.85\textwidth]{figures/baf/heatmap_prauc.pdf}
-%   \caption{$\Delta$PR-AUC (strategy $-$ None) per model on BAF Base.}
-%   \label{fig:heatmap_baf}
-% \end{figure}
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.85\textwidth]{figures/baf/heatmap_prauc.pdf}
+  \caption{$\Delta$PR-AUC (strategy $-$ None) per model on BAF Base.}
+  \label{fig:heatmap_baf_prauc}
+\end{figure}
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.85\textwidth]{figures/baf/heatmap_f2.pdf}
+  \caption{$\Delta F_2$ (strategy $-$ None) per model on BAF Base.}
+  \label{fig:heatmap_baf_f2}
+\end{figure}
 
 \paragraph{Discussion.}
-Table~\ref{tab:factorial_ulb_prauc} and Table~\ref{tab:factorial_ulb_f2}
-present the full factorial results for ULB~2013.
-The interaction heatmaps in Figures~\ref{fig:heatmap_ulb_prauc}
-and~\ref{fig:heatmap_ulb_f2} visualise the per-model deltas.
-Several patterns emerge:
+Tables~\ref{tab:factorial_ulb_prauc}--\ref{tab:factorial_ulb_f2}
+and Tables~\ref{tab:factorial_baf_prauc}--\ref{tab:factorial_baf_f2}
+present the full factorial results for ULB~2013 and BAF~Base, respectively.
+The interaction heatmaps in
+Figures~\ref{fig:heatmap_ulb_prauc}--\ref{fig:heatmap_ulb_f2} (ULB)
+and Figures~\ref{fig:heatmap_baf_prauc}--\ref{fig:heatmap_baf_f2} (BAF)
+visualise the per-model deltas.
+Several cross-dataset patterns emerge:
 
 \begin{itemize}
   \item \textbf{RUS is uniformly harmful.}
-    Random under-sampling discards $\approx$99.7\% of legitimate samples,
-    causing large degradation in both PR-AUC ($-0.07$ to $-0.25$)
-    and $F_2$ ($-0.07$ to $-0.18$) across all four models.
-  \item \textbf{ROS yields the best $F_2$ for boosting models.}
-    CatBoost (+1.2\,pp) and LGBM (+1.9\,pp) benefit from duplicated
-    minority examples, which increase the weight of fraud in the
-    gradient-based loss without introducing synthetic noise.
+    On ULB~2013, random under-sampling discards $\approx$99.7\% of
+    legitimate samples, degrading PR-AUC by $0.07$--$0.25$.
+    On BAF~Base the losses are smaller (LR~$-0.006$, RF~$-0.023$) but
+    still consistently negative.
+  \item \textbf{ROS and Weights benefit boosting models.}
+    On ULB, CatBoost+ROS gains $+1.2$\,pp~$F_2$; on BAF,
+    CatBoost+Weights achieves the highest overall PR-AUC ($0.185$,
+    $+0.6$\,pp over baseline), and CatBoost+ROS is a close second
+    ($0.184$).
+    LGBM follows the same pattern on both datasets.
   \item \textbf{SMOTE $\equiv$ SMOTE+Tomek.}
-    Tomek-link cleaning adds no measurable improvement for any model,
-    consistent with the expectation that tree-based learners are
-    insensitive to boundary noise.
-  \item \textbf{RF is the most robust model:}
-    no strategy improves upon the RF baseline ($F_2 = 0.862$);
-    all resampling variants degrade its performance.
-  \item \textbf{Class weights offer the best cost--benefit trade-off.}
-    Training time is essentially identical to the baseline, yet
-    the $F_2$ loss is $\leq$~1\,pp for every model.
-  \item \textbf{Overall, gains are marginal.}
+    Results are numerically identical for all four models on both datasets.
+    Tomek-link cleaning adds no measurable improvement, consistent with the
+    expectation that tree-based learners are insensitive to boundary noise.
+  \item \textbf{RF is uniquely hurt by oversampling.}
+    On ULB no strategy improves upon the RF baseline ($F_2 = 0.862$);
+    on BAF the degradation is severe: SMOTE drops PR-AUC from $0.154$
+    to $0.111$ ($-28\%$ relative).
+  \item \textbf{LR+Weights degrades on BAF.}
+    While class-weighting is benign for boosting models, LR+Weights
+    yields the worst PR-AUC on BAF ($0.118$), likely due to a
+    convergence issue with the \texttt{saga} solver under extreme
+    class reweighting on the harder task.
+  \item \textbf{Overall, gains remain marginal.}
     When proper evaluation is used (PR-AUC scoring, $F_2$-optimised
-    threshold), the benefit of resampling largely vanishes.
-    The largest improvement is CatBoost+ROS with $+1.2$\,pp~$F_2$.
+    threshold), the benefit of resampling largely vanishes on both
+    benchmarks.
+    The largest absolute improvement across both datasets is
+    CatBoost+Weights on BAF with $+0.6$\,pp PR-AUC.
 \end{itemize}
 
 

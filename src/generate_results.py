@@ -711,6 +711,16 @@ def main():
     else:
         print("  No BAF results found yet — skipping.")
 
+    # ── BAF Base — Factorial (Model × Strategy) ──
+    baf_fact = collect_factorial("baf_base")
+    n_baf_combos = sum(1 for m in baf_fact for s in baf_fact[m] if baf_fact[m][s] is not None)
+    if n_baf_combos > 0:
+        print(f"\n── BAF Base — Factorial ({n_baf_combos} combos) ──")
+        generate_factorial_tables(baf_fact, "BAF Base", "baf")
+        generate_factorial_heatmap(baf_fact, "BAF Base", "baf")
+    else:
+        print("\n  No BAF factorial results found — skipping.")
+
     print("\n" + "=" * 60)
     print("  Done! Check thesis/tables/{ulb,baf}/ and thesis/figures/{ulb,baf}/")
     print("=" * 60)
