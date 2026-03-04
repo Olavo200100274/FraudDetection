@@ -1,0 +1,16 @@
+\begin{table}[ht]
+\centering
+\caption{Threshold sensitivity on BAF Base~--- Recall by threshold strategy (strategy\,=\,None).}
+\label{tab:threshold_baf_recall}
+\begin{tabular}{l c c c c}
+\toprule
+Model & Fixed (0.5) & max-$F_1$ & max-$F_2$ & Prec\,$\geq$\,0.5 \\
+\midrule
+LR         & 0.012 & 0.272 & 0.436 & 0.026 \\
+RF         & 0.001 & 0.271 & 0.417 & 0.036 \\
+LGBM       & 0.034 & 0.281 & 0.484 & 0.043 \\
+CatBoost   & 0.025 & 0.281 & 0.473 & 0.047 \\
+OCSVM      & 0.030 & 0.108 & 0.171 & 0.000 \\
+\bottomrule
+\end{tabular}
+\end{table}

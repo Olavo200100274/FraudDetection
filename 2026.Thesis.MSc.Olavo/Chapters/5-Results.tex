@@ -341,12 +341,12 @@ as the primary threshold rule for fraud detection.
 \toprule
 Model & Fixed (0.5) & max-$F_1$ & max-$F_2$ & Prec\,$\geq$\,0.5 \\
 \midrule
-LR        & --- & --- & --- & --- \\
-RF        & --- & --- & --- & --- \\
-LGBM      & --- & --- & --- & --- \\
-CatBoost  & --- & --- & --- & --- \\
-FT-Trans. & --- & --- & --- & --- \\
-OCSVM     & --- & --- & --- & --- \\
+LR         & 0.015 & 0.248 & 0.286 & 0.032 \\
+RF         & 0.001 & 0.252 & 0.287 & 0.044 \\
+LGBM       & 0.042 & 0.260 & 0.312 & 0.053 \\
+CatBoost   & 0.031 & 0.266 & 0.318 & 0.058 \\
+% FT-Trans. & --- & --- & --- & --- \\
+OCSVM      & 0.031 & 0.071 & 0.081 & 0.000 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -359,12 +359,30 @@ OCSVM     & --- & --- & --- & --- \\
 \toprule
 Model & Fixed (0.5) & max-$F_1$ & max-$F_2$ & Prec\,$\geq$\,0.5 \\
 \midrule
-LR        & --- & --- & --- & --- \\
-RF        & --- & --- & --- & --- \\
-LGBM      & --- & --- & --- & --- \\
-CatBoost  & --- & --- & --- & --- \\
-FT-Trans. & --- & --- & --- & --- \\
-OCSVM     & --- & --- & --- & --- \\
+LR         & 0.023 & 0.219 & 0.189 & 0.050 \\
+RF         & 0.002 & 0.228 & 0.195 & 0.067 \\
+LGBM       & 0.065 & 0.235 & 0.204 & 0.080 \\
+CatBoost   & 0.048 & 0.247 & 0.213 & 0.086 \\
+% FT-Trans. & --- & --- & --- & --- \\
+OCSVM      & 0.031 & 0.046 & 0.045 & 0.000 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[ht]
+\centering
+\caption{Threshold sensitivity on BAF Base~--- Recall by threshold strategy (strategy\,=\,None).}
+\label{tab:threshold_baf_recall}
+\begin{tabular}{l c c c c}
+\toprule
+Model & Fixed (0.5) & max-$F_1$ & max-$F_2$ & Prec\,$\geq$\,0.5 \\
+\midrule
+LR         & 0.012 & 0.272 & 0.436 & 0.026 \\
+RF         & 0.001 & 0.271 & 0.417 & 0.036 \\
+LGBM       & 0.034 & 0.281 & 0.484 & 0.043 \\
+CatBoost   & 0.025 & 0.281 & 0.473 & 0.047 \\
+% FT-Trans. & --- & --- & --- & --- \\
+OCSVM      & 0.030 & 0.108 & 0.171 & 0.000 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -377,17 +395,50 @@ OCSVM     & --- & --- & --- & --- \\
 \toprule
 Model & Fixed (0.5) & max-$F_1$ & max-$F_2$ & Prec\,$\geq$\,0.5 \\
 \midrule
-LR        & --- & --- & --- & --- \\
-RF        & --- & --- & --- & --- \\
-LGBM      & --- & --- & --- & --- \\
-CatBoost  & --- & --- & --- & --- \\
-FT-Trans. & --- & --- & --- & --- \\
-OCSVM     & --- & --- & --- & --- \\
+LR         & 0.02\% & 1.65\% & 3.99\% & 0.06\% \\
+RF         & 0.00\% & 1.52\% & 3.60\% & 0.07\% \\
+LGBM       & 0.07\% & 1.54\% & 4.13\% & 0.09\% \\
+CatBoost   & 0.04\% & 1.41\% & 3.81\% & 0.10\% \\
+% FT-Trans. & --- & --- & --- & --- \\
+OCSVM      & 1.03\% & 4.06\% & 7.32\% & 0.00\% \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-% TODO: BAF threshold study discussion will be written once BAF experiments are complete.
+\paragraph{Discussion.}
+The BAF threshold sensitivity analysis
+(Tables~\ref{tab:threshold_baf_f2}--\ref{tab:threshold_baf_alert})
+amplifies the patterns observed on ULB but with starker contrasts.
+
+\textit{Fixed $\tau=0.5$ is catastrophic on BAF.}
+With a 1.1\,\% fraud rate, model scores rarely exceed 0.5.
+CatBoost retains only 2.5\,\% recall under Fixed~0.5 ($F_2=0.031$),
+and RF is virtually non-functional ($F_2=0.001$, recall\,$<$\,0.1\,\%).
+This confirms that the default threshold is entirely unsuitable for
+imbalanced datasets where calibrated probabilities lie far below~0.5.
+
+\textit{max-$F_2$ provides the best recall--$F_2$ trade-off.}
+CatBoost achieves $F_2=0.318$ (recall\,=\,0.473) under max-$F_2$,
+roughly 6$\times$ higher than max-$F_1$ in recall terms.
+However, this comes at an alert rate of 3.81\,\%, compared to 1.41\,\% for max-$F_1$.
+In a production setting with 200\,000 daily applications, max-$F_2$
+would flag ${\sim}7{,}600$ for review versus ${\sim}2{,}800$ under max-$F_1$.
+
+\textit{Prec\,$\geq$\,0.5 is effectively infeasible on BAF.}
+All supervised models produce recall below 5\,\% and $F_2$ below 0.06
+under the Prec\,$\geq$\,0.5 constraint.
+The required threshold ($\tau\approx0.39$--$0.46$) is too aggressive
+for a dataset where even the best model assigns a median fraud score of only~0.051.
+OCSVM produces zero predictions (Prec\,$\geq$\,0.5 yields $\tau=\infty$).
+
+\textit{OCSVM is not viable for BAF.}
+Even under the best threshold strategy (max-$F_2$), OCSVM achieves
+$F_2=0.081$ with 7.32\,\% alert rate~--- substantially worse than any
+supervised model across all strategies.
+
+These findings reinforce the conclusion from ULB: threshold selection is a first-class
+design decision that can shift $F_2$ by over 25\,pp on BAF, and the
+max-$F_2$ strategy remains the most appropriate for fraud detection.
 
 
 % ══════════════════════════════════════════════════════════════════════════

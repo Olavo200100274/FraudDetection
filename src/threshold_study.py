@@ -1,6 +1,6 @@
 """
-Threshold Sensitivity Study — ULB Credit Card 2013
-====================================================
+Threshold Sensitivity Study
+============================
 Applies 4 threshold strategies to the saved baseline models WITHOUT retraining.
 
 Strategies:
@@ -19,8 +19,9 @@ For each model the script:
 
 Usage:
     cd src/
-    python threshold_study.py                     # all models
-    python threshold_study.py --models logreg rf   # specific models
+    python threshold_study.py --dataset ulb                    # ULB, all models
+    python threshold_study.py --dataset baf_base               # BAF, all models
+    python threshold_study.py --dataset baf_base --models lgbm # BAF, single model
 """
 
 import argparse
@@ -35,7 +36,7 @@ import numpy as np
 from sklearn.base import clone
 from sklearn.model_selection import StratifiedKFold
 
-from data import load_ulb_data
+from data import load_dataset, DATASET_REGISTRY
 from preprocess import get_preprocessor
 from evaluation.metrics import (
     find_threshold_maximizing_f1,
@@ -46,14 +47,23 @@ from evaluation.metrics import (
 
 
 # ── Constants (must match main.py exactly) ────────────────────────────────
-DATASET_NAME = "ulb_2013"
 SPLIT_SEED = 42
 CV_SPLITS = 5
 CV = StratifiedKFold(n_splits=CV_SPLITS, shuffle=True, random_state=SPLIT_SEED)
 
 RESULTS_ROOT = Path(__file__).resolve().parent.parent / "results"
 
-MODEL_ORDER = ["logreg", "rf", "lgbm", "catboost", "ocsvm"]
+# Per-dataset model lists
+MODEL_ORDER_BY_DATASET = {
+    "ulb":      ["logreg", "rf", "lgbm", "catboost", "ocsvm"],
+    "baf_base": ["logreg", "rf", "lgbm", "catboost", "ocsvm"],
+}
+
+# Dataset label used in results/ directory names
+DATASET_LABEL = {
+    "ulb":      "ulb_2013",
+    "baf_base": "baf_base",
+}
 
 # Threshold strategies
 STRATEGIES = ["fixed_05", "max_f1", "max_f2", "prec_ge_05"]
@@ -67,9 +77,9 @@ STRATEGY_LABELS = {
 
 # ── Helpers ───────────────────────────────────────────────────────────────
 
-def find_latest_run(model_name):
+def find_latest_run(dataset_label, model_name):
     """Return Path to the latest run directory for a given model."""
-    base = RESULTS_ROOT / DATASET_NAME / model_name / "none"
+    base = RESULTS_ROOT / dataset_label / model_name / "none"
     if not base.exists():
         return None
     runs = sorted(base.iterdir())
@@ -312,14 +322,19 @@ def run_threshold_study_ocsvm(X_train, X_test, y_train, y_test,
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description="Threshold Sensitivity Study — ULB 2013"
+        description="Threshold Sensitivity Study"
+    )
+    parser.add_argument(
+        "--dataset",
+        choices=list(DATASET_LABEL.keys()),
+        required=True,
+        help="Dataset to use: ulb | baf_base",
     )
     parser.add_argument(
         "--models",
         nargs="+",
-        choices=MODEL_ORDER + ["all"],
         default=["all"],
-        help="Models to analyse (default: all)",
+        help="Models to analyse (default: all). Valid: logreg rf lgbm catboost ocsvm",
     )
     return parser.parse_args()
 
@@ -328,17 +343,28 @@ def parse_args():
 
 def main():
     args = parse_args()
+    dataset_key = args.dataset
+    dataset_label = DATASET_LABEL[dataset_key]
+    model_order = MODEL_ORDER_BY_DATASET[dataset_key]
+
     models = args.models
     if "all" in models:
-        models = list(MODEL_ORDER)
+        models = list(model_order)
+    else:
+        # Validate requested models exist for this dataset
+        for m in models:
+            if m not in model_order:
+                print(f"ERROR: model '{m}' not available for dataset '{dataset_key}'. "
+                      f"Available: {model_order}")
+                sys.exit(1)
 
     print("=" * 60)
-    print("  Threshold Sensitivity Study — ULB 2013")
+    print(f"  Threshold Sensitivity Study — {dataset_label}")
     print("=" * 60)
 
     # ── Load data (same split as main.py) ─────────────────────────
-    print("\nLoading ULB 2013 dataset ...")
-    X_train, X_test, y_train, y_test = load_ulb_data()
+    print(f"\nLoading {dataset_key} dataset ...")
+    X_train, X_test, y_train, y_test = load_dataset(dataset_key)
     print(f"  Train : {len(X_train):,} samples  ({y_train.sum()} fraud)")
     print(f"  Test  : {len(X_test):,} samples   ({y_test.sum()} fraud)")
 
@@ -349,7 +375,7 @@ def main():
     t_start = time.time()
 
     for model_name in models:
-        run_dir = find_latest_run(model_name)
+        run_dir = find_latest_run(dataset_label, model_name)
         if run_dir is None:
             print(f"\n  [SKIP] {model_name} — no baseline run found")
             continue
@@ -375,7 +401,7 @@ def main():
 
     # ── Summary ───────────────────────────────────────────────────
     print(f"\n\n{'=' * 80}")
-    print(f"  SUMMARY — Threshold Sensitivity Study — ULB 2013")
+    print(f"  SUMMARY — Threshold Sensitivity Study — {dataset_label}")
     print(f"{'=' * 80}")
 
     # F2 summary table

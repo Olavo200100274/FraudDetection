@@ -738,6 +738,14 @@ def main():
     else:
         print("  No BAF results found yet — skipping.")
 
+    # ── BAF Base — Threshold Study ──
+    baf_ts = collect_threshold_study("baf_base")
+    if baf_ts:
+        print(f"\n── BAF Base — Threshold Study ({len(baf_ts)} models) ──")
+        generate_threshold_tables(baf_ts, "BAF Base", "baf")
+    else:
+        print("\n  No BAF threshold study results found — skipping.")
+
     # ── BAF Base — Factorial (Model × Strategy) ──
     baf_fact = collect_factorial("baf_base")
     n_baf_combos = sum(1 for m in baf_fact for s in baf_fact[m] if baf_fact[m][s] is not None)
