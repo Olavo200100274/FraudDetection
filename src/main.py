@@ -6,7 +6,7 @@ on multiple fraud detection datasets (ULB 2013, BAF Base, etc.).
 
 For each supervised model:
   strategy=none (baseline):
-    1. Hyperparameter tuning  — GridSearchCV, scoring = PR-AUC (average_precision)
+    1. Hyperparameter tuning  — Optuna (TPE), scoring = PR-AUC (average_precision)
     2. Threshold selection    — 5-fold CV, maximise F2 per fold, τ = median
     3. Final training         — best params on full training partition
     4. Test evaluation        — holdout test with median τ
@@ -39,9 +39,13 @@ import time
 from pathlib import Path
 
 import numpy as np
+import optuna
 from sklearn.base import clone
-from sklearn.model_selection import GridSearchCV, StratifiedKFold
+from sklearn.metrics import average_precision_score
+from sklearn.model_selection import StratifiedKFold
 from sklearn.pipeline import Pipeline
+
+optuna.logging.set_verbosity(optuna.logging.WARNING)
 
 from data import load_dataset, get_dataset_info, DATASET_REGISTRY
 from preprocess import get_preprocessor
@@ -68,6 +72,8 @@ from strategies.balancing import (
 SPLIT_SEED = 42
 CV_SPLITS = 5
 BOOTSTRAP_ITERATIONS = 1000
+EARLY_STOP_MODELS = {"lgbm", "catboost"}
+EARLY_STOP_ROUNDS = 50
 
 # Inner CV — same folds for tuning AND threshold selection
 CV = StratifiedKFold(n_splits=CV_SPLITS, shuffle=True, random_state=SPLIT_SEED)
@@ -122,6 +128,12 @@ def parse_args():
             "fraud prevalence). Useful for smoke-testing the pipeline."
         ),
     )
+    parser.add_argument(
+        "--n_trials",
+        type=int,
+        default=50,
+        help="Number of Optuna trials for hyperparameter tuning (default: 50).",
+    )
     return parser.parse_args()
 
 
@@ -140,35 +152,128 @@ def _file_hash(path, algorithm="sha256"):
 
 # ── supervised models ─────────────────────────────────────────────────────
 def run_supervised(model_name, X_train, X_test, y_train, y_test,
-                   preprocessor, dataset_hash, dataset_name, dataset_file):
+                   preprocessor, dataset_hash, dataset_name, dataset_file,
+                   n_trials=50):
     """Full leakage-free protocol for a supervised classifier (strategy=None)."""
 
     get_fn = SUPERVISED_MODELS[model_name]
-    pipeline, param_grid = get_fn(preprocessor)
+    pipeline, suggest_fn = get_fn(preprocessor)
 
     print(f"\n{'=' * 60}")
     print(f"  {model_name.upper()} — Strategy: None")
     print(f"{'=' * 60}")
 
-    # ── 1. Hyperparameter tuning (GridSearchCV, scoring = PR-AUC) ─────
-    print(f"\n[1/4] Hyperparameter tuning ({model_name}) ...")
+    # ── 1. Hyperparameter tuning (Optuna + pruning, scoring = PR-AUC) ─
+    print(f"\n[1/4] Hyperparameter tuning ({model_name}, {n_trials} trials) ...")
     t0 = time.time()
 
-    grid_search = GridSearchCV(
-        pipeline,
-        param_grid,
-        cv=CV,
-        scoring="average_precision",   # PR-AUC
-        verbose=1,
-        n_jobs=-1,
-        refit=True,
-    )
-    grid_search.fit(X_train, y_train)
+    # Pre-compute fold-level preprocessed data — avoids re-fitting
+    # the preprocessor in every trial (same folds for tuning & threshold).
+    folds_data = []
+    for train_idx, val_idx in CV.split(X_train, y_train):
+        fold_pre = clone(preprocessor)
+        X_ft = fold_pre.fit_transform(X_train.iloc[train_idx])
+        X_fv = fold_pre.transform(X_train.iloc[val_idx])
+        folds_data.append((
+            X_ft, X_fv,
+            y_train.iloc[train_idx], y_train.iloc[val_idx],
+        ))
 
+    _base_clf = pipeline.named_steps["classifier"]
+    _uses_early_stop = model_name in EARLY_STOP_MODELS
+
+    def objective(trial):
+        params = suggest_fn(trial)
+        trial.set_user_attr("pipeline_params", params)
+        clf_params = {k.replace("classifier__", ""): v for k, v in params.items()}
+
+        scores = []
+        best_iters = []
+        for step, (X_ft, X_fv, y_ft, y_fv) in enumerate(folds_data):
+            clf = clone(_base_clf)
+            clf.set_params(**clf_params)
+
+            _can_early_stop = (
+                _uses_early_stop and len(np.unique(y_fv)) > 1
+            )
+            if _can_early_stop:
+                if model_name == "lgbm":
+                    import lightgbm as _lgb
+                    clf.fit(
+                        X_ft, y_ft,
+                        eval_set=[(X_fv, y_fv)],
+                        callbacks=[
+                            _lgb.early_stopping(EARLY_STOP_ROUNDS, verbose=False),
+                            _lgb.log_evaluation(0),
+                        ],
+                    )
+                else:  # catboost
+                    clf.fit(
+                        X_ft, y_ft,
+                        eval_set=[(X_fv, y_fv)],
+                        early_stopping_rounds=EARLY_STOP_ROUNDS,
+                    )
+                best_iters.append(clf.best_iteration_)
+            else:
+                clf.fit(X_ft, y_ft)
+
+            score = average_precision_score(
+                y_fv, clf.predict_proba(X_fv)[:, 1],
+            )
+            scores.append(score)
+
+            # Report running mean — enables pruning of unpromising trials
+            trial.report(np.mean(scores), step)
+            if trial.should_prune():
+                raise optuna.TrialPruned()
+
+        if best_iters:
+            trial.set_user_attr("best_iterations", best_iters)
+        return np.mean(scores)
+
+    def _log_trial(study, trial):
+        if trial.value is not None:
+            print(
+                f"  Trial {trial.number + 1:>3}/{n_trials}: "
+                f"CV PR-AUC = {trial.value:.4f}  "
+                f"(best: {study.best_value:.4f})"
+            )
+        else:
+            print(f"  Trial {trial.number + 1:>3}/{n_trials}: PRUNED")
+
+    study = optuna.create_study(
+        direction="maximize",
+        sampler=optuna.samplers.TPESampler(seed=SPLIT_SEED),
+        pruner=optuna.pruners.MedianPruner(
+            n_startup_trials=5, n_warmup_steps=1,
+        ),
+    )
+    study.optimize(objective, n_trials=n_trials, callbacks=[_log_trial])
+
+    n_pruned = len([
+        t for t in study.trials
+        if t.state == optuna.trial.TrialState.PRUNED
+    ])
     tuning_time = time.time() - t0
-    best_params = grid_search.best_params_
-    print(f"  Best params : {best_params}")
-    print(f"  CV PR-AUC   : {grid_search.best_score_:.4f}")
+    best_params = study.best_trial.user_attrs["pipeline_params"]
+    best_pipeline = clone(pipeline)
+    best_pipeline.set_params(**best_params)
+
+    # For early-stop models, set n_estimators/iterations to optimal value
+    if _uses_early_stop:
+        best_iters = study.best_trial.user_attrs.get("best_iterations", [])
+        if best_iters:
+            iter_key = "iterations" if model_name == "catboost" else "n_estimators"
+            best_n = int(np.median(best_iters))
+            if model_name == "catboost":
+                best_n += 1  # 0-based → count
+            best_pipeline.named_steps["classifier"].set_params(**{iter_key: best_n})
+            best_params[f"classifier__{iter_key}"] = best_n
+            print(f"  Early stopping: {iter_key} = {best_n} (median of fold best iters)")
+
+    print(f"\n  Best params : {best_params}")
+    print(f"  CV PR-AUC   : {study.best_value:.4f}")
+    print(f"  Trials      : {n_trials} total, {n_pruned} pruned")
     print(f"  Tuning time : {tuning_time:.1f}s")
 
     # ── 2. Threshold selection (5-fold CV, maximise F2 → median τ) ────
@@ -182,7 +287,7 @@ def run_supervised(model_name, X_train, X_test, y_train, y_test,
         y_fold_train = y_train.iloc[train_idx]
         y_fold_val = y_train.iloc[val_idx]
 
-        fold_model = clone(grid_search.best_estimator_)
+        fold_model = clone(best_pipeline)
         fold_model.fit(X_fold_train, y_fold_train)
 
         y_val_scores = fold_model.predict_proba(X_fold_val)[:, 1]
@@ -195,7 +300,7 @@ def run_supervised(model_name, X_train, X_test, y_train, y_test,
               f"  F1={fold_metrics['F1']:.4f}  F2={fold_metrics['F2']:.4f}")
 
     # Aggregate CV metrics
-    cv_keys = ["PR-AUC", "F1", "F2", "brier_score", "precision_at_k", "recall_at_k"]
+    cv_keys = ["PR-AUC", "ROC-AUC", "F1", "F2", "brier_score", "precision_at_k", "recall_at_k"]
     cv_summary = {}
     for k in cv_keys:
         vals = [fr[k] for fr in fold_results]
@@ -213,15 +318,16 @@ def run_supervised(model_name, X_train, X_test, y_train, y_test,
     }
 
     print(f"  ── CV Aggregated ──")
-    print(f"  PR-AUC : {cv_summary['PR-AUC_mean']:.4f} ± {cv_summary['PR-AUC_std']:.4f}")
-    print(f"  F1     : {cv_summary['F1_mean']:.4f} ± {cv_summary['F1_std']:.4f}")
-    print(f"  F2     : {cv_summary['F2_mean']:.4f} ± {cv_summary['F2_std']:.4f}")
+    print(f"  PR-AUC  : {cv_summary['PR-AUC_mean']:.4f} ± {cv_summary['PR-AUC_std']:.4f}")
+    print(f"  ROC-AUC : {cv_summary['ROC-AUC_mean']:.4f} ± {cv_summary['ROC-AUC_std']:.4f}")
+    print(f"  F1      : {cv_summary['F1_mean']:.4f} ± {cv_summary['F1_std']:.4f}")
+    print(f"  F2      : {cv_summary['F2_mean']:.4f} ± {cv_summary['F2_std']:.4f}")
     print(f"  Median threshold: τ = {tau_final:.6f}")
 
     # ── 3. Final training on full training partition ──────────────────
     print(f"\n[3/4] Training final model ({model_name}) ...")
     t0 = time.time()
-    final_model = clone(grid_search.best_estimator_)
+    final_model = clone(best_pipeline)
     final_model.fit(X_train, y_train)
     train_time = time.time() - t0
     print(f"  Training time: {train_time:.1f}s")
@@ -256,6 +362,10 @@ def run_supervised(model_name, X_train, X_test, y_train, y_test,
         "strategy": "none",
         "cv_folds": CV_SPLITS,
         "scoring": "average_precision (PR-AUC)",
+        "tuning": "Optuna (TPE sampler + MedianPruner)",
+        "n_trials": n_trials,
+        "n_pruned": n_pruned,
+        "early_stopping_rounds": EARLY_STOP_ROUNDS if _uses_early_stop else None,
         "threshold_rule": "maximise F2 on validation, take median across folds",
         "best_params": best_params,
         "tuning_time_s": round(tuning_time, 2),
@@ -327,7 +437,7 @@ def run_supervised_strategy(model_name, strategy, X_train, X_test,
     handling strategy (resampling or class weights).
 
     Differences from baseline:
-    - No GridSearchCV — best_params are loaded from the baseline run.
+    - No Optuna tuning — best_params are loaded from the baseline run.
     - Resampling is applied INSIDE each CV fold (no leakage).
     - Class weights are injected into the classifier before training.
     """
@@ -388,7 +498,7 @@ def run_supervised_strategy(model_name, strategy, X_train, X_test,
               f"  F1={fold_metrics['F1']:.4f}  F2={fold_metrics['F2']:.4f}")
 
     # Aggregate CV metrics
-    cv_keys = ["PR-AUC", "F1", "F2", "brier_score", "precision_at_k", "recall_at_k"]
+    cv_keys = ["PR-AUC", "ROC-AUC", "F1", "F2", "brier_score", "precision_at_k", "recall_at_k"]
     cv_summary = {}
     for k in cv_keys:
         vals = [fr[k] for fr in fold_results]
@@ -406,9 +516,10 @@ def run_supervised_strategy(model_name, strategy, X_train, X_test,
     }
 
     print(f"  ── CV Aggregated ──")
-    print(f"  PR-AUC : {cv_summary['PR-AUC_mean']:.4f} ± {cv_summary['PR-AUC_std']:.4f}")
-    print(f"  F1     : {cv_summary['F1_mean']:.4f} ± {cv_summary['F1_std']:.4f}")
-    print(f"  F2     : {cv_summary['F2_mean']:.4f} ± {cv_summary['F2_std']:.4f}")
+    print(f"  PR-AUC  : {cv_summary['PR-AUC_mean']:.4f} ± {cv_summary['PR-AUC_std']:.4f}")
+    print(f"  ROC-AUC : {cv_summary['ROC-AUC_mean']:.4f} ± {cv_summary['ROC-AUC_std']:.4f}")
+    print(f"  F1      : {cv_summary['F1_mean']:.4f} ± {cv_summary['F1_std']:.4f}")
+    print(f"  F2      : {cv_summary['F2_mean']:.4f} ± {cv_summary['F2_std']:.4f}")
     print(f"  Median threshold: τ = {tau_final:.6f}")
 
     # ── 2. Final training on full training partition ──────────────────
@@ -536,7 +647,7 @@ def run_ocsvm(X_train, X_test, y_train, y_test, preprocessor, dataset_hash,
         print(f"  Fold {i + 1}: τ={tau:.6f}  PR-AUC={fold_metrics['PR-AUC']:.4f}"
               f"  F1={fold_metrics['F1']:.4f}  F2={fold_metrics['F2']:.4f}")
 
-    cv_keys = ["PR-AUC", "F1", "F2", "brier_score", "precision_at_k", "recall_at_k"]
+    cv_keys = ["PR-AUC", "ROC-AUC", "F1", "F2", "brier_score", "precision_at_k", "recall_at_k"]
     cv_summary = {}
     for k in cv_keys:
         vals = [fr[k] for fr in fold_results]
@@ -554,9 +665,10 @@ def run_ocsvm(X_train, X_test, y_train, y_test, preprocessor, dataset_hash,
     }
 
     print(f"  ── CV Aggregated ──")
-    print(f"  PR-AUC : {cv_summary['PR-AUC_mean']:.4f} ± {cv_summary['PR-AUC_std']:.4f}")
-    print(f"  F1     : {cv_summary['F1_mean']:.4f} ± {cv_summary['F1_std']:.4f}")
-    print(f"  F2     : {cv_summary['F2_mean']:.4f} ± {cv_summary['F2_std']:.4f}")
+    print(f"  PR-AUC  : {cv_summary['PR-AUC_mean']:.4f} ± {cv_summary['PR-AUC_std']:.4f}")
+    print(f"  ROC-AUC : {cv_summary['ROC-AUC_mean']:.4f} ± {cv_summary['ROC-AUC_std']:.4f}")
+    print(f"  F1      : {cv_summary['F1_mean']:.4f} ± {cv_summary['F1_std']:.4f}")
+    print(f"  F2      : {cv_summary['F2_mean']:.4f} ± {cv_summary['F2_std']:.4f}")
     print(f"  Median threshold: τ = {tau_final:.6f}")
 
     # ── 2. Final training (class 0 only) ──────────────────────────────
@@ -627,10 +739,15 @@ def _print_results(m, ci=None):
         print(f"  [95% CI: {ci['PR-AUC_ci'][0]:.4f} – {ci['PR-AUC_ci'][1]:.4f}]")
     else:
         print()
+    print(f"  ROC-AUC      : {m['ROC-AUC']:.4f}", end="")
+    if ci:
+        print(f"  [95% CI: {ci['ROC-AUC_ci'][0]:.4f} \u2013 {ci['ROC-AUC_ci'][1]:.4f}]")
+    else:
+        print()
     print(f"  F1           : {m['F1']:.4f}")
     print(f"  F2           : {m['F2']:.4f}", end="")
     if ci:
-        print(f"  [95% CI: {ci['F2_ci'][0]:.4f} – {ci['F2_ci'][1]:.4f}]")
+        print(f"  [95% CI: {ci['F2_ci'][0]:.4f} \u2013 {ci['F2_ci'][1]:.4f}]")
     else:
         print()
     print(f"  Brier score  : {m['brier_score']:.4f}")
@@ -694,7 +811,8 @@ def main():
                 _, metrics = run_supervised(
                     name, X_train, X_test, y_train, y_test,
                     preprocessor, dataset_hash,
-                    dataset_name, dataset_file
+                    dataset_name, dataset_file,
+                    n_trials=args.n_trials,
                 )
             else:
                 _, metrics = run_supervised_strategy(
@@ -709,22 +827,22 @@ def main():
     print(f"  SUMMARY — {dataset_name.upper()}")
     print(f"{'=' * 110}")
     header = (
-        f"{'Model':<10} {'Strategy':<12} {'PR-AUC':>8} {'F1':>8} {'F2':>8} "
+        f"{'Model':<10} {'Strategy':<12} {'PR-AUC':>8} {'ROC-AUC':>8} {'F1':>8} {'F2':>8} "
         f"{'Brier':>8} {'TP':>5} {'FP':>5} {'FN':>5} {'TN':>7} "
         f"{'Alert%':>8} {'FP/TP':>7} {'P@k':>6} {'R@k':>6}"
     )
     print(header)
-    print("-" * 110)
+    print("-" * 120)
     for (name, strat), m in results.items():
         print(
             f"{name:<10} {strat:<12} "
-            f"{m['PR-AUC']:>8.4f} {m['F1']:>8.4f} {m['F2']:>8.4f} "
+            f"{m['PR-AUC']:>8.4f} {m['ROC-AUC']:>8.4f} {m['F1']:>8.4f} {m['F2']:>8.4f} "
             f"{m['brier_score']:>8.4f} "
             f"{m['TP']:>5} {m['FP']:>5} {m['FN']:>5} {m['TN']:>7} "
             f"{m['alert_rate']:>7.4%} {m['FP/TP']:>7.2f} "
             f"{m['precision_at_k']:>6.3f} {m['recall_at_k']:>6.3f}"
         )
-    print(f"{'=' * 110}")
+    print(f"{'=' * 120}")
 
 
 if __name__ == "__main__":

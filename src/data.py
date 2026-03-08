@@ -66,6 +66,13 @@ def load_dataset(name, sample=None):
         y_all = pd.concat([y_train, y_test], axis=0)
 
         n_sample = max(100, int(len(X_all) * sample))
+
+        # Guarantee enough fraud cases for 5-fold CV (≥ 2 per fold = 10 min)
+        fraud_rate = y_all.mean()
+        min_fraud_needed = 10  # ≥ 2 per fold with CV=5
+        min_n_for_fraud = int(np.ceil(min_fraud_needed / fraud_rate))
+        n_sample = max(n_sample, min(min_n_for_fraud, len(X_all)))
+
         X_all, _, y_all, _ = train_test_split(
             X_all, y_all,
             train_size=n_sample,

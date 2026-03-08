@@ -8,6 +8,9 @@ datasets/*.csv
 # trained model artefacts (large binaries)
 results/**/model.joblib
 
+# archived old GridSearchCV results (large, superseded by Optuna runs)
+results_old_gridSearch/
+
 # outputs de libs
 catboost_info/
 **/__pycache__/

@@ -144,10 +144,10 @@ def generate_baseline_table(data, dataset_label, filename):
         + r" (strategy\,=\,None, threshold\,=\,max-$F_2$).}"
     )
     lines.append(r"\label{tab:baseline_" + filename + "}")
-    lines.append(r"\begin{tabular}{l c c c c c c c}")
+    lines.append(r"\begin{tabular}{l c c c c c c c c}")
     lines.append(r"\toprule")
     lines.append(
-        r"Model & PR-AUC & $F_1$ & $F_2$ & Precision & Recall & $\tau$ & Brier \\"
+        r"Model & PR-AUC & ROC-AUC & $F_1$ & $F_2$ & Precision & Recall & $\tau$ & Brier \\"
     )
     lines.append(r"\midrule")
 
@@ -160,11 +160,12 @@ def generate_baseline_table(data, dataset_label, filename):
         rec = tp / (tp + fn) if (tp + fn) > 0 else 0
         tau_str = f"{m['threshold']:.3f}" if model != "ocsvm" else f"{m['threshold']:.2f}"
         brier_str = f"{m['brier_score']:.4f}" if model != "ocsvm" else "---"
+        roc_auc = m.get("ROC-AUC", 0)
 
         label = MODEL_LABELS[model]
         # Pad label to 10 chars for alignment
         lines.append(
-            f"{label:<10s} & {m['PR-AUC']:.3f} & {m['F1']:.3f} & {m['F2']:.3f} "
+            f"{label:<10s} & {m['PR-AUC']:.3f} & {roc_auc:.3f} & {m['F1']:.3f} & {m['F2']:.3f} "
             f"& {prec:.3f} & {rec:.3f} & {tau_str} & {brier_str} \\\\"
         )
 
@@ -226,30 +227,34 @@ def generate_ops_table(data, dataset_label, filename):
 # ══════════════════════════════════════════════════════════════════════════
 
 def generate_ci_table(data, dataset_label, filename):
-    """Generate LaTeX table: PR-AUC with 95% Bootstrap CI."""
+    """Generate LaTeX table: PR-AUC and ROC-AUC with 95% Bootstrap CI."""
     lines = []
     lines.append(r"\begin{table}[ht]")
     lines.append(r"\centering")
     lines.append(
-        r"\caption{95\% Bootstrap CI for PR-AUC on "
+        r"\caption{95\% Bootstrap CI for PR-AUC and ROC-AUC on "
         + dataset_label
         + r" (strategy\,=\,None, 1\,000 iterations).}"
     )
     lines.append(r"\label{tab:ci_" + filename + "}")
-    lines.append(r"\begin{tabular}{l c c}")
+    lines.append(r"\begin{tabular}{l c c c c}")
     lines.append(r"\toprule")
-    lines.append(r"Model & PR-AUC & 95\% CI \\")
+    lines.append(r"Model & PR-AUC & 95\% CI & ROC-AUC & 95\% CI \\")
     lines.append(r"\midrule")
 
     for model in MODEL_ORDER:
         if model not in data:
             continue
         m = data[model]["metrics"]
-        ci = m["bootstrap_ci"]["PR-AUC_ci"]
+        ci_pr = m["bootstrap_ci"]["PR-AUC_ci"]
+        ci_roc = m["bootstrap_ci"].get("ROC-AUC_ci", (0, 0))
+        roc_auc = m.get("ROC-AUC", 0)
         label = MODEL_LABELS[model]
         lines.append(
             f"{label:<10s} & {m['PR-AUC']:.3f} "
-            f"& [{ci[0]:.3f}, {ci[1]:.3f}] \\\\"
+            f"& [{ci_pr[0]:.3f}, {ci_pr[1]:.3f}] "
+            f"& {roc_auc:.3f} "
+            f"& [{ci_roc[0]:.3f}, {ci_roc[1]:.3f}] \\\\"
         )
 
     lines.append(r"\bottomrule")
@@ -273,7 +278,7 @@ def generate_cost_table(data, dataset_label, filename):
     lines.append(
         r"\caption{Computational cost on "
         + dataset_label
-        + r" (strategy\,=\,None). Tuning includes GridSearchCV (5-fold).}"
+        + r" (strategy\,=\,None). Tuning includes Optuna TPE (50 trials, 5-fold CV).}"
     )
     lines.append(r"\label{tab:cost_" + filename + "}")
     lines.append(r"\begin{tabular}{l r r r}")

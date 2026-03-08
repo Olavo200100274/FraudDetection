@@ -13,7 +13,7 @@ matplotlib.use("Agg")  # non-interactive backend
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
-from sklearn.metrics import confusion_matrix, precision_recall_curve
+from sklearn.metrics import confusion_matrix, precision_recall_curve, roc_curve, roc_auc_score
 
 
 # ─────────────────────────────────────────────────────────────────────────
@@ -45,6 +45,8 @@ def save_run(
         confusion_matrix.png   – confusion-matrix heatmap
         pr_curve.png           – precision-recall curve
         pr_curve_data.json     – raw PR-curve points for LaTeX pgfplots
+        roc_curve.png          – ROC curve
+        roc_curve_data.json    – raw ROC-curve points for LaTeX pgfplots
     """
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     run_dir = os.path.join(
@@ -84,7 +86,13 @@ def save_run(
     # 7. PR curve raw data
     _save_pr_data(y_test, y_test_scores, run_dir)
 
-    # 8. Raw predictions (for threshold study, DeLong tests, etc.)
+    # 8. ROC curve plot
+    _save_roc_curve(y_test, y_test_scores, model_name, strategy, run_dir)
+
+    # 9. ROC curve raw data
+    _save_roc_data(y_test, y_test_scores, run_dir)
+
+    # 10. Raw predictions (for threshold study, DeLong tests, etc.)
     np.save(os.path.join(run_dir, "y_test.npy"), np.asarray(y_test))
     np.save(os.path.join(run_dir, "y_test_scores.npy"), np.asarray(y_test_scores))
 
@@ -157,4 +165,33 @@ def _save_pr_data(y_test, y_scores, run_dir):
         "thresholds": thresholds.tolist(),
     }
     with open(os.path.join(run_dir, "pr_curve_data.json"), "w") as f:
+        json.dump(data, f)
+
+
+def _save_roc_curve(y_test, y_scores, model_name, strategy, run_dir):
+    fpr, tpr, _ = roc_curve(y_test, y_scores)
+    auc_val = roc_auc_score(y_test, y_scores)
+    plt.figure(figsize=(7, 5))
+    plt.plot(fpr, tpr, color="blue", lw=2, label=f"ROC-AUC = {auc_val:.4f}")
+    plt.plot([0, 1], [0, 1], "k--", lw=1, alpha=0.5, label="Random")
+    plt.xlabel("False Positive Rate")
+    plt.ylabel("True Positive Rate")
+    plt.title(f"{model_name} ({strategy}) — ROC Curve")
+    plt.xlim([0, 1])
+    plt.ylim([0, 1.05])
+    plt.legend(loc="lower right")
+    plt.grid(True, alpha=0.3)
+    plt.tight_layout()
+    plt.savefig(os.path.join(run_dir, "roc_curve.png"), dpi=150)
+    plt.close()
+
+
+def _save_roc_data(y_test, y_scores, run_dir):
+    fpr, tpr, thresholds = roc_curve(y_test, y_scores)
+    data = {
+        "fpr": fpr.tolist(),
+        "tpr": tpr.tolist(),
+        "thresholds": thresholds.tolist(),
+    }
+    with open(os.path.join(run_dir, "roc_curve_data.json"), "w") as f:
         json.dump(data, f)

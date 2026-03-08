@@ -1,0 +1,963 @@
+\chapter{Results and Discussion}
+\label{sec:chapterResults}
+
+% ══════════════════════════════════════════════════════════════════════════
+% REQUIRED PACKAGES (add to main .tex preamble if not already present):
+%   \usepackage{pgfplots}
+%   \pgfplotsset{compat=1.18}
+%   \usepgfplotslibrary{groupplots}
+%   \usepackage{booktabs}
+%   \usepackage{xcolor}       % for \definecolor
+%   \usepackage{multirow}     % for multi-row cells (optional)
+% ══════════════════════════════════════════════════════════════════════════
+
+% NOTE: This file is a TEMPLATE. All table values are set to "---" (empty)
+% and figures are commented out, pending new Optuna-based experimental runs.
+% Discussion paragraphs are marked with TODO comments.
+% Previous GridSearchCV results have been archived in results_old_gridSearch/.
+
+% ── Consistent model colours for all figures ──
+\definecolor{clrLGBM}{HTML}{1f77b4}
+\definecolor{clrCB}{HTML}{d62728}
+\definecolor{clrRF}{HTML}{2ca02c}
+\definecolor{clrFT}{HTML}{ff7f0e}
+\definecolor{clrLR}{HTML}{9467bd}
+\definecolor{clrOCSVM}{HTML}{7f7f7f}
+
+\section{Results}
+\label{sec:results}
+
+This section is organised in practical execution order:
+each subsection corresponds to a well-defined experimental step whose artefacts (tables, figures, metrics JSON files) are produced by a specific code pipeline run.
+Sections are numbered sequentially—no phase labels are used.
+All metrics are defined in Section~\ref{sec:metrics} of the Methodology chapter.
+
+% ══════════════════════════════════════════════════════════════════════════
+%  1 — BASELINE MODEL COMPARISON
+% ══════════════════════════════════════════════════════════════════════════
+% CODE STEP 1:
+%   python main.py --dataset ulb    --models all --strategy none
+%   python main.py --dataset baf_base --models all --strategy none
+% Produces: metrics_test.json, pr_curve_data.json, roc_curve_data.json,
+%           confusion_matrix.png for each model on each dataset.
+% ══════════════════════════════════════════════════════════════════════════
+
+\subsection{Baseline Model Comparison (No Imbalance Strategy)}
+\label{sec:baseline_results}
+
+This section compares all models tuned via Optuna TPE (50 trials,
+5-fold stratified cross-validation, scoring\,=\,PR-AUC)
+\emph{without} any imbalance handling strategy.
+Results are reported on the holdout test set using the
+$F_2$-maximising threshold~($\tau$) obtained from inner validation
+(median across folds).
+The same trained models and probability scores are later reused for
+the threshold sensitivity analysis (Section~\ref{sec:threshold_sensitivity}),
+where alternative threshold strategies are applied \emph{without retraining}.
+
+% ─────────────────── ULB 2013 ───────────────────
+
+\subsubsection{ULB Credit Card 2013}
+
+\begin{table}[ht]
+\centering
+\caption{Baseline comparison on ULB 2013 (strategy\,=\,None, threshold\,=\,max-$F_2$).}
+\label{tab:baseline_ulb}
+\begin{tabular}{l c c c c c c c c}
+\toprule
+Model & PR-AUC & ROC-AUC & $F_1$ & $F_2$ & Precision & Recall & $\tau$ & Brier \\
+\midrule
+LR         & --- & --- & --- & --- & --- & --- & --- & --- \\
+RF         & --- & --- & --- & --- & --- & --- & --- & --- \\
+LGBM       & --- & --- & --- & --- & --- & --- & --- & --- \\
+CatBoost   & --- & --- & --- & --- & --- & --- & --- & --- \\
+OCSVM      & --- & --- & --- & --- & --- & --- & --- & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[ht]
+\centering
+\caption{Operational metrics on ULB 2013 (strategy\,=\,None, threshold\,=\,max-$F_2$).}
+\label{tab:ops_ulb}
+\begin{tabular}{l c c c c c}
+\toprule
+Model & Alert Rate & FP/TP & P@$k$ & R@$k$ & $k$ \\
+\midrule
+LR         & --- & --- & --- & --- & --- \\
+RF         & --- & --- & --- & --- & --- \\
+LGBM       & --- & --- & --- & --- & --- \\
+CatBoost   & --- & --- & --- & --- & --- \\
+OCSVM      & --- & --- & --- & --- & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ── PR Curve — ULB 2013 Baseline ──
+% TODO: Uncomment once baseline experiments are complete.
+% \begin{figure}[ht]
+%   \centering
+%   \includegraphics[width=0.88\textwidth]{figures/ulb/pr_curves_baseline.pdf}
+%   \caption{Precision--Recall curves for all models on ULB 2013
+%     (strategy\,=\,None).
+%     PR-AUC values in parentheses.
+%     The dashed horizontal line marks the precision of a random classifier
+%     ($\approx 0.17\%$).}
+%   \label{fig:pr_curves_ulb}
+% \end{figure}
+
+% ─────────────────── BAF Base ───────────────────
+
+\subsubsection{BAF Base}
+
+\begin{table}[ht]
+\centering
+\caption{Baseline comparison on BAF Base (strategy\,=\,None, threshold\,=\,max-$F_2$).}
+\label{tab:baseline_baf}
+\begin{tabular}{l c c c c c c c c}
+\toprule
+Model & PR-AUC & ROC-AUC & $F_1$ & $F_2$ & Precision & Recall & $\tau$ & Brier \\
+\midrule
+LR         & --- & --- & --- & --- & --- & --- & --- & --- \\
+RF         & --- & --- & --- & --- & --- & --- & --- & --- \\
+LGBM       & --- & --- & --- & --- & --- & --- & --- & --- \\
+CatBoost   & --- & --- & --- & --- & --- & --- & --- & --- \\
+OCSVM      & --- & --- & --- & --- & --- & --- & --- & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[ht]
+\centering
+\caption{Operational metrics on BAF Base (strategy\,=\,None, threshold\,=\,max-$F_2$).}
+\label{tab:ops_baf}
+\begin{tabular}{l c c c c c}
+\toprule
+Model & Alert Rate & FP/TP & P@$k$ & R@$k$ & $k$ \\
+\midrule
+LR         & --- & --- & --- & --- & --- \\
+RF         & --- & --- & --- & --- & --- \\
+LGBM       & --- & --- & --- & --- & --- \\
+CatBoost   & --- & --- & --- & --- & --- \\
+OCSVM      & --- & --- & --- & --- & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ── PR Curve — BAF Base Baseline ──
+% TODO: Uncomment once baseline experiments are complete.
+% \begin{figure}[ht]
+%   \centering
+%   \includegraphics[width=0.88\textwidth]{figures/baf/pr_curves_baseline.pdf}
+%   \caption{Precision--Recall curves for all models on BAF Base
+%     (strategy\,=\,None).
+%     PR-AUC values in parentheses.
+%     The dashed horizontal line marks the precision of a random classifier
+%     ($\approx 1.10\%$).}
+%   \label{fig:pr_curves_baf_base}
+% \end{figure}
+
+\paragraph{Discussion.}
+% TODO: Discussion will be written once baseline experiments are complete with Optuna.
+
+
+% ══════════════════════════════════════════════════════════════════════════
+%  2 — THRESHOLD SENSITIVITY ANALYSIS
+% ══════════════════════════════════════════════════════════════════════════
+% CODE STEP 2:
+%   python threshold_study.py --dataset ulb    --source-run results/ulb_2013/<model>/none/...
+%   python threshold_study.py --dataset baf_base --source-run results/baf_base/<model>/none/...
+% Loads the saved probability scores from Step 1 and applies the 4
+% threshold strategies (Fixed 0.5, max-F1, max-F2, Precision>=0.5)
+% WITHOUT retraining.  Produces threshold_study.json per model.
+% ══════════════════════════════════════════════════════════════════════════
+
+\subsection{Threshold Sensitivity Analysis}
+\label{sec:threshold_sensitivity}
+
+This section investigates how the choice of decision threshold strategy
+affects all downstream metrics and, critically, whether it changes model rankings.
+The four strategies defined in Section~\ref{sec:threshold_study} of the Methodology are:
+\begin{enumerate}
+  \item \textbf{Fixed ($\tau=0.5$):} na\"ive baseline.
+  \item \textbf{max-$F_1$:} threshold maximising $F_1$ on validation folds (median across folds).
+  \item \textbf{max-$F_2$:} threshold maximising $F_2$ on validation folds (median across folds)~--- the primary analysis criterion.
+  \item \textbf{Precision\,$\geq$\,0.5:} lowest threshold ensuring $\text{Precision} \geq 0.5$ on validation folds (median across folds).
+\end{enumerate}
+
+All strategies select $\tau$ exclusively on inner validation folds;
+the same $\tau$ is then applied to the holdout test set.
+No retraining is performed~--- the same probability scores from the baseline are reused.
+
+% ─────── ULB 2013 — Threshold Study ───────
+
+\subsubsection{ULB Credit Card 2013}
+
+\begin{table}[ht]
+\centering
+\caption{Threshold sensitivity on ULB 2013~--- $F_2$ by threshold strategy (strategy\,=\,None).}
+\label{tab:threshold_ulb_f2}
+\begin{tabular}{l c c c c}
+\toprule
+Model & Fixed (0.5) & max-$F_1$ & max-$F_2$ & Prec\,$\geq$\,0.5 \\
+\midrule
+LR         & --- & --- & --- & --- \\
+RF         & --- & --- & --- & --- \\
+LGBM       & --- & --- & --- & --- \\
+CatBoost   & --- & --- & --- & --- \\
+% FT-Trans. & --- & --- & --- & --- \\
+OCSVM      & --- & --- & --- & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[ht]
+\centering
+\caption{Threshold sensitivity on ULB 2013~--- $F_1$ by threshold strategy (strategy\,=\,None).}
+\label{tab:threshold_ulb_f1}
+\begin{tabular}{l c c c c}
+\toprule
+Model & Fixed (0.5) & max-$F_1$ & max-$F_2$ & Prec\,$\geq$\,0.5 \\
+\midrule
+LR         & --- & --- & --- & --- \\
+RF         & --- & --- & --- & --- \\
+LGBM       & --- & --- & --- & --- \\
+CatBoost   & --- & --- & --- & --- \\
+% FT-Trans. & --- & --- & --- & --- \\
+OCSVM      & --- & --- & --- & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[ht]
+\centering
+\caption{Threshold sensitivity on ULB 2013~--- Recall by threshold strategy (strategy\,=\,None).}
+\label{tab:threshold_ulb_recall}
+\begin{tabular}{l c c c c}
+\toprule
+Model & Fixed (0.5) & max-$F_1$ & max-$F_2$ & Prec\,$\geq$\,0.5 \\
+\midrule
+LR         & --- & --- & --- & --- \\
+RF         & --- & --- & --- & --- \\
+LGBM       & --- & --- & --- & --- \\
+CatBoost   & --- & --- & --- & --- \\
+% FT-Trans. & --- & --- & --- & --- \\
+OCSVM      & --- & --- & --- & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[ht]
+\centering
+\caption{Threshold sensitivity on ULB 2013~--- Alert Rate (\%) by threshold strategy (strategy\,=\,None).}
+\label{tab:threshold_ulb_alert}
+\begin{tabular}{l c c c c}
+\toprule
+Model & Fixed (0.5) & max-$F_1$ & max-$F_2$ & Prec\,$\geq$\,0.5 \\
+\midrule
+LR         & --- & --- & --- & --- \\
+RF         & --- & --- & --- & --- \\
+LGBM       & --- & --- & --- & --- \\
+CatBoost   & --- & --- & --- & --- \\
+% FT-Trans. & --- & --- & --- & --- \\
+OCSVM      & --- & --- & --- & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Discussion.}
+% TODO: Discussion will be written once threshold study experiments are complete with Optuna.
+
+% ─────── BAF Base — Threshold Study ───────
+
+\subsubsection{BAF Base}
+
+\begin{table}[ht]
+\centering
+\caption{Threshold sensitivity on BAF Base~--- $F_2$ by threshold strategy (strategy\,=\,None).}
+\label{tab:threshold_baf_f2}
+\begin{tabular}{l c c c c}
+\toprule
+Model & Fixed (0.5) & max-$F_1$ & max-$F_2$ & Prec\,$\geq$\,0.5 \\
+\midrule
+LR         & --- & --- & --- & --- \\
+RF         & --- & --- & --- & --- \\
+LGBM       & --- & --- & --- & --- \\
+CatBoost   & --- & --- & --- & --- \\
+% FT-Trans. & --- & --- & --- & --- \\
+OCSVM      & --- & --- & --- & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[ht]
+\centering
+\caption{Threshold sensitivity on BAF Base~--- $F_1$ by threshold strategy (strategy\,=\,None).}
+\label{tab:threshold_baf_f1}
+\begin{tabular}{l c c c c}
+\toprule
+Model & Fixed (0.5) & max-$F_1$ & max-$F_2$ & Prec\,$\geq$\,0.5 \\
+\midrule
+LR         & --- & --- & --- & --- \\
+RF         & --- & --- & --- & --- \\
+LGBM       & --- & --- & --- & --- \\
+CatBoost   & --- & --- & --- & --- \\
+% FT-Trans. & --- & --- & --- & --- \\
+OCSVM      & --- & --- & --- & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[ht]
+\centering
+\caption{Threshold sensitivity on BAF Base~--- Recall by threshold strategy (strategy\,=\,None).}
+\label{tab:threshold_baf_recall}
+\begin{tabular}{l c c c c}
+\toprule
+Model & Fixed (0.5) & max-$F_1$ & max-$F_2$ & Prec\,$\geq$\,0.5 \\
+\midrule
+LR         & --- & --- & --- & --- \\
+RF         & --- & --- & --- & --- \\
+LGBM       & --- & --- & --- & --- \\
+CatBoost   & --- & --- & --- & --- \\
+% FT-Trans. & --- & --- & --- & --- \\
+OCSVM      & --- & --- & --- & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[ht]
+\centering
+\caption{Threshold sensitivity on BAF Base~--- Alert Rate (\%) by threshold strategy (strategy\,=\,None).}
+\label{tab:threshold_baf_alert}
+\begin{tabular}{l c c c c}
+\toprule
+Model & Fixed (0.5) & max-$F_1$ & max-$F_2$ & Prec\,$\geq$\,0.5 \\
+\midrule
+LR         & --- & --- & --- & --- \\
+RF         & --- & --- & --- & --- \\
+LGBM       & --- & --- & --- & --- \\
+CatBoost   & --- & --- & --- & --- \\
+% FT-Trans. & --- & --- & --- & --- \\
+OCSVM      & --- & --- & --- & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Discussion.}
+% TODO: Discussion will be written once threshold study experiments are complete with Optuna.
+
+
+% ══════════════════════════════════════════════════════════════════════════
+%  3 — FULL FACTORIAL: IMBALANCE STRATEGY × MODEL
+% ══════════════════════════════════════════════════════════════════════════
+% CODE STEP 3:
+%   for strategy in rus ros smote smote_tomek smoteenn weights; do
+%     python main.py --dataset ulb      --models supervised --strategy $strategy
+%     python main.py --dataset baf_base --models supervised --strategy $strategy
+%   done
+% Hyperparameters stay fixed from Step 1 (strategy=None).
+% Produces metrics_test.json per (model, strategy, dataset).
+% ══════════════════════════════════════════════════════════════════════════
+
+\subsection{Full Factorial Analysis~--- Imbalance Strategy $\times$ Model}
+\label{sec:factorial_results}
+
+This subsection presents results for all (model, strategy) combinations
+under the primary threshold (max-$F_2$).
+Hyperparameters are fixed to those obtained in the baseline (strategy\,=\,None);
+only the balancing technique changes.
+OCSVM is excluded because it does not use labelled fraud examples during training.
+
+% ─────── ULB 2013 — Factorial ───────
+
+\subsubsection{ULB Credit Card 2013}
+
+\begin{table}[ht]
+\centering
+\caption{PR-AUC by model $\times$ strategy on ULB 2013.}
+\label{tab:factorial_ulb_prauc}
+\begin{tabular}{l c c c c c c c}
+\toprule
+Model & None & RUS & ROS & SMOTE & SM+T & SMOTEENN & Weights \\
+\midrule
+LR         & --- & --- & --- & --- & --- & --- & --- \\
+RF         & --- & --- & --- & --- & --- & --- & --- \\
+LGBM       & --- & --- & --- & --- & --- & --- & --- \\
+CatBoost   & --- & --- & --- & --- & --- & --- & --- \\
+% FT-Trans. & --- & --- & --- & --- & --- & --- & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[ht]
+\centering
+\caption{$F_2$ by model $\times$ strategy on ULB 2013.}
+\label{tab:factorial_ulb_f2}
+\begin{tabular}{l c c c c c c c}
+\toprule
+Model & None & RUS & ROS & SMOTE & SM+T & SMOTEENN & Weights \\
+\midrule
+LR         & --- & --- & --- & --- & --- & --- & --- \\
+RF         & --- & --- & --- & --- & --- & --- & --- \\
+LGBM       & --- & --- & --- & --- & --- & --- & --- \\
+CatBoost   & --- & --- & --- & --- & --- & --- & --- \\
+% FT-Trans. & --- & --- & --- & --- & --- & --- & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ─────── BAF Base — Factorial ───────
+
+\subsubsection{BAF Base}
+
+\begin{table}[ht]
+\centering
+\caption{PR-AUC by model $\times$ strategy on BAF Base.}
+\label{tab:factorial_baf_prauc}
+\begin{tabular}{l c c c c c c c}
+\toprule
+Model & None & RUS & ROS & SMOTE & SM+T & SMOTEENN & Weights \\
+\midrule
+LR        & --- & --- & --- & --- & --- & --- & --- \\
+RF        & --- & --- & --- & --- & --- & --- & --- \\
+LGBM      & --- & --- & --- & --- & --- & --- & --- \\
+CatBoost  & --- & --- & --- & --- & --- & --- & --- \\
+FT-Trans. & --- & --- & --- & --- & --- & --- & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[ht]
+\centering
+\caption{$F_2$ by model $\times$ strategy on BAF Base.}
+\label{tab:factorial_baf_f2}
+\begin{tabular}{l c c c c c c c}
+\toprule
+Model & None & RUS & ROS & SMOTE & SM+T & SMOTEENN & Weights \\
+\midrule
+LR        & --- & --- & --- & --- & --- & --- & --- \\
+RF        & --- & --- & --- & --- & --- & --- & --- \\
+LGBM      & --- & --- & --- & --- & --- & --- & --- \\
+CatBoost  & --- & --- & --- & --- & --- & --- & --- \\
+FT-Trans. & --- & --- & --- & --- & --- & --- & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{Interaction Heatmaps}
+
+% ── Heatmap ULB (code-generated) ──
+% TODO: Uncomment once factorial experiments are complete.
+% \begin{figure}[ht]
+%   \centering
+%   \includegraphics[width=0.85\textwidth]{figures/ulb/heatmap_prauc.pdf}
+%   \caption{$\Delta$PR-AUC (strategy $-$ None) per model on ULB 2013.}
+%   \label{fig:heatmap_ulb_prauc}
+% \end{figure}
+
+% \begin{figure}[ht]
+%   \centering
+%   \includegraphics[width=0.85\textwidth]{figures/ulb/heatmap_f2.pdf}
+%   \caption{$\Delta F_2$ (strategy $-$ None) per model on ULB 2013.}
+%   \label{fig:heatmap_ulb_f2}
+% \end{figure}
+
+% \begin{figure}[ht]
+%   \centering
+%   \includegraphics[width=0.85\textwidth]{figures/baf/heatmap_prauc.pdf}
+%   \caption{$\Delta$PR-AUC (strategy $-$ None) per model on BAF Base.}
+%   \label{fig:heatmap_baf_prauc}
+% \end{figure}
+
+% \begin{figure}[ht]
+%   \centering
+%   \includegraphics[width=0.85\textwidth]{figures/baf/heatmap_f2.pdf}
+%   \caption{$\Delta F_2$ (strategy $-$ None) per model on BAF Base.}
+%   \label{fig:heatmap_baf_f2}
+% \end{figure}
+
+\paragraph{Discussion.}
+% TODO: Discussion will be written once factorial experiments are complete with Optuna.
+
+
+% ══════════════════════════════════════════════════════════════════════════
+%  4 — TRANSFORMER ROBUSTNESS TO CLASS IMBALANCE
+% ══════════════════════════════════════════════════════════════════════════
+% CODE STEP 4:
+%   No additional code runs — this section extracts and reshapes the
+%   factorial results (Step 3) to compare FT-Transformer vs. best tree.
+%   Script: python analysis/transformer_robustness.py
+% ══════════════════════════════════════════════════════════════════════════
+
+\subsection{Transformer Robustness to Class Imbalance}
+\label{sec:transformer_imbalance}
+
+This section directly addresses the hypothesis:
+\emph{Is an attention-based architecture inherently more or less robust to
+class imbalance than tree-based models?}
+The FT-Transformer is compared against the best tree-based model
+(identified from the baseline and factorial sections) under all seven
+strategy conditions.
+
+\begin{table}[ht]
+\centering
+\caption{FT-Transformer vs.\ best tree (LGBM): robustness to imbalance strategies on ULB 2013.}
+\label{tab:transformer_robustness_ulb}
+\begin{tabular}{l cc cc}
+\toprule
+& \multicolumn{2}{c}{FT-Transformer} & \multicolumn{2}{c}{LGBM} \\
+Strategy & PR-AUC & $F_2$ & PR-AUC & $F_2$ \\
+\midrule
+None      & --- & --- & --- & --- \\
+RUS       & --- & --- & --- & --- \\
+ROS       & --- & --- & --- & --- \\
+SMOTE     & --- & --- & --- & --- \\
+SM+Tomek  & --- & --- & --- & --- \\
+SMOTEENN  & --- & --- & --- & --- \\
+Weights   & --- & --- & --- & --- \\
+\midrule
+\textit{Std.\ dev.} & \textit{---} & \textit{---} & \textit{---} & \textit{---} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[ht]
+\centering
+\caption{FT-Transformer vs.\ best tree (CatBoost): robustness to imbalance strategies on BAF Base.}
+\label{tab:transformer_robustness_baf}
+\begin{tabular}{l cc cc}
+\toprule
+& \multicolumn{2}{c}{FT-Transformer} & \multicolumn{2}{c}{CatBoost} \\
+Strategy & PR-AUC & $F_2$ & PR-AUC & $F_2$ \\
+\midrule
+None      & --- & --- & --- & --- \\
+RUS       & --- & --- & --- & --- \\
+ROS       & --- & --- & --- & --- \\
+SMOTE     & --- & --- & --- & --- \\
+SM+Tomek  & --- & --- & --- & --- \\
+SMOTEENN  & --- & --- & --- & --- \\
+Weights   & --- & --- & --- & --- \\
+\midrule
+\textit{Std.\ dev.} & \textit{---} & \textit{---} & \textit{---} & \textit{---} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Discussion.}
+% TODO: Discussion will be written once FT-Transformer and strategy experiments are complete.
+
+
+% ══════════════════════════════════════════════════════════════════════════
+%  5 — CROSS-DOMAIN GENERALIZATION (BAF INTERNAL)
+% ══════════════════════════════════════════════════════════════════════════
+% CODE STEP 5:
+%   python cross_domain.py \
+%     --source baf_base \
+%     --targets baf_var1 baf_var2 baf_var3 baf_var4 baf_var5 \
+%     --models all --strategy best
+% Loads the model trained on BAF Base (from Step 1/3) and evaluates on
+% the holdout test sets of Variants I--V WITHOUT retraining.
+% Extra columns (x1, x2) in Variants III and V are dropped automatically.
+% Produces cross_domain_results.json.
+% ══════════════════════════════════════════════════════════════════════════
+
+\subsection{Cross-Domain Generalization (BAF Internal)}
+\label{sec:cross_domain_results}
+
+Models are trained on BAF~Base and evaluated on the holdout test sets
+of Variants~I--V \emph{without retraining}.
+In-domain baselines (train and test on the same dataset via the standard
+holdout protocol) are provided for reference.
+The extra columns (\texttt{x1}, \texttt{x2}) present in Variants~III
+and~V are excluded to maintain a consistent 32-feature input across
+all six datasets.
+
+\subsubsection{In-Domain vs.\ Cross-Domain Performance}
+
+\begin{table}[ht]
+\centering
+\caption{Cross-domain PR-AUC (best strategy per model, trained on BAF Base).
+  ``Base (ID)'' is the in-domain result on BAF Base itself.}
+\label{tab:crossdomain_prauc}
+\begin{tabular}{l c c c c c c}
+\toprule
+Model & Base (ID) & Var.~I & Var.~II & Var.~III & Var.~IV & Var.~V \\
+\midrule
+LR        & --- & --- & --- & --- & --- & --- \\
+RF        & --- & --- & --- & --- & --- & --- \\
+LGBM      & --- & --- & --- & --- & --- & --- \\
+CatBoost  & --- & --- & --- & --- & --- & --- \\
+FT-Trans. & --- & --- & --- & --- & --- & --- \\
+OCSVM     & --- & --- & --- & --- & --- & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[ht]
+\centering
+\caption{Cross-domain $F_2$ (best strategy per model, trained on BAF Base).}
+\label{tab:crossdomain_f2}
+\begin{tabular}{l c c c c c c}
+\toprule
+Model & Base (ID) & Var.~I & Var.~II & Var.~III & Var.~IV & Var.~V \\
+\midrule
+LR        & --- & --- & --- & --- & --- & --- \\
+RF        & --- & --- & --- & --- & --- & --- \\
+LGBM      & --- & --- & --- & --- & --- & --- \\
+CatBoost  & --- & --- & --- & --- & --- & --- \\
+FT-Trans. & --- & --- & --- & --- & --- & --- \\
+OCSVM     & --- & --- & --- & --- & --- & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{Performance Degradation Under Distribution Shift}
+
+\begin{table}[ht]
+\centering
+\caption{Relative change in PR-AUC from in-domain to cross-domain (\%).
+  Negative\,=\,degradation.}
+\label{tab:crossdomain_delta}
+\begin{tabular}{l c c c c c}
+\toprule
+Model & $\Delta$ Var.~I & $\Delta$ Var.~II & $\Delta$ Var.~III & $\Delta$ Var.~IV & $\Delta$ Var.~V \\
+\midrule
+LR        & ---  & ---  & ---  & ---  & ---  \\
+RF        & ---  & ---  & ---  & ---  & ---  \\
+LGBM      & ---  & ---  & ---  & ---  & ---  \\
+CatBoost  & ---  & ---  & ---  & ---  & ---  \\
+FT-Trans. & ---  & ---  & ---  & ---  & ---  \\
+OCSVM     & ---  & ---  & ---  & ---  & ---  \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ── Cross-Domain Degradation Bar Chart ──
+% TODO: Will be generated from real data once cross-domain experiments are complete.
+% \begin{figure}[ht]
+%   \centering
+%   \includegraphics[width=0.88\textwidth]{figures/crossdomain_degradation.pdf}
+%   \caption{PR-AUC degradation (\%) from in-domain (BAF Base) to
+%     cross-domain (Variants~I--V) by model family.}
+%   \label{fig:crossdomain_degradation}
+% \end{figure}
+
+\subsubsection{Threshold Transfer}
+
+This table tests whether the decision threshold $\tau$ calibrated on
+BAF~Base transfers well to the Variants, or whether local recalibration
+recovers lost performance.
+
+\begin{table}[ht]
+\centering
+\caption{Threshold transfer: $F_2$ when using Base-derived $\tau$ vs.\
+  Variant-specific $\tau$ (LGBM, best strategy).}
+\label{tab:crossdomain_threshold}
+\begin{tabular}{l c c c}
+\toprule
+Dataset & $F_2$ (Base $\tau$) & $F_2$ (Local $\tau$) & $\Delta$ $F_2$ \\
+\midrule
+Var.~I   & --- & --- & --- \\
+Var.~II  & --- & --- & --- \\
+Var.~III & --- & --- & --- \\
+Var.~IV  & --- & --- & --- \\
+Var.~V   & --- & --- & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Discussion.}
+% TODO: Discussion will be written once cross-domain experiments are complete.
+
+
+% ══════════════════════════════════════════════════════════════════════════
+%  6 — BAF VARIANTS: IN-DOMAIN FULL RESULTS
+% ══════════════════════════════════════════════════════════════════════════
+% CODE STEP 6:
+%   for variant in baf_var1 baf_var2 baf_var3 baf_var4 baf_var5; do
+%     python main.py --dataset $variant --models all --strategy best
+%   done
+% Uses the same hyperparameters tuned on BAF Base (Section~\ref{sec:tuning}).
+% Produces metrics_test.json + pr_curve_data.json per (model, variant).
+% ══════════════════════════════════════════════════════════════════════════
+
+\subsection{BAF Variants: In-Domain Results}
+\label{sec:baf_variants}
+
+This section reports in-domain results for each BAF Variant
+(standard holdout protocol, hyperparameters from BAF Base tuning,
+best strategy per model).
+By comparing in-domain vs.\ cross-domain performance on the same Variant,
+we can disentangle model capacity from generalization failure.
+
+\begin{table}[ht]
+\centering
+\caption{Best PR-AUC per model across BAF Variants (in-domain, best strategy).}
+\label{tab:baf_variants_summary}
+\begin{tabular}{l c c c c c c}
+\toprule
+Model & Base & Var.~I & Var.~II & Var.~III & Var.~IV & Var.~V \\
+\midrule
+LR        & --- & --- & --- & --- & --- & --- \\
+RF        & --- & --- & --- & --- & --- & --- \\
+LGBM      & --- & --- & --- & --- & --- & --- \\
+CatBoost  & --- & --- & --- & --- & --- & --- \\
+FT-Trans. & --- & --- & --- & --- & --- & --- \\
+OCSVM     & --- & --- & --- & --- & --- & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ── BAF Variants Grouped Bar Chart ──
+% TODO: Will be generated from real data once BAF variant experiments are complete.
+% \begin{figure}[ht]
+%   \centering
+%   \includegraphics[width=0.88\textwidth]{figures/baf/variants_comparison.pdf}
+%   \caption{PR-AUC across BAF Variants for the top-3 models
+%     (in-domain, best strategy).}
+%   \label{fig:baf_variants_comparison}
+% \end{figure}
+
+
+% ══════════════════════════════════════════════════════════════════════════
+%  7 — INTERPRETABILITY (SHAP)
+% ══════════════════════════════════════════════════════════════════════════
+% CODE STEP 7:
+%   python shap_analysis.py --dataset baf_base \
+%     --models lr lgbm catboost ft_transformer \
+%     --top-k 15
+% Produces: shap_global_<model>.json, shap_waterfall_tp_fp_fn.pdf,
+%           shap_jaccard_cross_model.json, shap_jaccard_cross_variant.json.
+% ══════════════════════════════════════════════════════════════════════════
+
+\subsection{Interpretability Analysis (SHAP)}
+\label{sec:shap_results}
+
+Interpretability analysis uses SHAP (SHapley Additive exPlanations)
+on the BAF~Base dataset, where features have semantic meaning.
+ULB~2013 features (PCA components V1--V28) are not interpretable,
+so SHAP analysis on ULB serves only as a consistency check.
+
+\subsubsection{Global Feature Importance}
+
+% ── Global SHAP bar chart ──
+% TODO: Will be generated from real data once SHAP analysis is complete.
+% \begin{figure}[ht]
+%   \centering
+%   \includegraphics[width=0.88\textwidth]{figures/shap_global.pdf}
+%   \caption{Top-15 features by mean $|\text{SHAP}|$ on BAF Base for LGBM and CatBoost.}
+%   \label{fig:shap_global}
+% \end{figure}
+
+\subsubsection{Cross-Model Feature Consistency}
+
+\begin{table}[ht]
+\centering
+\caption{Jaccard similarity of top-10 SHAP features across model pairs (BAF Base).}
+\label{tab:shap_consistency}
+\begin{tabular}{l c c c c}
+\toprule
+          & LR   & LGBM & CatBoost & FT-Trans. \\
+\midrule
+LR        & ---  & ---  & ---      & ---  \\
+LGBM      & ---  & ---  & ---      & ---  \\
+CatBoost  & ---  & ---  & ---      & ---  \\
+FT-Trans. & ---  & ---  & ---      & ---  \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{Cross-Variant Feature Stability}
+
+\begin{table}[ht]
+\centering
+\caption{Jaccard similarity of top-10 SHAP features for LGBM across BAF Variants.}
+\label{tab:shap_stability}
+\begin{tabular}{l c c c c c c}
+\toprule
+         & Base & Var.~I & Var.~II & Var.~III & Var.~IV & Var.~V \\
+\midrule
+Base     & --- & --- & --- & --- & --- & --- \\
+Var.~I   & --- & --- & --- & --- & --- & --- \\
+Var.~II  & --- & --- & --- & --- & --- & --- \\
+Var.~III & --- & --- & --- & --- & --- & --- \\
+Var.~IV  & --- & --- & --- & --- & --- & --- \\
+Var.~V   & --- & --- & --- & --- & --- & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{Local Explanations}
+
+% ── Local SHAP explanations ──
+% TODO: Will be generated from real data once SHAP analysis is complete.
+% \begin{figure}[ht]
+%   \centering
+%   \includegraphics[width=0.9\textwidth]{figures/shap_waterfall_tp_fp_fn.pdf}
+%   \caption{SHAP contribution plots for representative True Positive,
+%     False Positive, and False Negative cases (LGBM on BAF Base).
+%     Red bars push toward fraud; blue bars push toward legitimate.}
+%   \label{fig:shap_local}
+% \end{figure}
+
+\paragraph{Discussion.}
+% TODO: Discussion will be written once SHAP analysis is complete.
+
+
+% ══════════════════════════════════════════════════════════════════════════
+%  8 — CONSOLIDATED SUMMARY
+% ══════════════════════════════════════════════════════════════════════════
+% CODE STEP 8:
+%   python analysis/consolidate.py
+% Aggregates results from all previous steps into summary tables,
+% overlaid PR curves, bootstrap CIs, and the decision framework.
+% ══════════════════════════════════════════════════════════════════════════
+
+\subsection{Consolidated Summary}
+\label{sec:consolidated}
+
+\subsubsection{PR Curves~--- All Models Overlaid (Best Strategy)}
+
+% ── Side-by-side PR Curves: ULB and BAF ──
+% TODO: Will be generated from real data once all experiments are complete.
+% \begin{figure}[ht]
+%   \centering
+%   \includegraphics[width=0.95\textwidth]{figures/pr_curves_consolidated.pdf}
+%   \caption{Precision--Recall curves for all supervised models:
+%     ULB~2013 (left) and BAF~Base (right). Strategy\,=\,best per model.
+%     OCSVM omitted for readability.}
+%   \label{fig:pr_curves_consolidated}
+% \end{figure}
+
+\subsubsection{Decision Framework}
+
+\begin{table}[ht]
+\centering
+\caption{Decision framework: recommended configuration by deployment scenario.}
+\label{tab:decision_framework}
+\begin{tabular}{l l l l}
+\toprule
+Scenario & Model & Strategy & Threshold \\
+\midrule
+High recall priority, ULB-like  & ---      & ---      & ---       \\
+Balanced $F_1$, ULB-like        & ---      & ---      & ---       \\
+High recall priority, BAF-like  & ---      & ---      & ---       \\
+Balanced $F_1$, BAF-like        & ---      & ---      & ---       \\
+Cross-domain deployment         & ---      & ---      & ---       \\
+Interpretability required       & ---      & ---      & ---       \\
+Low workload budget             & ---      & ---      & ---       \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{Bootstrap Confidence Intervals}
+
+\begin{table}[ht]
+\centering
+\caption{95\% Bootstrap CI for PR-AUC and ROC-AUC on ULB 2013 (best strategy per model, 1\,000 iterations).}
+\label{tab:ci_ulb}
+\begin{tabular}{l c c c c}
+\toprule
+Model & PR-AUC & 95\% CI & ROC-AUC & 95\% CI \\
+\midrule
+LR        & --- & --- & --- & --- \\
+RF        & --- & --- & --- & --- \\
+LGBM      & --- & --- & --- & --- \\
+CatBoost  & --- & --- & --- & --- \\
+FT-Trans. & --- & --- & --- & --- \\
+OCSVM     & --- & --- & --- & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[ht]
+\centering
+\caption{95\% Bootstrap CI for PR-AUC and ROC-AUC on BAF Base (best strategy per model, 1\,000 iterations).}
+\label{tab:ci_baf}
+\begin{tabular}{l c c c c}
+\toprule
+Model & PR-AUC & 95\% CI & ROC-AUC & 95\% CI \\
+\midrule
+LR        & --- & --- & --- & --- \\
+RF        & --- & --- & --- & --- \\
+LGBM      & --- & --- & --- & --- \\
+CatBoost  & --- & --- & --- & --- \\
+FT-Trans. & --- & --- & --- & --- \\
+OCSVM     & --- & --- & --- & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{Computational Cost}
+
+\begin{table}[ht]
+\centering
+\caption{Wall-clock training and inference time (baseline, strategy\,=\,None).
+  Tuning = Optuna TPE (50 trials, 5-fold CV).
+  Times measured on a single machine with [hardware TBD].}
+\label{tab:computational_cost}
+\begin{tabular}{l r r r r r r}
+\toprule
+& \multicolumn{3}{c}{ULB 2013} & \multicolumn{3}{c}{BAF Base} \\
+Model & Tune (s) & Train (s) & Infer (s) & Tune (s) & Train (s) & Infer (s) \\
+\midrule
+LR         &  --- & --- & --- &  --- &  --- & --- \\
+RF         &  --- & --- & --- &  --- &  --- & --- \\
+LGBM       &  --- & --- & --- &  --- &  --- & --- \\
+CatBoost   &  --- & --- & --- &  --- &  --- & --- \\
+% FT-Trans. — not yet run \\
+OCSVM      &  --- & --- & --- &  --- &  --- & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+% ══════════════════════════════════════════════════════════════════════════
+% DISCUSSION
+% ══════════════════════════════════════════════════════════════════════════
+
+\section{Discussion}
+\label{sec:discussion}
+
+\subsection{Classical ML vs.\ Transformer for Fraud Detection}
+
+% TODO: Discussion will be written once all baseline experiments are complete with Optuna.
+
+\subsection{Threshold Selection Matters}
+
+% TODO: Discussion will be written once threshold study experiments are complete.
+
+\subsection{Imbalance Strategy $\times$ Model Interaction}
+
+% TODO: Discussion will be written once factorial experiments are complete.
+
+\subsection{Cross-Domain Generalization}
+
+% TODO: Discussion will be written once cross-domain experiments are complete.
+
+ULB~$\leftrightarrow$~BAF cross-dataset transfer is not feasible due
+to incompatible feature spaces (PCA-anonymised vs.\ real-world features).
+This limitation is acknowledged; the BAF internal transfer setting
+provides a controlled environment to study generalization with matched features.
+
+\subsection{Performance--Interpretability Trade-offs}
+
+% TODO: Discussion will be written once SHAP analysis is complete.
+
+\subsection{Threats to Validity}
+\begin{itemize}
+  \item \textbf{Internal:} Hyperparameter tuning budget is finite
+    (50 Optuna trials per model); single holdout split rather
+    than repeated random sub-sampling; reliance on two dataset families.
+  \item \textbf{External:} ULB features are PCA-anonymised, limiting
+    interpretability and real-world applicability of ULB-specific findings.
+    BAF is synthetically generated, so fraud patterns may not fully
+    reflect real-world complexity.
+  \item \textbf{Construct:} PR-AUC is sensitive to the class prior;
+    comparisons of absolute PR-AUC values across datasets with different
+    fraud rates should be made with caution.
+  \item \textbf{Statistical:} Bootstrap CIs assume the holdout test set
+    is representative; with extreme imbalance, bootstrap samples may
+    have very few positive examples, widening CIs.
+\end{itemize}

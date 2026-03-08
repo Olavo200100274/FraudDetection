@@ -2,6 +2,7 @@ import numpy as np
 from sklearn.metrics import (
     precision_recall_curve,
     average_precision_score,
+    roc_auc_score,
     f1_score,
     fbeta_score,
     brier_score_loss,
@@ -107,6 +108,7 @@ def compute_all_metrics(y_true, y_scores, threshold):
     y_pred = (y_scores >= threshold).astype(int)
 
     pr_auc = average_precision_score(y_true, y_scores)
+    roc_auc = roc_auc_score(y_true, y_scores)
     f1 = f1_score(y_true, y_pred, zero_division=0)
     f2 = fbeta_score(y_true, y_pred, beta=2, zero_division=0)
 
@@ -127,6 +129,7 @@ def compute_all_metrics(y_true, y_scores, threshold):
 
     return {
         "PR-AUC": round(float(pr_auc), 6),
+        "ROC-AUC": round(float(roc_auc), 6),
         "F1": round(float(f1), 6),
         "F2": round(float(f2), 6),
         "TP": int(tp),
@@ -162,6 +165,7 @@ def bootstrap_ci(y_true, y_scores, threshold, metric_fn=None,
     n = len(y_true)
 
     pr_aucs = []
+    roc_aucs = []
     f2s = []
 
     for _ in range(n_bootstrap):
@@ -174,6 +178,7 @@ def bootstrap_ci(y_true, y_scores, threshold, metric_fn=None,
             continue
 
         pr_aucs.append(average_precision_score(yt, ys))
+        roc_aucs.append(roc_auc_score(yt, ys))
         y_pred = (ys >= threshold).astype(int)
         f2s.append(fbeta_score(yt, y_pred, beta=2, zero_division=0))
 
@@ -182,6 +187,10 @@ def bootstrap_ci(y_true, y_scores, threshold, metric_fn=None,
         "PR-AUC_ci": (
             round(float(np.percentile(pr_aucs, 100 * alpha)), 6),
             round(float(np.percentile(pr_aucs, 100 * (1 - alpha))), 6),
+        ),
+        "ROC-AUC_ci": (
+            round(float(np.percentile(roc_aucs, 100 * alpha)), 6),
+            round(float(np.percentile(roc_aucs, 100 * (1 - alpha))), 6),
         ),
         "F2_ci": (
             round(float(np.percentile(f2s, 100 * alpha)), 6),

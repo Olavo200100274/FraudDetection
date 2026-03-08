@@ -3,21 +3,21 @@ from sklearn.pipeline import Pipeline
 
 
 def get_pipeline_and_params(preprocessor):
-    """Return (pipeline, param_grid) for Logistic Regression.
+    """Return (pipeline, suggest_fn) for Logistic Regression.
 
-    Grid rationale (ULB 2013 / tabular fraud):
-    - C spans 4 orders of magnitude to find the right regularisation strength.
-    - Both L1 and L2 penalties are tested (L1 can zero-out irrelevant PCA dims).
-    - 'saga' supports both penalties and scales well; 'liblinear' is fast for L1.
+    Search space (Optuna):
+    - C: log-uniform [1e-4, 100] — regularisation strength.
+    - l1_ratio: uniform [0, 1] — 0 = L2, 1 = L1, in between = ElasticNet.
     """
     pipeline = Pipeline([
         ('preprocessor', preprocessor),
         ('classifier', LogisticRegression(max_iter=5000, solver='saga', random_state=42)),
     ])
 
-    param_grid = {
-        'classifier__C': [0.01, 0.1, 1, 10, 100],
-        'classifier__l1_ratio': [0, 0.5, 1],   # 0=L2, 1=L1, 0.5=ElasticNet
-    }
+    def suggest_params(trial):
+        return {
+            "classifier__C": trial.suggest_float("C", 1e-4, 100, log=True),
+            "classifier__l1_ratio": trial.suggest_float("l1_ratio", 0.0, 1.0),
+        }
 
-    return pipeline, param_grid
+    return pipeline, suggest_params

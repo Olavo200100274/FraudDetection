@@ -3,23 +3,25 @@ from sklearn.pipeline import Pipeline
 
 
 def get_pipeline_and_params(preprocessor):
-    """Return (pipeline, param_grid) for Random Forest.
+    """Return (pipeline, suggest_fn) for Random Forest.
 
-    Grid rationale (ULB 2013 / tabular fraud):
-    - n_estimators ≥ 100 needed for stable ensembles on 228 K samples.
-    - max_depth None allows full growth (common best for RF).
-    - min_samples_leaf controls overfitting on the tiny fraud class.
+    Search space (Optuna):
+    - n_estimators: [50, 500] step 50 — forest size.
+    - max_depth: categorical {None, 10, 20, 30, 40, 50} — tree depth.
+    - min_samples_split: [2, 20] — min samples to split an internal node.
+    - min_samples_leaf: [1, 10] — min samples at a leaf.
     """
     pipeline = Pipeline([
         ('preprocessor', preprocessor),
         ('classifier', RandomForestClassifier(random_state=42)),
     ])
 
-    param_grid = {
-        'classifier__n_estimators': [100, 200, 300],
-        'classifier__max_depth': [10, 20, None],
-        'classifier__min_samples_split': [2, 5],
-        'classifier__min_samples_leaf': [1, 2],
-    }
+    def suggest_params(trial):
+        return {
+            "classifier__n_estimators": trial.suggest_int("n_estimators", 50, 500, step=50),
+            "classifier__max_depth": trial.suggest_categorical("max_depth", [None, 10, 20, 30, 40, 50]),
+            "classifier__min_samples_split": trial.suggest_int("min_samples_split", 2, 20),
+            "classifier__min_samples_leaf": trial.suggest_int("min_samples_leaf", 1, 10),
+        }
 
-    return pipeline, param_grid
+    return pipeline, suggest_params
