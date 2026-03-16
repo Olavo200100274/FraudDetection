@@ -6,7 +6,8 @@ Usage:
     python generate_results.py
 
 Reads from:  ../results/ulb_2013/<model>/none/<run>/
-Writes to:   ../thesis/tables/{ulb,baf}/  and  ../thesis/figures/{ulb,baf}/
+Writes to:   ../thesis/tables/{ulb,baf}/ and ../thesis/figures/{ulb,baf}/
+             plus a mirror under ../Overleaf/tables/generated and ../Overleaf/figures/generated
 """
 
 import json
@@ -27,9 +28,9 @@ TABLES_BASE = ROOT / "thesis" / "tables"
 FIGURES_BASE = ROOT / "thesis" / "figures"
 
 # Overleaf project mirror — generated artifacts are copied here automatically
-OVERLEAF_ROOT = ROOT / "2026.Thesis.MSc.Olavo"
-OVERLEAF_TABLES = OVERLEAF_ROOT / "tables"
-OVERLEAF_FIGURES = OVERLEAF_ROOT / "figures"
+OVERLEAF_ROOT = ROOT / "Overleaf"
+OVERLEAF_TABLES = OVERLEAF_ROOT / "tables" / "generated"
+OVERLEAF_FIGURES = OVERLEAF_ROOT / "figures" / "generated"
 
 import shutil
 
@@ -45,8 +46,9 @@ def _mirror_to_overleaf(src: Path):
             dst = OVERLEAF_FIGURES / rel
         except ValueError:
             return  # not a tables/figures file
-    dst.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copy2(src, dst)
+    if OVERLEAF_ROOT.exists():
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(src, dst)
 
 def _tables_dir(filename):
     d = TABLES_BASE / filename
@@ -158,15 +160,19 @@ def generate_baseline_table(data, dataset_label, filename):
         tp, fp, fn = m["TP"], m["FP"], m["FN"]
         prec = tp / (tp + fp) if (tp + fp) > 0 else 0
         rec = tp / (tp + fn) if (tp + fn) > 0 else 0
-        tau_str = f"{m['threshold']:.3f}" if model != "ocsvm" else f"{m['threshold']:.2f}"
-        brier_str = f"{m['brier_score']:.4f}" if model != "ocsvm" else "---"
+        tau = m["threshold"]
+        if abs(tau) >= 10:
+            tau_str = f"{tau:.2f}"
+        else:
+            tau_str = f"{tau:.4f}"
+        brier_str = f"{m['brier_score']:.5f}"
         roc_auc = m.get("ROC-AUC", 0)
 
         label = MODEL_LABELS[model]
         # Pad label to 10 chars for alignment
         lines.append(
-            f"{label:<10s} & {m['PR-AUC']:.3f} & {roc_auc:.3f} & {m['F1']:.3f} & {m['F2']:.3f} "
-            f"& {prec:.3f} & {rec:.3f} & {tau_str} & {brier_str} \\\\"
+            f"{label:<10s} & {m['PR-AUC']:.4f} & {roc_auc:.4f} & {m['F1']:.4f} & {m['F2']:.4f} "
+            f"& {prec:.4f} & {rec:.4f} & {tau_str} & {brier_str} \\\\"
         )
 
     lines.append(r"\bottomrule")
@@ -203,14 +209,14 @@ def generate_ops_table(data, dataset_label, filename):
             continue
         m = data[model]["metrics"]
         label = MODEL_LABELS[model]
-        alert_pct = m["alert_rate"] * 100
+        alert_rate = m["alert_rate"]
         fp_tp = m["FP/TP"]
-        fp_tp_str = f"{fp_tp:.2f}" if fp_tp < 100 else f"{fp_tp:.1f}"
+        fp_tp_str = f"{fp_tp:.4f}" if fp_tp < 100 else f"{fp_tp:.1f}"
 
         lines.append(
-            f"{label:<10s} & {alert_pct:.2f}\\% & {fp_tp_str} "
-            f"& {m['precision_at_k']:.3f} & {m['recall_at_k']:.3f} "
-            f"& {m['k_used']:,} \\\\"
+            f"{label:<10s} & {alert_rate:.5f} & {fp_tp_str} "
+            f"& {m['precision_at_k']:.4f} & {m['recall_at_k']:.4f} "
+            f"& {m['k_used']} \\\\"
         )
 
     lines.append(r"\bottomrule")
@@ -615,9 +621,12 @@ def generate_factorial_table(fdata, metric_key, dataset_label, filename,
 
 
 def generate_factorial_tables(fdata, dataset_label, filename):
-    """Generate PR-AUC and F2 factorial tables."""
+    """Generate PR-AUC, ROC-AUC, F2 and F1 factorial tables."""
     generate_factorial_table(
         fdata, "PR-AUC", dataset_label, filename, "PR-AUC", "prauc"
+    )
+    generate_factorial_table(
+        fdata, "ROC-AUC", dataset_label, filename, "ROC-AUC", "rocauc"
     )
     generate_factorial_table(
         fdata, "F2", dataset_label, filename, "$F_2$", "f2"
@@ -720,7 +729,12 @@ def main():
 
     # ── ULB 2013 — Factorial (Model × Strategy) ──
     ulb_fact = collect_factorial("ulb_2013")
-    n_combos = sum(1 for m in ulb_fact for s in ulb_fact[m] if ulb_fact[m][s] is not None)
+    n_combos = sum(
+        1
+        for m in ulb_fact
+        for s in ulb_fact[m]
+        if s != "none" and ulb_fact[m][s] is not None
+    )
     if n_combos > 0:
         print(f"\n── ULB 2013 — Factorial ({n_combos} combos) ──")
         generate_factorial_tables(ulb_fact, "ULB 2013", "ulb")
@@ -753,7 +767,12 @@ def main():
 
     # ── BAF Base — Factorial (Model × Strategy) ──
     baf_fact = collect_factorial("baf_base")
-    n_baf_combos = sum(1 for m in baf_fact for s in baf_fact[m] if baf_fact[m][s] is not None)
+    n_baf_combos = sum(
+        1
+        for m in baf_fact
+        for s in baf_fact[m]
+        if s != "none" and baf_fact[m][s] is not None
+    )
     if n_baf_combos > 0:
         print(f"\n── BAF Base — Factorial ({n_baf_combos} combos) ──")
         generate_factorial_tables(baf_fact, "BAF Base", "baf")
@@ -763,6 +782,8 @@ def main():
 
     print("\n" + "=" * 60)
     print("  Done! Check thesis/tables/{ulb,baf}/ and thesis/figures/{ulb,baf}/")
+    if OVERLEAF_ROOT.exists():
+        print("  Mirrored to Overleaf/tables/generated and Overleaf/figures/generated")
     print("=" * 60)
 
 

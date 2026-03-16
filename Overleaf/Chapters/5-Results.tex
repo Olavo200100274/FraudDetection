@@ -59,106 +59,38 @@ where alternative threshold strategies are applied \emph{without retraining}.
 
 \subsubsection{ULB Credit Card 2013}
 
-\begin{table}[ht]
-\centering
-\caption{Baseline comparison on ULB 2013 (strategy\,=\,None, threshold\,=\,max-$F_2$).}
-\label{tab:baseline_ulb}
-\begin{tabular}{l c c c c c c c c}
-\toprule
-Model & PR-AUC & ROC-AUC & $F_1$ & $F_2$ & Precision & Recall & $\tau$ & Brier \\
-\midrule
-LR         & --- & --- & --- & --- & --- & --- & --- & --- \\
-RF         & --- & --- & --- & --- & --- & --- & --- & --- \\
-LGBM       & --- & --- & --- & --- & --- & --- & --- & --- \\
-CatBoost   & --- & --- & --- & --- & --- & --- & --- & --- \\
-OCSVM      & --- & --- & --- & --- & --- & --- & --- & --- \\
-\bottomrule
-\end{tabular}
-\end{table}
+\input{tables/generated/ulb/baseline.tex}
 
-\begin{table}[ht]
-\centering
-\caption{Operational metrics on ULB 2013 (strategy\,=\,None, threshold\,=\,max-$F_2$).}
-\label{tab:ops_ulb}
-\begin{tabular}{l c c c c c}
-\toprule
-Model & Alert Rate & FP/TP & P@$k$ & R@$k$ & $k$ \\
-\midrule
-LR         & --- & --- & --- & --- & --- \\
-RF         & --- & --- & --- & --- & --- \\
-LGBM       & --- & --- & --- & --- & --- \\
-CatBoost   & --- & --- & --- & --- & --- \\
-OCSVM      & --- & --- & --- & --- & --- \\
-\bottomrule
-\end{tabular}
-\end{table}
+\input{tables/generated/ulb/ops.tex}
 
-% ── PR Curve — ULB 2013 Baseline ──
-% TODO: Uncomment once baseline experiments are complete.
-% \begin{figure}[ht]
-%   \centering
-%   \includegraphics[width=0.88\textwidth]{figures/ulb/pr_curves_baseline.pdf}
-%   \caption{Precision--Recall curves for all models on ULB 2013
-%     (strategy\,=\,None).
-%     PR-AUC values in parentheses.
-%     The dashed horizontal line marks the precision of a random classifier
-%     ($\approx 0.17\%$).}
-%   \label{fig:pr_curves_ulb}
-% \end{figure}
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.78\textwidth]{figures/generated/ulb/prauc_bar_baseline.pdf}
+  \caption{PR-AUC for all models on ULB 2013 (baseline, Optuna, $F_2$ threshold).}
+  \label{fig:prauc_ulb}
+\end{figure}
 
 % ─────────────────── BAF Base ───────────────────
 
 \subsubsection{BAF Base}
 
-\begin{table}[ht]
-\centering
-\caption{Baseline comparison on BAF Base (strategy\,=\,None, threshold\,=\,max-$F_2$).}
-\label{tab:baseline_baf}
-\begin{tabular}{l c c c c c c c c}
-\toprule
-Model & PR-AUC & ROC-AUC & $F_1$ & $F_2$ & Precision & Recall & $\tau$ & Brier \\
-\midrule
-LR         & --- & --- & --- & --- & --- & --- & --- & --- \\
-RF         & --- & --- & --- & --- & --- & --- & --- & --- \\
-LGBM       & --- & --- & --- & --- & --- & --- & --- & --- \\
-CatBoost   & --- & --- & --- & --- & --- & --- & --- & --- \\
-OCSVM      & --- & --- & --- & --- & --- & --- & --- & --- \\
-\bottomrule
-\end{tabular}
-\end{table}
+\input{tables/generated/baf/baseline.tex}
 
-\begin{table}[ht]
-\centering
-\caption{Operational metrics on BAF Base (strategy\,=\,None, threshold\,=\,max-$F_2$).}
-\label{tab:ops_baf}
-\begin{tabular}{l c c c c c}
-\toprule
-Model & Alert Rate & FP/TP & P@$k$ & R@$k$ & $k$ \\
-\midrule
-LR         & --- & --- & --- & --- & --- \\
-RF         & --- & --- & --- & --- & --- \\
-LGBM       & --- & --- & --- & --- & --- \\
-CatBoost   & --- & --- & --- & --- & --- \\
-OCSVM      & --- & --- & --- & --- & --- \\
-\bottomrule
-\end{tabular}
-\end{table}
+\input{tables/generated/baf/ops.tex}
 
-% ── PR Curve — BAF Base Baseline ──
-% TODO: Uncomment once baseline experiments are complete.
-% \begin{figure}[ht]
-%   \centering
-%   \includegraphics[width=0.88\textwidth]{figures/baf/pr_curves_baseline.pdf}
-%   \caption{Precision--Recall curves for all models on BAF Base
-%     (strategy\,=\,None).
-%     PR-AUC values in parentheses.
-%     The dashed horizontal line marks the precision of a random classifier
-%     ($\approx 1.10\%$).}
-%   \label{fig:pr_curves_baf_base}
-% \end{figure}
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.78\textwidth]{figures/generated/baf/prauc_bar_baseline.pdf}
+  \caption{PR-AUC for all models on BAF Base (baseline, Optuna, $F_2$ threshold).}
+  \label{fig:prauc_baf}
+\end{figure}
 
 \paragraph{Discussion.}
-% TODO: Discussion will be written once baseline experiments are complete with Optuna.
+  On ULB~2013, all supervised models achieve high PR-AUC values ($>0.74$), with CatBoost leading at~0.88 and OCSVM serving only as a weak baseline~(0.33). The gap between CatBoost/LGBM/RF and Logistic Regression is notable, reflecting the ability of tree-based models to capture non-linear relationships even in datasets with PCA-anonymised features. OCSVM, as expected, performs substantially worse.
+
+  On BAF~Base, all supervised models exhibit considerably lower PR-AUC values (max.\ 0.18), reflecting the greater difficulty of this dataset. CatBoost and LGBM lead, followed by RF and Logistic Regression. OCSVM barely detects fraud (PR-AUC\,=\,0.019). The performance gap between CatBoost/LGBM and the remaining models is more pronounced on BAF, demonstrating the robustness of gradient boosting methods in realistic and challenging scenarios. The operational workload (alert rate, FP/TP ratio) is substantially higher on BAF, which is expected given the higher fraud prevalence and dataset complexity.
+
+  Across both datasets, the max-$F_2$ threshold strategy provides an effective trade-off between recall and workload, maximising the practical utility of the models. Optuna-based tuning proved effective, producing consistent and reproducible artefacts and metrics.
 
 
 % ══════════════════════════════════════════════════════════════════════════
@@ -373,112 +305,60 @@ OCSVM is excluded because it does not use labelled fraud examples during trainin
 
 \subsubsection{ULB Credit Card 2013}
 
-\begin{table}[ht]
-\centering
-\caption{PR-AUC by model $\times$ strategy on ULB 2013.}
-\label{tab:factorial_ulb_prauc}
-\begin{tabular}{l c c c c c c c}
-\toprule
-Model & None & RUS & ROS & SMOTE & SM+T & SMOTEENN & Weights \\
-\midrule
-LR         & --- & --- & --- & --- & --- & --- & --- \\
-RF         & --- & --- & --- & --- & --- & --- & --- \\
-LGBM       & --- & --- & --- & --- & --- & --- & --- \\
-CatBoost   & --- & --- & --- & --- & --- & --- & --- \\
-% FT-Trans. & --- & --- & --- & --- & --- & --- & --- \\
-\bottomrule
-\end{tabular}
-\end{table}
+\input{tables/generated/ulb/factorial_prauc.tex}
 
-\begin{table}[ht]
-\centering
-\caption{$F_2$ by model $\times$ strategy on ULB 2013.}
-\label{tab:factorial_ulb_f2}
-\begin{tabular}{l c c c c c c c}
-\toprule
-Model & None & RUS & ROS & SMOTE & SM+T & SMOTEENN & Weights \\
-\midrule
-LR         & --- & --- & --- & --- & --- & --- & --- \\
-RF         & --- & --- & --- & --- & --- & --- & --- \\
-LGBM       & --- & --- & --- & --- & --- & --- & --- \\
-CatBoost   & --- & --- & --- & --- & --- & --- & --- \\
-% FT-Trans. & --- & --- & --- & --- & --- & --- & --- \\
-\bottomrule
-\end{tabular}
-\end{table}
+\input{tables/generated/ulb/factorial_rocauc.tex}
+
+\input{tables/generated/ulb/factorial_f2.tex}
 
 % ─────── BAF Base — Factorial ───────
 
 \subsubsection{BAF Base}
 
-\begin{table}[ht]
-\centering
-\caption{PR-AUC by model $\times$ strategy on BAF Base.}
-\label{tab:factorial_baf_prauc}
-\begin{tabular}{l c c c c c c c}
-\toprule
-Model & None & RUS & ROS & SMOTE & SM+T & SMOTEENN & Weights \\
-\midrule
-LR        & --- & --- & --- & --- & --- & --- & --- \\
-RF        & --- & --- & --- & --- & --- & --- & --- \\
-LGBM      & --- & --- & --- & --- & --- & --- & --- \\
-CatBoost  & --- & --- & --- & --- & --- & --- & --- \\
-FT-Trans. & --- & --- & --- & --- & --- & --- & --- \\
-\bottomrule
-\end{tabular}
-\end{table}
+\input{tables/generated/baf/factorial_prauc.tex}
 
-\begin{table}[ht]
-\centering
-\caption{$F_2$ by model $\times$ strategy on BAF Base.}
-\label{tab:factorial_baf_f2}
-\begin{tabular}{l c c c c c c c}
-\toprule
-Model & None & RUS & ROS & SMOTE & SM+T & SMOTEENN & Weights \\
-\midrule
-LR        & --- & --- & --- & --- & --- & --- & --- \\
-RF        & --- & --- & --- & --- & --- & --- & --- \\
-LGBM      & --- & --- & --- & --- & --- & --- & --- \\
-CatBoost  & --- & --- & --- & --- & --- & --- & --- \\
-FT-Trans. & --- & --- & --- & --- & --- & --- & --- \\
-\bottomrule
-\end{tabular}
-\end{table}
+\input{tables/generated/baf/factorial_rocauc.tex}
+
+\input{tables/generated/baf/factorial_f2.tex}
 
 \subsubsection{Interaction Heatmaps}
 
-% ── Heatmap ULB (code-generated) ──
-% TODO: Uncomment once factorial experiments are complete.
-% \begin{figure}[ht]
-%   \centering
-%   \includegraphics[width=0.85\textwidth]{figures/ulb/heatmap_prauc.pdf}
-%   \caption{$\Delta$PR-AUC (strategy $-$ None) per model on ULB 2013.}
-%   \label{fig:heatmap_ulb_prauc}
-% \end{figure}
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.85\textwidth]{figures/generated/ulb/heatmap_prauc.pdf}
+  \caption{$\Delta$PR-AUC (strategy $-$ None) per model on ULB 2013.}
+  \label{fig:heatmap_ulb_prauc}
+\end{figure}
 
-% \begin{figure}[ht]
-%   \centering
-%   \includegraphics[width=0.85\textwidth]{figures/ulb/heatmap_f2.pdf}
-%   \caption{$\Delta F_2$ (strategy $-$ None) per model on ULB 2013.}
-%   \label{fig:heatmap_ulb_f2}
-% \end{figure}
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.85\textwidth]{figures/generated/ulb/heatmap_f2.pdf}
+  \caption{$\Delta F_2$ (strategy $-$ None) per model on ULB 2013.}
+  \label{fig:heatmap_ulb_f2}
+\end{figure}
 
-% \begin{figure}[ht]
-%   \centering
-%   \includegraphics[width=0.85\textwidth]{figures/baf/heatmap_prauc.pdf}
-%   \caption{$\Delta$PR-AUC (strategy $-$ None) per model on BAF Base.}
-%   \label{fig:heatmap_baf_prauc}
-% \end{figure}
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.85\textwidth]{figures/generated/baf/heatmap_prauc.pdf}
+  \caption{$\Delta$PR-AUC (strategy $-$ None) per model on BAF Base.}
+  \label{fig:heatmap_baf_prauc}
+\end{figure}
 
-% \begin{figure}[ht]
-%   \centering
-%   \includegraphics[width=0.85\textwidth]{figures/baf/heatmap_f2.pdf}
-%   \caption{$\Delta F_2$ (strategy $-$ None) per model on BAF Base.}
-%   \label{fig:heatmap_baf_f2}
-% \end{figure}
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=0.85\textwidth]{figures/generated/baf/heatmap_f2.pdf}
+  \caption{$\Delta F_2$ (strategy $-$ None) per model on BAF Base.}
+  \label{fig:heatmap_baf_f2}
+\end{figure}
 
 \paragraph{Discussion.}
-% TODO: Discussion will be written once factorial experiments are complete with Optuna.
+  The factorial analysis reveals several noteworthy patterns.
+  On ULB~2013, Random Oversampling (ROS) consistently improves or maintains PR-AUC across all models, with CatBoost achieving the highest overall PR-AUC (0.885 with None). Conversely, Random Undersampling (RUS) degrades performance substantially for all models, likely because discarding majority-class examples in an already small dataset ($N\approx284\text{K}$) removes valuable decision-boundary information.
+  SMOTE and SMOTE+Tomek produce identical results across all models on both datasets, indicating that the Tomek Links cleaning step removes zero borderline examples in this context---an expected outcome when the minority class is extremely rare.
+
+  On BAF~Base, the picture differs: CatBoost and LGBM are the top performers regardless of strategy, and the best absolute PR-AUC is achieved by CatBoost with ROS (0.185). However, the magnitude of improvement from any strategy over the baseline is modest ($<0.01$ PR-AUC), suggesting that gradient boosting models already handle class imbalance effectively via their internal loss functions. SMOTE-based strategies tend to degrade performance relative to the baseline, particularly for tree-based models, echoing recent findings in the literature that oversampling synthetic examples can introduce noise in high-dimensional feature spaces.
+
+  The heatmaps (Figures~\ref{fig:heatmap_ulb_prauc}--\ref{fig:heatmap_baf_f2}) visualise these interactions: green cells indicate improvement over the baseline and red cells indicate degradation. The predominance of near-zero or slightly negative deltas on BAF confirms that, for well-tuned gradient boosting models, imbalance strategies offer limited added value on this dataset.
 
 
 % ══════════════════════════════════════════════════════════════════════════
@@ -853,64 +733,15 @@ Low workload budget             & ---      & ---      & ---       \\
 
 \subsubsection{Bootstrap Confidence Intervals}
 
-\begin{table}[ht]
-\centering
-\caption{95\% Bootstrap CI for PR-AUC and ROC-AUC on ULB 2013 (best strategy per model, 1\,000 iterations).}
-\label{tab:ci_ulb}
-\begin{tabular}{l c c c c}
-\toprule
-Model & PR-AUC & 95\% CI & ROC-AUC & 95\% CI \\
-\midrule
-LR        & --- & --- & --- & --- \\
-RF        & --- & --- & --- & --- \\
-LGBM      & --- & --- & --- & --- \\
-CatBoost  & --- & --- & --- & --- \\
-FT-Trans. & --- & --- & --- & --- \\
-OCSVM     & --- & --- & --- & --- \\
-\bottomrule
-\end{tabular}
-\end{table}
+\input{tables/generated/ulb/ci.tex}
 
-\begin{table}[ht]
-\centering
-\caption{95\% Bootstrap CI for PR-AUC and ROC-AUC on BAF Base (best strategy per model, 1\,000 iterations).}
-\label{tab:ci_baf}
-\begin{tabular}{l c c c c}
-\toprule
-Model & PR-AUC & 95\% CI & ROC-AUC & 95\% CI \\
-\midrule
-LR        & --- & --- & --- & --- \\
-RF        & --- & --- & --- & --- \\
-LGBM      & --- & --- & --- & --- \\
-CatBoost  & --- & --- & --- & --- \\
-FT-Trans. & --- & --- & --- & --- \\
-OCSVM     & --- & --- & --- & --- \\
-\bottomrule
-\end{tabular}
-\end{table}
+\input{tables/generated/baf/ci.tex}
 
 \subsubsection{Computational Cost}
 
-\begin{table}[ht]
-\centering
-\caption{Wall-clock training and inference time (baseline, strategy\,=\,None).
-  Tuning = Optuna TPE (50 trials, 5-fold CV).
-  Times measured on a single machine with [hardware TBD].}
-\label{tab:computational_cost}
-\begin{tabular}{l r r r r r r}
-\toprule
-& \multicolumn{3}{c}{ULB 2013} & \multicolumn{3}{c}{BAF Base} \\
-Model & Tune (s) & Train (s) & Infer (s) & Tune (s) & Train (s) & Infer (s) \\
-\midrule
-LR         &  --- & --- & --- &  --- &  --- & --- \\
-RF         &  --- & --- & --- &  --- &  --- & --- \\
-LGBM       &  --- & --- & --- &  --- &  --- & --- \\
-CatBoost   &  --- & --- & --- &  --- &  --- & --- \\
-% FT-Trans. — not yet run \\
-OCSVM      &  --- & --- & --- &  --- &  --- & --- \\
-\bottomrule
-\end{tabular}
-\end{table}
+\input{tables/generated/ulb/cost.tex}
+
+\input{tables/generated/baf/cost.tex}
 
 
 % ══════════════════════════════════════════════════════════════════════════
