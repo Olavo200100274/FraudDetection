@@ -125,159 +125,42 @@ No retraining is performed~--- the same probability scores from the baseline are
 
 \subsubsection{ULB Credit Card 2013}
 
-\begin{table}[ht]
-\centering
-\caption{Threshold sensitivity on ULB 2013~--- $F_2$ by threshold strategy (strategy\,=\,None).}
-\label{tab:threshold_ulb_f2}
-\begin{tabular}{l c c c c}
-\toprule
-Model & Fixed (0.5) & max-$F_1$ & max-$F_2$ & Prec\,$\geq$\,0.5 \\
-\midrule
-LR         & --- & --- & --- & --- \\
-RF         & --- & --- & --- & --- \\
-LGBM       & --- & --- & --- & --- \\
-CatBoost   & --- & --- & --- & --- \\
-% FT-Trans. & --- & --- & --- & --- \\
-OCSVM      & --- & --- & --- & --- \\
-\bottomrule
-\end{tabular}
-\end{table}
+\input{tables/generated/ulb/threshold_f2.tex}
 
-\begin{table}[ht]
-\centering
-\caption{Threshold sensitivity on ULB 2013~--- $F_1$ by threshold strategy (strategy\,=\,None).}
-\label{tab:threshold_ulb_f1}
-\begin{tabular}{l c c c c}
-\toprule
-Model & Fixed (0.5) & max-$F_1$ & max-$F_2$ & Prec\,$\geq$\,0.5 \\
-\midrule
-LR         & --- & --- & --- & --- \\
-RF         & --- & --- & --- & --- \\
-LGBM       & --- & --- & --- & --- \\
-CatBoost   & --- & --- & --- & --- \\
-% FT-Trans. & --- & --- & --- & --- \\
-OCSVM      & --- & --- & --- & --- \\
-\bottomrule
-\end{tabular}
-\end{table}
+\input{tables/generated/ulb/threshold_f1.tex}
 
-\begin{table}[ht]
-\centering
-\caption{Threshold sensitivity on ULB 2013~--- Recall by threshold strategy (strategy\,=\,None).}
-\label{tab:threshold_ulb_recall}
-\begin{tabular}{l c c c c}
-\toprule
-Model & Fixed (0.5) & max-$F_1$ & max-$F_2$ & Prec\,$\geq$\,0.5 \\
-\midrule
-LR         & --- & --- & --- & --- \\
-RF         & --- & --- & --- & --- \\
-LGBM       & --- & --- & --- & --- \\
-CatBoost   & --- & --- & --- & --- \\
-% FT-Trans. & --- & --- & --- & --- \\
-OCSVM      & --- & --- & --- & --- \\
-\bottomrule
-\end{tabular}
-\end{table}
+\input{tables/generated/ulb/threshold_recall.tex}
 
-\begin{table}[ht]
-\centering
-\caption{Threshold sensitivity on ULB 2013~--- Alert Rate (\%) by threshold strategy (strategy\,=\,None).}
-\label{tab:threshold_ulb_alert}
-\begin{tabular}{l c c c c}
-\toprule
-Model & Fixed (0.5) & max-$F_1$ & max-$F_2$ & Prec\,$\geq$\,0.5 \\
-\midrule
-LR         & --- & --- & --- & --- \\
-RF         & --- & --- & --- & --- \\
-LGBM       & --- & --- & --- & --- \\
-CatBoost   & --- & --- & --- & --- \\
-% FT-Trans. & --- & --- & --- & --- \\
-OCSVM      & --- & --- & --- & --- \\
-\bottomrule
-\end{tabular}
-\end{table}
+\input{tables/generated/ulb/threshold_alert.tex}
 
 \paragraph{Discussion.}
-% TODO: Discussion will be written once threshold study experiments are complete with Optuna.
+On ULB~2013, the choice of threshold strategy has a moderate but meaningful impact.
+For tree-based models (RF, LGBM, CatBoost), the fixed $\tau=0.5$ threshold already performs well because these models produce well-calibrated probabilities on this dataset---the optimal $F_2$ threshold lies close to~0.5.
+In contrast, Logistic Regression benefits substantially from threshold optimisation: $F_2$ improves from~0.664 (fixed) to~0.799 (max-$F_2$), a~20\% relative gain, because its predicted probabilities are poorly calibrated around~0.5.
+OCSVM scores are not probabilities but negated decision-function values, making $\tau=0.5$ essentially arbitrary; the max-$F_2$ strategy recovers a more reasonable operating point.
+The Precision\,$\geq$\,0.5 strategy yields the most conservative predictions (lowest alert rates) but sacrifices substantial recall, making it suitable only when false-positive costs dominate.
+Crucially, model rankings are preserved across all four strategies: CatBoost\,$>$\,RF\,$\approx$\,LGBM\,$>$\,LR\,$\gg$\,OCSVM.
 
 % ─────── BAF Base — Threshold Study ───────
 
 \subsubsection{BAF Base}
 
-\begin{table}[ht]
-\centering
-\caption{Threshold sensitivity on BAF Base~--- $F_2$ by threshold strategy (strategy\,=\,None).}
-\label{tab:threshold_baf_f2}
-\begin{tabular}{l c c c c}
-\toprule
-Model & Fixed (0.5) & max-$F_1$ & max-$F_2$ & Prec\,$\geq$\,0.5 \\
-\midrule
-LR         & --- & --- & --- & --- \\
-RF         & --- & --- & --- & --- \\
-LGBM       & --- & --- & --- & --- \\
-CatBoost   & --- & --- & --- & --- \\
-% FT-Trans. & --- & --- & --- & --- \\
-OCSVM      & --- & --- & --- & --- \\
-\bottomrule
-\end{tabular}
-\end{table}
+\input{tables/generated/baf/threshold_f2.tex}
 
-\begin{table}[ht]
-\centering
-\caption{Threshold sensitivity on BAF Base~--- $F_1$ by threshold strategy (strategy\,=\,None).}
-\label{tab:threshold_baf_f1}
-\begin{tabular}{l c c c c}
-\toprule
-Model & Fixed (0.5) & max-$F_1$ & max-$F_2$ & Prec\,$\geq$\,0.5 \\
-\midrule
-LR         & --- & --- & --- & --- \\
-RF         & --- & --- & --- & --- \\
-LGBM       & --- & --- & --- & --- \\
-CatBoost   & --- & --- & --- & --- \\
-% FT-Trans. & --- & --- & --- & --- \\
-OCSVM      & --- & --- & --- & --- \\
-\bottomrule
-\end{tabular}
-\end{table}
+\input{tables/generated/baf/threshold_f1.tex}
 
-\begin{table}[ht]
-\centering
-\caption{Threshold sensitivity on BAF Base~--- Recall by threshold strategy (strategy\,=\,None).}
-\label{tab:threshold_baf_recall}
-\begin{tabular}{l c c c c}
-\toprule
-Model & Fixed (0.5) & max-$F_1$ & max-$F_2$ & Prec\,$\geq$\,0.5 \\
-\midrule
-LR         & --- & --- & --- & --- \\
-RF         & --- & --- & --- & --- \\
-LGBM       & --- & --- & --- & --- \\
-CatBoost   & --- & --- & --- & --- \\
-% FT-Trans. & --- & --- & --- & --- \\
-OCSVM      & --- & --- & --- & --- \\
-\bottomrule
-\end{tabular}
-\end{table}
+\input{tables/generated/baf/threshold_recall.tex}
 
-\begin{table}[ht]
-\centering
-\caption{Threshold sensitivity on BAF Base~--- Alert Rate (\%) by threshold strategy (strategy\,=\,None).}
-\label{tab:threshold_baf_alert}
-\begin{tabular}{l c c c c}
-\toprule
-Model & Fixed (0.5) & max-$F_1$ & max-$F_2$ & Prec\,$\geq$\,0.5 \\
-\midrule
-LR         & --- & --- & --- & --- \\
-RF         & --- & --- & --- & --- \\
-LGBM       & --- & --- & --- & --- \\
-CatBoost   & --- & --- & --- & --- \\
-% FT-Trans. & --- & --- & --- & --- \\
-OCSVM      & --- & --- & --- & --- \\
-\bottomrule
-\end{tabular}
-\end{table}
+\input{tables/generated/baf/threshold_alert.tex}
 
 \paragraph{Discussion.}
-% TODO: Discussion will be written once threshold study experiments are complete with Optuna.
+On BAF~Base, the impact of threshold selection is dramatic.
+The fixed $\tau=0.5$ threshold is catastrophic for all models: $F_2$ drops below~0.05 for every supervised classifier and RF effectively predicts zero fraud ($F_2=0.001$, Recall\,=\,0.0005).
+This occurs because, with $\approx$1.1\% fraud prevalence, model scores are concentrated well below~0.5, and a na\"ive threshold discards nearly all positive predictions.
+The max-$F_2$ strategy recovers substantial performance (e.g., CatBoost $F_2$: $0.037 \to 0.314$; LGBM: $0.042 \to 0.316$), although absolute values remain modest due to the inherent difficulty of this dataset.
+The max-$F_1$ strategy provides a middle ground with higher precision but lower recall.
+The Precision\,$\geq$\,0.5 strategy is the most restrictive; notably, OCSVM cannot achieve $\text{Precision} \geq 0.5$ at any threshold ($\tau=\infty$), confirming its inability to reliably separate fraud in this setting.
+These results underscore a key finding: \textbf{threshold selection is not a minor post-hoc detail but a critical design choice that can change $F_2$ by an order of magnitude}, particularly on datasets with low fraud prevalence.
 
 
 % ══════════════════════════════════════════════════════════════════════════
@@ -757,7 +640,16 @@ Low workload budget             & ---      & ---      & ---       \\
 
 \subsection{Threshold Selection Matters}
 
-% TODO: Discussion will be written once threshold study experiments are complete.
+The threshold sensitivity analysis reveals one of the most practically significant findings of this thesis.
+On ULB~2013, where fraud prevalence is extremely low (0.17\%) but models produce well-separated scores, threshold choice has a moderate effect: the gap between worst and best strategy is $\sim$0.15~$F_2$ for Logistic Regression but $<$0.04 for CatBoost.
+On BAF~Base ($\approx$1.1\% fraud), the effect is an order of magnitude larger: using $\tau=0.5$ reduces $F_2$ to near zero for all models, while max-$F_2$ recovers values in the 0.29--0.32 range.
+
+This asymmetry has a clear explanation.
+ULB models, tuned on a dataset where the positive class is extremely rare, learn to output high confidence scores for true positives; thus, most fraud cases already exceed~0.5.
+BAF models, facing a less extreme imbalance ratio but more complex feature interactions, produce lower and more spread-out probability scores; the optimal threshold lies in the 0.05--0.10 range, far from the default.
+
+From a practical standpoint, these results confirm that \textbf{any deployment of a fraud detection system must include an explicit threshold calibration step}.
+Using a fixed 0.5 threshold---the default in most ML frameworks---is acceptable only when the positive class is already well-separated in score space, which cannot be assumed in general.
 
 \subsection{Imbalance Strategy $\times$ Model Interaction}
 
