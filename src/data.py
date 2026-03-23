@@ -138,3 +138,63 @@ def load_baf_base_data():
         X, y, test_size=0.2, stratify=y, random_state=SPLIT_SEED
     )
     return X_train, X_test, y_train, y_test
+
+
+# ── BAF Variants I–V (NeurIPS 2022) ─────────────────────────────────────
+
+def _load_baf_variant(csv_name, drop_extra_cols=False):
+    """
+    Shared loader for BAF Variant datasets.
+
+    Parameters
+    ----------
+    csv_name : str
+        CSV filename under datasets/ (e.g. "Variant I.csv").
+    drop_extra_cols : bool
+        If True, drop columns ``x1`` and ``x2`` present in Variants III & V
+        to maintain 32-column alignment with BAF Base.
+    """
+    df = pd.read_csv(_PROJECT_ROOT / "datasets" / csv_name)
+    assert df.isnull().sum().sum() == 0, f"{csv_name}: unexpected null values."
+
+    df = df.drop(columns=["month"])
+    if drop_extra_cols:
+        df = df.drop(columns=["x1", "x2"])
+
+    X = df.drop(columns="fraud_bool")
+    y = df["fraud_bool"]
+
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, stratify=y, random_state=SPLIT_SEED
+    )
+    return X_train, X_test, y_train, y_test
+
+
+@_register("baf_var1", str(_PROJECT_ROOT / "datasets" / "Variant I.csv"), "baf_var1")
+def load_baf_var1():
+    """Load BAF Variant I — covariate shift."""
+    return _load_baf_variant("Variant I.csv")
+
+
+@_register("baf_var2", str(_PROJECT_ROOT / "datasets" / "Variant II.csv"), "baf_var2")
+def load_baf_var2():
+    """Load BAF Variant II — label shift."""
+    return _load_baf_variant("Variant II.csv")
+
+
+@_register("baf_var3", str(_PROJECT_ROOT / "datasets" / "Variant III.csv"), "baf_var3")
+def load_baf_var3():
+    """Load BAF Variant III — covariate shift + new features (x1, x2 dropped)."""
+    return _load_baf_variant("Variant III.csv", drop_extra_cols=True)
+
+
+@_register("baf_var4", str(_PROJECT_ROOT / "datasets" / "Variant IV.csv"), "baf_var4")
+def load_baf_var4():
+    """Load BAF Variant IV — bias conditions."""
+    return _load_baf_variant("Variant IV.csv")
+
+
+@_register("baf_var5", str(_PROJECT_ROOT / "datasets" / "Variant V.csv"), "baf_var5")
+def load_baf_var5():
+    """Load BAF Variant V — bias + new features (x1, x2 dropped)."""
+    return _load_baf_variant("Variant V.csv", drop_extra_cols=True)

@@ -31,6 +31,7 @@ def save_run(
     strategy="none",
     dataset="ulb_2013",
     bootstrap_ci=None,
+    model_type="sklearn",
 ):
     """
     Persist a complete run with all artefacts.
@@ -64,7 +65,11 @@ def save_run(
     _save_json(full_config, os.path.join(run_dir, "config.json"))
 
     # 2. Model
-    joblib.dump(model, os.path.join(run_dir, "model.joblib"))
+    if model_type == "torch":
+        import torch
+        torch.save(model, os.path.join(run_dir, "model.pt"))
+    else:
+        joblib.dump(model, os.path.join(run_dir, "model.joblib"))
 
     # 3. Cross-validation metrics
     _save_json(metrics_cv, os.path.join(run_dir, "metrics_cv.json"))

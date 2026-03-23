@@ -134,6 +134,7 @@ Figure~\ref{fig:pipeline} provides a high-level overview of the end-to-end exper
 \caption{End-to-end experimental pipeline for fraud detection under extreme class imbalance. Stages~3--5 operate exclusively on the DEV partition (80\%) via inner cross-validation; stages~6--7 provide a single unbiased evaluation on the held-out TEST set (20\%); stage~8 adds post-hoc explainability via SHAP.}
 \label{fig:pipeline}
 \end{figure}
+\clearpage
 
 % ──────────────────────────────────────────────────────────────────────────
 \subsection{Datasets}
@@ -353,7 +354,21 @@ For each strategy, $\tau$ is selected \emph{exclusively on the validation folds}
 
 Hyperparameter tuning is performed only for the baseline setting (\texttt{strategy=None}) to ensure feasibility and fairness across the imbalance strategy study. The best hyperparameters found under the baseline are reused for all resampling strategies within the same model and dataset, isolating the effect of the balancing technique from confounding model capacity changes.
 
-Tuning uses \textbf{Optuna}~\cite{akiba2019optuna} with the Tree-structured Parzen Estimator (TPE) sampler and a \texttt{MedianPruner} that terminates unpromising trials early (based on per-fold intermediate results). Each study runs 50~trials (configurable), optimising PR-AUC via 5-fold stratified cross-validation. For gradient-boosted models (LightGBM and CatBoost), early stopping (patience~=~50 rounds) determines the optimal number of boosting iterations, avoiding both over-fitting and wasteful computation. TPE is seeded for full reproducibility.
+\subsubsection{Classical ML Models}
+
+Tuning uses \textbf{Optuna}~\cite{akiba2019optuna} with the Tree-structured Parzen Estimator (TPE) sampler and a \texttt{MedianPruner} that terminates unpromising trials early (based on per-fold intermediate results). Each study runs 50~trials, optimising PR-AUC via 5-fold stratified cross-validation. For gradient-boosted models (LightGBM and CatBoost), early stopping (patience~=~50 rounds) determines the optimal number of boosting iterations, avoiding both over-fitting and wasteful computation. TPE is seeded for full reproducibility.
+
+\subsubsection{FT-Transformer}
+
+For the FT-Transformer, 5-fold cross-validation is replaced by a \textbf{single holdout validation split} (80/20 within the DEV partition), because training a deep model for each fold would be prohibitively expensive (each trial requires full gradient-based optimisation over many epochs).
+This is standard practice in the tabular deep learning literature~\cite{gorishniy2021revisiting}.
+
+Tuning also uses Optuna TPE with 50~trials, optimising PR-AUC on the validation split.
+Each trial trains the model with early stopping (patience~=~15 epochs, monitoring validation PR-AUC).
+The hyperparameter search space includes: number of Transformer blocks ($2$--$4$), token embedding dimension ($64$--$256$), number of attention heads ($4$--$8$), FFN dimension multiplier ($2/3$--$8/3$), attention and FFN dropout ($0.0$--$0.5$), learning rate ($10^{-5}$--$10^{-3}$), weight decay ($10^{-6}$--$10^{-3}$), and batch size ($256$--$1024$).
+The decision threshold~$\tau$ is selected by maximising $F_2$ on the validation split (rather than the median across folds).
+
+\subsubsection{General Notes}
 
 For the BAF suite, tuning is performed on the Base dataset and the best hyperparameters are reused across the variants, keeping model capacity constant while testing robustness under dataset shifts.
 
@@ -506,18 +521,30 @@ Bootstrap 95\% confidence intervals (1\,000 iterations) are computed on the hold
 \label{sec:reproducibility}
 % ──────────────────────────────────────────────────────────────────────────
 
-Each run logs the full configuration (dataset identifier and SHA-256 hash, split seed, model parameters, preprocessing specification, imbalance strategy, threshold rule), training and inference time, and hardware/software context (Python version, platform). Trained model artefacts and evaluation artefacts (metrics JSON files, PR-curve data, confusion matrix plots) are stored to enable full reproducibility.
+All experiments are conducted on a single machine with an Intel Core i5-13600KF (14 cores), 16\,GB RAM, and an NVIDIA RTX~3070 (8\,GB VRAM). Classical ML models run on CPU via scikit-learn, LightGBM, and CatBoost; the FT-Transformer runs on GPU via PyTorch.
+
+Each run logs the full configuration (dataset identifier and SHA-256 hash, split seed, model parameters, preprocessing specification, imbalance strategy, threshold rule), training and inference time, and hardware/software context (Python version, platform). Trained model artefacts and evaluation artefacts (metrics JSON files, PR-curve data, confusion matrix plots) are stored to enable full reproducibility. All random seeds are fixed (seed\,=\,42) across data splitting, Optuna sampling, and PyTorch initialisation.
 
 % ──────────────────────────────────────────────────────────────────────────
 \subsection{Interpretability}
 \label{sec:interpretability}
 % ──────────────────────────────────────────────────────────────────────────
 
-Interpretability is analysed via SHAP for the top-performing classical models and the FT-Transformer:
+Interpretability is analysed via SHAP (SHapley Additive exPlanations)~\cite{lundberg2017unified} on the BAF~Base dataset, where features have semantic meaning. ULB~2013 features (PCA components V1--V28) are not interpretable, so SHAP analysis is restricted to the BAF suite.
+
+Four models are analysed: LR, LGBM, CatBoost, and FT-Transformer. The SHAP explainer is chosen to match each model's architecture:
 \begin{itemize}
-  \item \textbf{Global explanations:} Feature importance summaries (mean $|\text{SHAP}|$).
-  \item \textbf{Local explanations:} Instance-level explanations for representative TP, FP, and FN cases.
-  \item \textbf{Cross-model consistency:} Whether the top-$k$ most important features are consistent across model families and across BAF variants.
+  \item \textbf{LinearExplainer} for Logistic Regression (exact Shapley values via the linear model's coefficients).
+  \item \textbf{TreeExplainer} for LGBM and CatBoost (exact Shapley values via the tree-path algorithm~\cite{lundberg2020local}).
+  \item \textbf{GradientExplainer} for FT-Transformer (gradient-based approximation using a background sample of 500 instances from the training set).
 \end{itemize}
 
-Due to the PCA-anonymised features in ULB~2013, interpretability analysis is expected to be more actionable on the BAF suite, where features have semantic meaning.
+The analysis comprises four components:
+\begin{enumerate}
+  \item \textbf{Global feature importance:} Mean $|\text{SHAP}|$ across all test samples, identifying the top-$k$ ($k=15$) most influential features per model.
+  \item \textbf{Local explanations:} SHAP waterfall plots for representative True Positive, False Positive, and False Negative cases, illustrating per-feature contributions for individual predictions.
+  \item \textbf{Cross-model consistency:} Pairwise Jaccard similarity of the top-10 feature sets across all four models, quantifying whether different architectures rely on the same features.
+  \item \textbf{Cross-variant stability:} Pairwise Jaccard similarity of LGBM's top-10 features across all six BAF datasets (Base + Variants~I--V), testing whether feature importance is stable under distribution shift.
+\end{enumerate}
+
+For categorical features that are one-hot encoded during preprocessing, SHAP values are aggregated back to the original feature level (sum of absolute SHAP values across one-hot columns) to enable meaningful cross-model comparison.

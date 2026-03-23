@@ -66,12 +66,13 @@ def _emit(out: Path):
     print(f"  → {out}")
 
 # ── display ordering & names ─────────────────────────────────────────────
-MODEL_ORDER = ["logreg", "rf", "lgbm", "catboost", "ocsvm"]
+MODEL_ORDER = ["logreg", "rf", "lgbm", "catboost", "fttransformer", "ocsvm"]
 MODEL_LABELS = {
     "logreg": "LR",
     "rf": "RF",
     "lgbm": "LGBM",
     "catboost": "CatBoost",
+    "fttransformer": "FT-Trans.",
     "ocsvm": "OCSVM",
 }
 MODEL_COLORS = {
@@ -79,6 +80,7 @@ MODEL_COLORS = {
     "rf":      "#2ca02c",
     "lgbm":    "#1f77b4",
     "catboost": "#d62728",
+    "fttransformer": "#ff7f0e",
     "ocsvm":   "#7f7f7f",
 }
 
@@ -138,7 +140,7 @@ def collect_threshold_study(dataset):
 def generate_baseline_table(data, dataset_label, filename):
     """Generate LaTeX table: PR-AUC, F1, F2, Precision, Recall, τ, Brier."""
     lines = []
-    lines.append(r"\begin{table}[ht]")
+    lines.append(r"\begin{table}[ht!]")
     lines.append(r"\centering")
     lines.append(
         r"\caption{Baseline comparison on "
@@ -191,7 +193,7 @@ def generate_baseline_table(data, dataset_label, filename):
 def generate_ops_table(data, dataset_label, filename):
     """Generate LaTeX table: Alert Rate, FP/TP, P@k, R@k, k."""
     lines = []
-    lines.append(r"\begin{table}[ht]")
+    lines.append(r"\begin{table}[ht!]")
     lines.append(r"\centering")
     lines.append(
         r"\caption{Operational metrics on "
@@ -235,7 +237,7 @@ def generate_ops_table(data, dataset_label, filename):
 def generate_ci_table(data, dataset_label, filename):
     """Generate LaTeX table: PR-AUC and ROC-AUC with 95% Bootstrap CI."""
     lines = []
-    lines.append(r"\begin{table}[ht]")
+    lines.append(r"\begin{table}[ht!]")
     lines.append(r"\centering")
     lines.append(
         r"\caption{95\% Bootstrap CI for PR-AUC and ROC-AUC on "
@@ -279,7 +281,7 @@ def generate_ci_table(data, dataset_label, filename):
 def generate_cost_table(data, dataset_label, filename):
     """Generate LaTeX table: tuning, training, and inference times."""
     lines = []
-    lines.append(r"\begin{table}[ht]")
+    lines.append(r"\begin{table}[ht!]")
     lines.append(r"\centering")
     lines.append(
         r"\caption{Computational cost on "
@@ -463,7 +465,7 @@ def _generate_threshold_table(ts_data, metric_key, dataset_label, filename,
                                 caption_metric, label_suffix, fmt=".3f"):
     """Generic helper: one threshold-study table for a given metric."""
     lines = []
-    lines.append(r"\begin{table}[ht]")
+    lines.append(r"\begin{table}[ht!]")
     lines.append(r"\centering")
     lines.append(
         r"\caption{Threshold sensitivity on "
@@ -533,7 +535,7 @@ BALANCE_LABELS = {
     "weights":    "Weights",
 }
 # Models eligible for factorial (OCSVM excluded — anomaly detection paradigm)
-FACTORIAL_MODELS = ["logreg", "rf", "lgbm", "catboost"]
+FACTORIAL_MODELS = ["logreg", "rf", "lgbm", "catboost", "fttransformer"]
 
 
 def collect_factorial(dataset):
@@ -562,7 +564,7 @@ def generate_factorial_table(fdata, metric_key, dataset_label, filename,
                              caption_metric, label_suffix, fmt=".3f"):
     """One factorial table: rows = models, columns = strategies."""
     lines = []
-    lines.append(r"\begin{table}[ht]")
+    lines.append(r"\begin{table}[ht!]")
     lines.append(r"\centering")
     lines.append(
         r"\caption{" + caption_metric + r" by model $\times$ strategy on "
@@ -698,6 +700,590 @@ def generate_factorial_heatmap(fdata, dataset_label, filename):
 
 
 # ══════════════════════════════════════════════════════════════════════════
+#  CROSS-DOMAIN GENERALIZATION  (BAF Base → Variants I–V)
+# ══════════════════════════════════════════════════════════════════════════
+
+VARIANT_ORDER = ["baf_base", "baf_var1", "baf_var2", "baf_var3", "baf_var4", "baf_var5"]
+VARIANT_LABELS = {
+    "baf_base": "Base",
+    "baf_var1": "Var I",
+    "baf_var2": "Var II",
+    "baf_var3": "Var III",
+    "baf_var4": "Var IV",
+    "baf_var5": "Var V",
+}
+
+
+def collect_cross_domain():
+    """Load cross_domain.json from each Base model's run directory."""
+    data = {}
+    for model in MODEL_ORDER:
+        run_dir = find_latest_run("baf_base", model)
+        if run_dir is None:
+            continue
+        cd_path = run_dir / "cross_domain.json"
+        if cd_path.exists():
+            data[model] = load_json(cd_path)
+    return data
+
+
+def generate_cross_domain_table(cd_data, metric_key, caption_metric,
+                                 label_suffix, fmt=".4f"):
+    """Cross-domain table: rows = models, columns = Base + Variants."""
+    lines = []
+    lines.append(r"\begin{table}[ht!]")
+    lines.append(r"\centering")
+    lines.append(
+        r"\caption{Cross-domain " + caption_metric
+        + r": trained on BAF Base, evaluated on each Variant (no retraining).}"
+    )
+    lines.append(r"\label{tab:crossdomain_" + label_suffix + "}")
+    lines.append(r"\begin{tabular}{l" + " c" * len(VARIANT_ORDER) + "}")
+    lines.append(r"\toprule")
+
+    col_headers = " & ".join(VARIANT_LABELS[v] for v in VARIANT_ORDER)
+    lines.append(r"Model & " + col_headers + r" \\")
+    lines.append(r"\midrule")
+
+    for model in MODEL_ORDER:
+        if model not in cd_data:
+            continue
+        label = MODEL_LABELS[model]
+        vals = []
+        numeric = []
+        for var in VARIANT_ORDER:
+            if var in cd_data[model]:
+                m = cd_data[model][var]["metrics"]
+                v = m[metric_key]
+                vals.append((f"{v:{fmt}}", v))
+                numeric.append(v)
+            else:
+                vals.append(("---", None))
+
+        best = max(numeric) if numeric else None
+        formatted = []
+        for text, v in vals:
+            if v is not None and best is not None and abs(v - best) < 1e-6:
+                formatted.append(r"\textbf{" + text + "}")
+            else:
+                formatted.append(text)
+
+        lines.append(f"{label:<10s} & " + " & ".join(formatted) + r" \\")
+
+    lines.append(r"\bottomrule")
+    lines.append(r"\end{tabular}")
+    lines.append(r"\end{table}")
+
+    out = _tables_dir("baf") / f"crossdomain_{label_suffix}.tex"
+    out.write_text("\n".join(lines), encoding="utf-8")
+    _emit(out)
+
+
+def generate_cross_domain_tables(cd_data):
+    """Generate PR-AUC and F2 cross-domain tables."""
+    generate_cross_domain_table(cd_data, "PR-AUC", "PR-AUC", "prauc")
+    generate_cross_domain_table(cd_data, "F2", "$F_2$", "f2")
+    generate_cross_domain_table(cd_data, "ROC-AUC", "ROC-AUC", "rocauc")
+
+
+# ══════════════════════════════════════════════════════════════════════════
+#  BAF VARIANTS IN-DOMAIN  (train & test on same variant)
+# ══════════════════════════════════════════════════════════════════════════
+
+def collect_variants_indomain():
+    """Collect baseline metrics for all BAF variants (in-domain runs)."""
+    data = {}
+    for var in VARIANT_ORDER:
+        data[var] = {}
+        for model in MODEL_ORDER:
+            run_dir = find_latest_run(var, model)
+            if run_dir is None:
+                data[var][model] = None
+                continue
+            mt_path = run_dir / "metrics_test.json"
+            if mt_path.exists():
+                data[var][model] = load_json(mt_path)
+            else:
+                data[var][model] = None
+    return data
+
+
+def generate_variants_indomain_table(vi_data, metric_key, caption_metric,
+                                      label_suffix, fmt=".4f"):
+    """In-domain table: rows = models, columns = Base + Variants."""
+    lines = []
+    lines.append(r"\begin{table}[ht!]")
+    lines.append(r"\centering")
+    lines.append(
+        r"\caption{In-domain " + caption_metric
+        + r" across BAF datasets (each model trained and tested on the same dataset).}"
+    )
+    lines.append(r"\label{tab:indomain_" + label_suffix + "}")
+    lines.append(r"\begin{tabular}{l" + " c" * len(VARIANT_ORDER) + "}")
+    lines.append(r"\toprule")
+
+    col_headers = " & ".join(VARIANT_LABELS[v] for v in VARIANT_ORDER)
+    lines.append(r"Model & " + col_headers + r" \\")
+    lines.append(r"\midrule")
+
+    for model in MODEL_ORDER:
+        label = MODEL_LABELS[model]
+        vals = []
+        numeric = []
+        for var in VARIANT_ORDER:
+            mt = vi_data[var].get(model)
+            if mt is not None:
+                v = mt[metric_key]
+                vals.append((f"{v:{fmt}}", v))
+                numeric.append(v)
+            else:
+                vals.append(("---", None))
+
+        best = max(numeric) if numeric else None
+        formatted = []
+        for text, v in vals:
+            if v is not None and best is not None and abs(v - best) < 1e-6:
+                formatted.append(r"\textbf{" + text + "}")
+            else:
+                formatted.append(text)
+
+        lines.append(f"{label:<10s} & " + " & ".join(formatted) + r" \\")
+
+    lines.append(r"\bottomrule")
+    lines.append(r"\end{tabular}")
+    lines.append(r"\end{table}")
+
+    out = _tables_dir("baf") / f"indomain_{label_suffix}.tex"
+    out.write_text("\n".join(lines), encoding="utf-8")
+    _emit(out)
+
+
+def generate_variants_indomain_tables(vi_data):
+    """Generate in-domain summary tables for PR-AUC and F2."""
+    generate_variants_indomain_table(vi_data, "PR-AUC", "PR-AUC", "prauc")
+    generate_variants_indomain_table(vi_data, "F2", "$F_2$", "f2")
+
+
+# ══════════════════════════════════════════════════════════════════════════
+#  CROSS vs IN-DOMAIN DELTA TABLE
+# ══════════════════════════════════════════════════════════════════════════
+
+def generate_delta_table(cd_data, vi_data, metric_key, caption_metric,
+                          label_suffix, fmt="+.4f"):
+    """Δ table (cross-domain − in-domain) for Variants I–V only."""
+    var_keys = [v for v in VARIANT_ORDER if v != "baf_base"]
+
+    lines = []
+    lines.append(r"\begin{table}[ht!]")
+    lines.append(r"\centering")
+    lines.append(
+        r"\caption{$\Delta$" + caption_metric
+        + r" (cross-domain $-$ in-domain) on BAF Variants. "
+        + r"Negative values indicate degradation under distribution shift.}"
+    )
+    lines.append(r"\label{tab:delta_" + label_suffix + "}")
+    lines.append(r"\begin{tabular}{l" + " c" * len(var_keys) + "}")
+    lines.append(r"\toprule")
+
+    col_headers = " & ".join(VARIANT_LABELS[v] for v in var_keys)
+    lines.append(r"Model & " + col_headers + r" \\")
+    lines.append(r"\midrule")
+
+    for model in MODEL_ORDER:
+        if model not in cd_data:
+            continue
+        label = MODEL_LABELS[model]
+        vals = []
+        for var in var_keys:
+            cd_metrics = cd_data[model].get(var, {}).get("metrics")
+            id_metrics = vi_data.get(var, {}).get(model)
+            if cd_metrics is not None and id_metrics is not None:
+                delta = cd_metrics[metric_key] - id_metrics[metric_key]
+                vals.append(f"{delta:{fmt}}")
+            else:
+                vals.append("---")
+        lines.append(f"{label:<10s} & " + " & ".join(vals) + r" \\")
+
+    lines.append(r"\bottomrule")
+    lines.append(r"\end{tabular}")
+    lines.append(r"\end{table}")
+
+    out = _tables_dir("baf") / f"delta_{label_suffix}.tex"
+    out.write_text("\n".join(lines), encoding="utf-8")
+    _emit(out)
+
+
+def generate_delta_tables(cd_data, vi_data):
+    """Generate Δ tables for PR-AUC and F2."""
+    generate_delta_table(cd_data, vi_data, "PR-AUC", "PR-AUC", "prauc")
+    generate_delta_table(cd_data, vi_data, "F2", "$F_2$", "f2")
+
+
+# ══════════════════════════════════════════════════════════════════════════
+#  SHAP ANALYSIS TABLES & FIGURES
+# ══════════════════════════════════════════════════════════════════════════
+
+SHAP_MODELS = ["logreg", "lgbm", "catboost", "fttransformer"]
+SHAP_LABELS = {
+    "logreg": "LR",
+    "lgbm": "LGBM",
+    "catboost": "CatBoost",
+    "fttransformer": "FT-Trans.",
+}
+
+VARIANT_LABEL_MAP = {
+    "baf_base": "Base",
+    "baf_var1": "Var.~I",
+    "baf_var2": "Var.~II",
+    "baf_var3": "Var.~III",
+    "baf_var4": "Var.~IV",
+    "baf_var5": "Var.~V",
+}
+
+
+def collect_shap_data():
+    """Collect shap_global.json, shap_consistency.json, shap_variant_stability.json."""
+    global_data = {}
+    for model in SHAP_MODELS:
+        run_dir = find_latest_run("baf_base", model)
+        if run_dir is None:
+            continue
+        gpath = run_dir / "shap_global.json"
+        if gpath.exists():
+            with open(gpath) as f:
+                global_data[model] = json.load(f)
+
+    # Consistency matrix
+    consistency = None
+    lgbm_dir = find_latest_run("baf_base", "lgbm")
+    if lgbm_dir:
+        cpath = lgbm_dir / "shap_consistency.json"
+        if cpath.exists():
+            with open(cpath) as f:
+                consistency = json.load(f)
+
+    # Variant stability
+    stability = None
+    if lgbm_dir:
+        spath = lgbm_dir / "shap_variant_stability.json"
+        if spath.exists():
+            with open(spath) as f:
+                stability = json.load(f)
+
+    # Local cases
+    local_data = {}
+    for model in SHAP_MODELS:
+        run_dir = find_latest_run("baf_base", model)
+        if run_dir is None:
+            continue
+        lpath = run_dir / "shap_local_cases.json"
+        if lpath.exists():
+            with open(lpath) as f:
+                local_data[model] = json.load(f)
+
+    return global_data, consistency, stability, local_data
+
+
+def generate_shap_global_bar(global_data):
+    """Horizontal grouped bar chart: top-15 features by mean |SHAP| for multiple models."""
+    if not global_data:
+        return
+
+    # Use LGBM's feature order as reference
+    ref_model = "lgbm" if "lgbm" in global_data else list(global_data.keys())[0]
+    features = list(global_data[ref_model].keys())[:15]  # top-15
+
+    models_to_plot = [m for m in SHAP_MODELS if m in global_data]
+    n_models = len(models_to_plot)
+    bar_height = 0.8 / n_models
+
+    fig, ax = plt.subplots(figsize=(10, 7))
+    colors = ["#1f77b4", "#d62728", "#2ca02c", "#ff7f0e"]
+
+    for i, model in enumerate(models_to_plot):
+        importances = [global_data[model].get(f, 0) for f in features]
+        y_pos = np.arange(len(features)) + i * bar_height
+        ax.barh(y_pos, importances, height=bar_height, label=SHAP_LABELS[model],
+                color=colors[i % len(colors)], alpha=0.85)
+
+    ax.set_yticks(np.arange(len(features)) + bar_height * (n_models - 1) / 2)
+    ax.set_yticklabels(features, fontsize=9)
+    ax.invert_yaxis()
+    ax.set_xlabel("Mean |SHAP value|", fontsize=11)
+    ax.set_title("Global Feature Importance (BAF Base, top-15)", fontsize=13)
+    ax.legend(loc="lower right", fontsize=10)
+    ax.grid(axis="x", alpha=0.3)
+
+    plt.tight_layout()
+    out = _figures_dir("baf") / "shap_global.pdf"
+    fig.savefig(out, bbox_inches="tight", dpi=150)
+    plt.close(fig)
+    _emit(out)
+
+
+def generate_shap_beeswarm(global_data):
+    """
+    Generate a beeswarm-style bar chart showing feature importance with direction.
+
+    Note: True beeswarm requires raw SHAP values + feature values.
+    This generates a simplified importance bar chart as a fallback.
+    Full beeswarm is generated directly by shap_analysis.py if shap_values.npy exists.
+    """
+    # The actual beeswarm is better generated directly with shap library
+    # in shap_analysis.py. Here we check if it was already generated.
+    lgbm_dir = find_latest_run("baf_base", "lgbm")
+    if lgbm_dir is None:
+        return
+
+    shap_path = lgbm_dir / "shap_values.npy"
+    if not shap_path.exists():
+        return
+
+    try:
+        import shap as shap_lib
+        shap_values = np.load(shap_path)
+
+        # Load test data feature names from preprocessor
+        import joblib
+        pipeline = joblib.load(lgbm_dir / "model.joblib")
+        preprocessor = pipeline.named_steps["preprocessor"]
+
+        from data import load_dataset
+        _, X_test, _, _ = load_dataset("baf_base")
+        X_transformed = preprocessor.transform(X_test)
+        feature_names = list(preprocessor.get_feature_names_out())
+
+        if hasattr(X_transformed, "values"):
+            X_transformed_np = X_transformed.values
+        else:
+            X_transformed_np = X_transformed
+
+        # Create SHAP Explanation object
+        explanation = shap_lib.Explanation(
+            values=shap_values,
+            data=X_transformed_np,
+            feature_names=feature_names,
+        )
+
+        fig, ax = plt.subplots(figsize=(10, 8))
+        shap_lib.plots.beeswarm(explanation, max_display=15, show=False)
+        plt.title("SHAP Beeswarm — LGBM on BAF Base", fontsize=13)
+        plt.tight_layout()
+
+        out = _figures_dir("baf") / "shap_beeswarm.pdf"
+        fig.savefig(out, bbox_inches="tight", dpi=150)
+        plt.close(fig)
+        _emit(out)
+    except Exception as e:
+        print(f"  [WARN] Beeswarm plot failed: {e}")
+
+
+def generate_shap_consistency_table(consistency):
+    """Generate Jaccard cross-model consistency table."""
+    if consistency is None:
+        return
+
+    models = consistency["models"]
+    jm = consistency["jaccard_matrix"]
+
+    lines = [
+        r"\begin{table}[ht!]",
+        r"\centering",
+        r"\caption{Jaccard similarity of top-10 SHAP features across model pairs (BAF Base).}",
+        r"\label{tab:shap_consistency}",
+    ]
+
+    col_spec = "l " + " ".join(["c"] * len(models))
+    lines.append(r"\begin{tabular}{" + col_spec + "}")
+    lines.append(r"\toprule")
+
+    header = " & ".join(SHAP_LABELS.get(m, m) for m in models)
+    lines.append(f"          & {header} \\\\")
+    lines.append(r"\midrule")
+
+    for m1 in models:
+        label = SHAP_LABELS.get(m1, m1)
+        vals = []
+        for m2 in models:
+            if m1 == m2:
+                vals.append("---")
+            else:
+                v = jm[m1][m2]
+                vals.append(f"{v:.2f}")
+        lines.append(f"{label:<10s} & " + " & ".join(vals) + r" \\")
+
+    lines.append(r"\bottomrule")
+    lines.append(r"\end{tabular}")
+    lines.append(r"\end{table}")
+
+    out = _tables_dir("baf") / "shap_consistency.tex"
+    out.write_text("\n".join(lines), encoding="utf-8")
+    _emit(out)
+
+
+def generate_shap_stability_table(stability):
+    """Generate Jaccard cross-variant stability table."""
+    if stability is None:
+        return
+
+    var_keys = stability["variant_keys"]
+    jm = stability["jaccard_matrix"]
+
+    lines = [
+        r"\begin{table}[ht!]",
+        r"\centering",
+        r"\caption{Jaccard similarity of top-10 SHAP features for LGBM across BAF Variants.}",
+        r"\label{tab:shap_stability}",
+    ]
+
+    col_spec = "l " + " ".join(["c"] * len(var_keys))
+    lines.append(r"\begin{tabular}{" + col_spec + "}")
+    lines.append(r"\toprule")
+
+    header = " & ".join(VARIANT_LABEL_MAP.get(v, v) for v in var_keys)
+    lines.append(f"         & {header} \\\\")
+    lines.append(r"\midrule")
+
+    for v1 in var_keys:
+        label = VARIANT_LABEL_MAP.get(v1, v1)
+        vals = []
+        for v2 in var_keys:
+            if v1 == v2:
+                vals.append("---")
+            else:
+                v = jm[v1][v2]
+                vals.append(f"{v:.2f}")
+        lines.append(f"{label:<10s} & " + " & ".join(vals) + r" \\")
+
+    lines.append(r"\bottomrule")
+    lines.append(r"\end{tabular}")
+    lines.append(r"\end{table}")
+
+    out = _tables_dir("baf") / "shap_stability.tex"
+    out.write_text("\n".join(lines), encoding="utf-8")
+    _emit(out)
+
+
+def generate_shap_waterfall(local_data):
+    """Generate 3-panel waterfall plot for TP, FP, FN (LGBM on BAF Base)."""
+    model = "lgbm"
+    if model not in local_data:
+        return
+
+    cases = local_data[model]
+    case_types = ["TP", "FP", "FN"]
+    available = [ct for ct in case_types if ct in cases]
+    if not available:
+        return
+
+    fig, axes = plt.subplots(1, len(available), figsize=(6 * len(available), 6))
+    if len(available) == 1:
+        axes = [axes]
+
+    titles = {
+        "TP": "True Positive\n(correctly flagged fraud)",
+        "FP": "False Positive\n(false alarm)",
+        "FN": "False Negative\n(missed fraud)",
+    }
+
+    for ax, ct in zip(axes, available):
+        case = cases[ct]
+        sv = case["shap_values"]
+
+        # Sort by absolute value, take top-10
+        sorted_feats = sorted(sv.items(), key=lambda x: abs(x[1]), reverse=True)[:10]
+        features = [f[0] for f in sorted_feats][::-1]
+        values = [f[1] for f in sorted_feats][::-1]
+
+        colors = ["#d62728" if v > 0 else "#1f77b4" for v in values]
+
+        ax.barh(features, values, color=colors, height=0.6)
+        ax.axvline(0, color="black", linewidth=0.8)
+        ax.set_xlabel("SHAP value", fontsize=10)
+        ax.set_title(f"{titles[ct]}\n(score={case['score']:.4f})", fontsize=10)
+        ax.tick_params(axis="y", labelsize=8)
+        ax.grid(axis="x", alpha=0.3)
+
+    plt.suptitle("Local SHAP Explanations — LGBM on BAF Base", fontsize=13, y=1.02)
+    plt.tight_layout()
+
+    out = _figures_dir("baf") / "shap_waterfall_tp_fp_fn.pdf"
+    fig.savefig(out, bbox_inches="tight", dpi=150)
+    plt.close(fig)
+    _emit(out)
+
+
+def generate_shap_dependence(global_data):
+    """Generate dependence plots for top-3 features (LGBM on BAF Base)."""
+    lgbm_dir = find_latest_run("baf_base", "lgbm")
+    if lgbm_dir is None or "lgbm" not in global_data:
+        return
+
+    shap_path = lgbm_dir / "shap_values.npy"
+    if not shap_path.exists():
+        return
+
+    try:
+        import joblib
+        shap_values = np.load(shap_path)
+        pipeline = joblib.load(lgbm_dir / "model.joblib")
+        preprocessor = pipeline.named_steps["preprocessor"]
+
+        from data import load_dataset
+        _, X_test, _, _ = load_dataset("baf_base")
+        X_transformed = preprocessor.transform(X_test)
+        feature_names = list(preprocessor.get_feature_names_out())
+
+        if hasattr(X_transformed, "values"):
+            X_transformed_np = X_transformed.values
+        else:
+            X_transformed_np = X_transformed
+
+        # Top-3 features from global importance
+        top3 = list(global_data["lgbm"].keys())[:3]
+
+        fig, axes = plt.subplots(1, 3, figsize=(18, 5))
+        for ax, feat_name in zip(axes, top3):
+            if feat_name in feature_names:
+                idx = feature_names.index(feat_name)
+                ax.scatter(X_transformed_np[:, idx], shap_values[:, idx],
+                          alpha=0.05, s=3, c=shap_values[:, idx],
+                          cmap="coolwarm", rasterized=True)
+                ax.set_xlabel(feat_name, fontsize=11)
+                ax.set_ylabel("SHAP value", fontsize=11)
+                ax.axhline(0, color="black", linewidth=0.5, alpha=0.5)
+                ax.grid(alpha=0.2)
+
+        plt.suptitle("SHAP Dependence Plots — LGBM on BAF Base (top-3 features)",
+                     fontsize=13)
+        plt.tight_layout()
+
+        out = _figures_dir("baf") / "shap_dependence.pdf"
+        fig.savefig(out, bbox_inches="tight", dpi=150)
+        plt.close(fig)
+        _emit(out)
+    except Exception as e:
+        print(f"  [WARN] Dependence plots failed: {e}")
+
+
+def generate_all_shap():
+    """Generate all SHAP tables and figures."""
+    global_data, consistency, stability, local_data = collect_shap_data()
+
+    if not global_data:
+        print("\n  No SHAP results found — skipping.")
+        return
+
+    print(f"\n── BAF Base — SHAP Analysis ({len(global_data)} models) ──")
+    generate_shap_global_bar(global_data)
+    generate_shap_beeswarm(global_data)
+    generate_shap_consistency_table(consistency)
+    generate_shap_stability_table(stability)
+    generate_shap_waterfall(local_data)
+    generate_shap_dependence(global_data)
+
+
+# ══════════════════════════════════════════════════════════════════════════
 #  MAIN
 # ══════════════════════════════════════════════════════════════════════════
 
@@ -779,6 +1365,37 @@ def main():
         generate_factorial_heatmap(baf_fact, "BAF Base", "baf")
     else:
         print("\n  No BAF factorial results found — skipping.")
+
+    # ── BAF Cross-Domain Generalization ──
+    cd_data = collect_cross_domain()
+    if cd_data:
+        print(f"\n── BAF Cross-Domain ({len(cd_data)} models) ──")
+        generate_cross_domain_tables(cd_data)
+    else:
+        print("\n  No BAF cross-domain results found — skipping.")
+
+    # ── BAF Variants In-Domain ──
+    vi_data = collect_variants_indomain()
+    n_vi = sum(
+        1 for v in vi_data for m in vi_data[v] if vi_data[v][m] is not None
+    )
+    # Subtract Base models (already reported as baselines)
+    n_vi_variants = sum(
+        1 for v in vi_data if v != "baf_base"
+        for m in vi_data[v] if vi_data[v][m] is not None
+    )
+    if n_vi_variants > 0:
+        print(f"\n── BAF Variants In-Domain ({n_vi_variants} runs) ──")
+        generate_variants_indomain_tables(vi_data)
+        # If we also have cross-domain data, generate delta tables
+        if cd_data:
+            print(f"\n── BAF Δ Cross-vs-In-Domain ──")
+            generate_delta_tables(cd_data, vi_data)
+    else:
+        print("\n  No BAF variant in-domain results found — skipping delta tables.")
+
+    # ── SHAP Analysis ──
+    generate_all_shap()
 
     print("\n" + "=" * 60)
     print("  Done! Check thesis/tables/{ulb,baf}/ and thesis/figures/{ulb,baf}/")

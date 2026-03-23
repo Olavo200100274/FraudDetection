@@ -2,11 +2,11 @@
 runs/
 reports/
 
-# datasets (too large for git)
-datasets/*.csv
+# datasets tracked via Git LFS (see .gitattributes)
 
-# trained model artefacts (large binaries)
-results/**/model.joblib
+
+# Claude Code local settings
+.claude/
 
 # archived old GridSearchCV results (large, superseded by Optuna runs)
 results_old_gridSearch/
@@ -25,4 +25,7 @@ Thumbs.db
 
 # Thesis backups
 thesis/Results_old*.tex
+
+# Overleaf download archive
+Overleaf.zip
 
