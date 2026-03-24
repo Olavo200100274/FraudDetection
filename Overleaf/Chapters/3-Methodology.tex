@@ -228,13 +228,13 @@ For each (model, strategy, dataset), the final configuration is trained on the f
 \begin{tikzpicture}[
     >={Stealth[length=2.5mm]},
     node distance=0.5cm,
-    step/.style={
+    procstep/.style={
         rectangle, rounded corners=2pt, minimum width=3.8cm, minimum height=0.8cm,
         font=\footnotesize\bfseries, align=center, text=white,
         drop shadow={shadow xshift=0.8pt, shadow yshift=-0.8pt}
     },
-    trainstep/.style={step, fill=clrStep},
-    valstep/.style={step, fill=clrValStep},
+    trainstep/.style={procstep, fill=clrStep},
+    valstep/.style={procstep, fill=clrValStep},
     annot/.style={font=\scriptsize, text=black!60, align=center},
     warnnote/.style={font=\scriptsize\itshape, text=clrWarn, align=center},
     arrow/.style={->, thick, black!60},

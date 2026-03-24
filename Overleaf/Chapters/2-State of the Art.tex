@@ -4,40 +4,13 @@
 \section{Fraud Detection in Financial Transactions}
 \label{sec:sota-fraud-detection-financial}
 
-Fraud detection in financial transactions is best understood as an operational decision problem rather than a purely offline classification task. In payment and transfer systems, detection models must operate under real-time constraints and produce actionable alerts that can be investigated under limited human review capacity. Industry-oriented evidence emphasizes that fraud management systems rely on human reviewers to investigate generated alerts and that operational trade-offs include the impact of false positives on legitimate customers (e.g., unnecessary customer contact undermining trust) \cite{rymantubb2018survey}. This operational reality motivates the literature’s focus on streaming pipelines and evaluation protocols that reflect real-world feedback loops.
-
-A central difficulty is that transactional fraud data are highly imbalanced and non-stationary, and that labels are not immediately available at decision time. Dal Pozzolo et al.\ explicitly identify concept drift, class imbalance, and verification latency as key challenges in credit card fraud detection, and describe the operational loop in which investigators provide feedback labels for alerted transactions \cite{dalpozzolo2017realistic}. They argue for realistic experimental settings that account for delayed supervision and feedback-driven learning, since methodological choices (e.g., how time and delayed verification are handled) can materially affect performance conclusions \cite{dalpozzolo2017realistic}.
-
-\paragraph{From batch scoring to streaming detection.}
-Modern transaction monitoring is frequently implemented as a streaming process in which each incoming transaction is enriched with historical context and then scored online. The SCARFF framework proposes an end-to-end architecture for streaming credit card fraud detection using scalable components, combining historical aggregation for feature engineering with online classification that outputs estimated fraud risk \cite{carcillo2017scarff}. After classification, SCARFF updates a prioritized list of alerts sorted by estimated risk, aligning model outputs with downstream investigation workflows \cite{carcillo2017scarff}. Moreover, SCARFF discusses system-level considerations such as data throughput and computational performance under varying resource allocations and incoming transaction rates, highlighting that deployable fraud detection depends not only on predictive quality but also on scalable processing \cite{carcillo2017scarff}.
-
-\paragraph{Learning under delayed labels and constrained review budgets.}
-Streaming detection raises the question of how to learn when labels are scarce, delayed, and expensive. Carcillo et al.\ frame real-life fraud detection labels as the outcome of an active learning process, where investigators contact only a limited number of cardholders (typically associated with the riskiest transactions) and the system operates under a query budget \cite{carcillo2018streamingAL}. In this setting, the interaction between scoring, investigation, and label acquisition becomes fundamental: what is investigated becomes what is labeled, reinforcing the need for realistic experimental design and careful interpretation of reported results \cite{carcillo2018streamingAL,dalpozzolo2017realistic}.
-
-\paragraph{Cost and risk are instance-dependent.}
-In many financial applications, the objective is not simply to minimize misclassification rate, but to minimize expected cost where mistakes have asymmetric and transaction-specific consequences. Höppner et al.\ formalize transfer fraud detection as an instance-dependent cost-sensitive classification problem, where misclassification costs vary between instances; notably, false-negative costs scale with transaction amount, motivating instance-dependent decision thresholds \cite{hoppner2021idcs}. This perspective connects detection to business impact and supports treating fraud detection as a decision pipeline in which model scores feed cost-aware alerting and prioritization policies \cite{hoppner2021idcs,rymantubb2018survey}.
-
-\paragraph{Representations beyond per-transaction features.}
-A recurring theme across operational and academic work is that fraud signals often emerge from behavioral patterns rather than isolated transactions. One approach is to encode transaction history through aggregation; another is to learn representations capturing contextual information. Ye{\c{s}}ilkanat et al.\ propose an approach that combines transaction aggregation with word representations (word embeddings) as part of a fast fraud detection pipeline, with feature generation and representation extraction integrated into training and real-time detection stages \cite{yesilkanat2020adaptive}. This is consistent with streaming architectures such as SCARFF, where enriching each decision with recent historical context is central to capturing realistic fraud strategies \cite{carcillo2017scarff,yesilkanat2020adaptive}.
-
-\paragraph{Dataset realism, bias, and temporal dynamics.}
-The gap between benchmark evaluations and production reality is a persistent concern in fraud research. ``Turning the Tables'' introduces datasets designed to reflect phenomena common in real-world tabular ML, including temporal dynamics, distribution shifts, and significant class imbalance, and provides biased variants to stress test ML methods \cite{jesus2022turning}. Together with realistic modeling perspectives that emphasize verification latency and evolving behavior \cite{dalpozzolo2017realistic}, this motivates evaluation protocols that respect temporal structure and avoid overly optimistic conclusions from static splits.
-
-\paragraph{Methodological pitfalls: data leakage and deceptive performance.}
-A major threat to the credibility of fraud detection results is that experimental pipelines can inadvertently introduce information unavailable at prediction time. Hayat and Magnier highlight pervasive data leakage due to improper preprocessing sequences and inadequate temporal validation in transaction data, showing how these issues can lead to deceptively strong performance estimates \cite{hayat2025leakage}. This critique reinforces the need for leakage-aware, temporally valid evaluation protocols when assessing fraud detection models.
-
-\paragraph{Summary and implications for this thesis.}
-Across industry benchmarks and academic frameworks, a consistent picture emerges: financial fraud detection is constrained by real-time operation, delayed and selective labels, limited investigative capacity, and evolving behavior \cite{rymantubb2018survey,carcillo2018streamingAL,dalpozzolo2017realistic}. Scalable streaming architectures (e.g., SCARFF) show how online scoring, historical aggregation, and risk-based alert prioritization connect modeling to operational action \cite{carcillo2017scarff}. Cost-sensitive formulations connect prediction quality to transaction-level impact \cite{hoppner2021idcs}, while dataset and methodology critiques emphasize that robustness depends on dynamic evaluation and explicit safeguards against leakage \cite{jesus2022turning,hayat2025leakage}. These principles define the problem setting for the remainder of the state of the art and justify the thesis’ emphasis on evaluation robustness and operationally meaningful interpretation.
-
-
-
 % ------------------------------------------------------------
 
 \section{Evaluation of Fraud Detection Systems under Class Imbalance}
 \label{subsec:fraud_detection_class_imbalance}
 
 (focus on PR-AUC/AUPRC, precision/recall/F1, thresholding, and probability calibration) 
-\cite{yourDLReviewPaper}. \cite{dalpozzolo2017realistic}
+
 
 % ------------------------------------------------------------
 
@@ -45,7 +18,7 @@ Across industry benchmarks and academic frameworks, a consistent picture emerges
 \label{subsec:classicML}
 
 (baselines, interpretability, strengths/limitations in tabular fraud)
-\cite{yourDLReviewPaper}.
+
 
 % ------------------------------------------------------------
 
@@ -53,7 +26,7 @@ Across industry benchmarks and academic frameworks, a consistent picture emerges
 \label{subsec:deep_learning}
 
 (supervised deep learning + semi-supervised/unsupervised paradigms and their evaluation challenges)
-\cite{yourDLReviewPaper}.
+
 
 % ------------------------------------------------------------
 
@@ -61,7 +34,7 @@ Across industry benchmarks and academic frameworks, a consistent picture emerges
 \label{subsec:transformers_tabular}
 
 (motivation, key families/ideas, empirical evidence, implementation considerations, open challenges, explicit coverage of TabTransformer and FT-Transformer)
-\cite{yourDLReviewPaper}.
+
 
 % ------------------------------------------------------------
 
@@ -69,7 +42,6 @@ Across industry benchmarks and academic frameworks, a consistent picture emerges
 \label{subsec:XAI}
 
 (motivation, key families/ideas, empirical evidence, implementation considerations, open challenges, explicit coverage of TabTransformer and FT-Transformer)
-\cite{yourDLReviewPaper}.
 
 % ------------------------------------------------------------
 
@@ -77,4 +49,3 @@ Across industry benchmarks and academic frameworks, a consistent picture emerges
 \label{subsec:limitations_research}
 
 (comparative synthesis, common pitfalls, gaps mapped to RQs, positioning and contributions)
-\cite{yourDLReviewPaper}.
