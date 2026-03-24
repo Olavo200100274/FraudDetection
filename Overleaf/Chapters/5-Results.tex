@@ -33,12 +33,6 @@ All metrics are defined in Section~\ref{sec:metrics} of the Methodology chapter.
 % ══════════════════════════════════════════════════════════════════════════
 %  1 — BASELINE MODEL COMPARISON
 % ══════════════════════════════════════════════════════════════════════════
-% CODE STEP 1:
-%   python main.py --dataset ulb    --models all --strategy none
-%   python main.py --dataset baf_base --models all --strategy none
-% Produces: metrics_test.json, pr_curve_data.json, roc_curve_data.json,
-%           confusion_matrix.png for each model on each dataset.
-% ══════════════════════════════════════════════════════════════════════════
 
 \subsection{Baseline Model Comparison (No Imbalance Strategy)}
 \label{sec:baseline_results}
@@ -57,13 +51,45 @@ where alternative threshold strategies are applied \emph{without retraining}.
 
 \subsubsection{ULB Credit Card 2013}
 
-\input{tables/generated/ulb/baseline.tex}
+\begin{table}[ht!]
+\centering
+\caption{Baseline comparison on ULB 2013 (strategy\,=\,None, threshold\,=\,max-$F_2$).}
+\label{tab:baseline_ulb}
+\begin{tabular}{l c c c c c c c c}
+\toprule
+Model & PR-AUC & ROC-AUC & $F_1$ & $F_2$ & Precision & Recall & $\tau$ & Brier \\
+\midrule
+LR         & 0.7419 & 0.9649 & 0.7489 & 0.7992 & 0.6777 & 0.8367 & 0.0435 & 0.00075 \\
+RF         & 0.8667 & 0.9591 & 0.8309 & 0.8583 & 0.7890 & 0.8776 & 0.1920 & 0.00039 \\
+LGBM       & 0.8744 & 0.9749 & 0.8235 & 0.8434 & 0.7925 & 0.8571 & 0.1038 & 0.00039 \\
+CatBoost   & 0.8847 & 0.9776 & 0.8333 & 0.8534 & 0.8019 & 0.8673 & 0.0539 & 0.00034 \\
+FT-Trans.  & 0.8562 & 0.9748 & 0.7545 & 0.8074 & 0.6803 & 0.8469 & 0.0350 & 0.00048 \\
+OCSVM      & 0.3354 & 0.9534 & 0.4145 & 0.5268 & 0.3058 & 0.6429 & 2.4887 & 0.00832 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-\input{tables/generated/ulb/ops.tex}
+\begin{table}[ht!]
+\centering
+\caption{Operational metrics on ULB 2013 (strategy\,=\,None, threshold\,=\,max-$F_2$).}
+\label{tab:ops_ulb}
+\begin{tabular}{l c c c c c}
+\toprule
+Model & Alert Rate & FP/TP & P@$k$ & R@$k$ & $k$ \\
+\midrule
+LR         & 0.00212 & 0.4756 & 0.3063 & 0.8878 & 284 \\
+RF         & 0.00191 & 0.2674 & 0.3099 & 0.8980 & 284 \\
+LGBM       & 0.00186 & 0.2619 & 0.3099 & 0.8980 & 284 \\
+CatBoost   & 0.00186 & 0.2471 & 0.3099 & 0.8980 & 284 \\
+FT-Trans.  & 0.00214 & 0.4699 & 0.3063 & 0.8878 & 284 \\
+OCSVM      & 0.00362 & 2.2698 & 0.2430 & 0.7041 & 284 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \begin{figure}[ht!]
   \centering
-  \includegraphics[width=0.78\textwidth]{figures/generated/ulb/prauc_bar_baseline.pdf}
+  \includegraphics[width=0.78\textwidth]{figures/ulb/prauc_bar_baseline.pdf}
   \caption{PR-AUC for all models on ULB 2013 (baseline, Optuna, $F_2$ threshold).}
   \label{fig:prauc_ulb}
 \end{figure}
@@ -72,13 +98,45 @@ where alternative threshold strategies are applied \emph{without retraining}.
 
 \subsubsection{BAF Base}
 
-\input{tables/generated/baf/baseline.tex}
+\begin{table}[ht!]
+\centering
+\caption{Baseline comparison on BAF Base (strategy\,=\,None, threshold\,=\,max-$F_2$).}
+\label{tab:baseline_baf}
+\begin{tabular}{l c c c c c c c c}
+\toprule
+Model & PR-AUC & ROC-AUC & $F_1$ & $F_2$ & Precision & Recall & $\tau$ & Brier \\
+\midrule
+LR         & 0.1432 & 0.8745 & 0.1871 & 0.2868 & 0.1185 & 0.4447 & 0.0527 & 0.01009 \\
+RF         & 0.1588 & 0.8778 & 0.2048 & 0.2941 & 0.1360 & 0.4148 & 0.0631 & 0.01007 \\
+LGBM       & 0.1768 & 0.8985 & 0.2224 & 0.3159 & 0.1490 & 0.4388 & 0.0636 & 0.00986 \\
+CatBoost   & 0.1796 & 0.8980 & 0.2106 & 0.3143 & 0.1359 & 0.4678 & 0.0573 & 0.00984 \\
+FT-Trans.  & 0.1797 & 0.8974 & 0.2246 & 0.3160 & 0.1515 & 0.4338 & 0.0584 & 0.00986 \\
+OCSVM      & 0.0190 & 0.6279 & 0.0449 & 0.0805 & 0.0258 & 0.1714 & -40.26 & 0.02061 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-\input{tables/generated/baf/ops.tex}
+\begin{table}[ht!]
+\centering
+\caption{Operational metrics on BAF Base (strategy\,=\,None, threshold\,=\,max-$F_2$).}
+\label{tab:ops_baf}
+\begin{tabular}{l c c c c c}
+\toprule
+Model & Alert Rate & FP/TP & P@$k$ & R@$k$ & $k$ \\
+\midrule
+LR         & 0.04140 & 7.4393 & 0.2720 & 0.1233 & 1000 \\
+RF         & 0.03365 & 6.3552 & 0.3120 & 0.1414 & 1000 \\
+LGBM       & 0.03249 & 5.7128 & 0.3420 & 0.1550 & 1000 \\
+CatBoost   & 0.03798 & 6.3605 & 0.3420 & 0.1550 & 1000 \\
+FT-Trans.  & 0.03158 & 5.5998 & 0.3360 & 0.1523 & 1000 \\
+OCSVM      & 0.07321 & 37.7328 & 0.0300 & 0.0136 & 1000 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \begin{figure}[ht!]
   \centering
-  \includegraphics[width=0.78\textwidth]{figures/generated/baf/prauc_bar_baseline.pdf}
+  \includegraphics[width=0.78\textwidth]{figures/baf/prauc_bar_baseline.pdf}
   \caption{PR-AUC for all models on BAF Base (baseline, Optuna, $F_2$ threshold).}
   \label{fig:prauc_baf}
 \end{figure}
@@ -93,13 +151,6 @@ where alternative threshold strategies are applied \emph{without retraining}.
 
 % ══════════════════════════════════════════════════════════════════════════
 %  2 — THRESHOLD SENSITIVITY ANALYSIS
-% ══════════════════════════════════════════════════════════════════════════
-% CODE STEP 2:
-%   python threshold_study.py --dataset ulb    --source-run results/ulb_2013/<model>/none/...
-%   python threshold_study.py --dataset baf_base --source-run results/baf_base/<model>/none/...
-% Loads the saved probability scores from Step 1 and applies the 4
-% threshold strategies (Fixed 0.5, max-F1, max-F2, Precision>=0.5)
-% WITHOUT retraining.  Produces threshold_study.json per model.
 % ══════════════════════════════════════════════════════════════════════════
 
 \subsection{Threshold Sensitivity Analysis}
@@ -123,13 +174,77 @@ No retraining is performed~--- the same probability scores from the baseline are
 
 \subsubsection{ULB Credit Card 2013}
 
-\input{tables/generated/ulb/threshold_f2.tex}
+\begin{table}[ht!]
+\centering
+\caption{Threshold sensitivity on ULB 2013~--- $F_2$ by threshold strategy (strategy\,=\,None).}
+\label{tab:threshold_ulb_f2}
+\begin{tabular}{l c c c c}
+\toprule
+Model & Fixed (0.5) & max-$F_1$ & max-$F_2$ & Prec\,$\geq$\,0.5 \\
+\midrule
+LR         & 0.664 & 0.772 & 0.799 & 0.742 \\
+RF         & 0.830 & 0.832 & 0.858 & 0.772 \\
+LGBM       & 0.803 & 0.825 & 0.843 & 0.726 \\
+CatBoost   & 0.816 & 0.816 & 0.853 & 0.752 \\
+FT-Trans.  & 0.825 & 0.825 & 0.820 & 0.778 \\
+OCSVM      & 0.420 & 0.498 & 0.527 & 0.455 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-\input{tables/generated/ulb/threshold_f1.tex}
+\begin{table}[ht!]
+\centering
+\caption{Threshold sensitivity on ULB 2013~--- $F_1$ by threshold strategy (strategy\,=\,None).}
+\label{tab:threshold_ulb_f1}
+\begin{tabular}{l c c c c}
+\toprule
+Model & Fixed (0.5) & max-$F_1$ & max-$F_2$ & Prec\,$\geq$\,0.5 \\
+\midrule
+LR         & 0.717 & 0.751 & 0.749 & 0.596 \\
+RF         & 0.868 & 0.873 & 0.831 & 0.654 \\
+LGBM       & 0.849 & 0.854 & 0.824 & 0.570 \\
+CatBoost   & 0.865 & 0.865 & 0.833 & 0.605 \\
+FT-Trans.  & 0.838 & 0.838 & 0.825 & 0.683 \\
+OCSVM      & 0.241 & 0.418 & 0.414 & 0.422 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-\input{tables/generated/ulb/threshold_recall.tex}
+\begin{table}[ht!]
+\centering
+\caption{Threshold sensitivity on ULB 2013~--- Recall by threshold strategy (strategy\,=\,None).}
+\label{tab:threshold_ulb_recall}
+\begin{tabular}{l c c c c}
+\toprule
+Model & Fixed (0.5) & max-$F_1$ & max-$F_2$ & Prec\,$\geq$\,0.5 \\
+\midrule
+LR         & 0.633 & 0.786 & 0.837 & 0.888 \\
+RF         & 0.806 & 0.806 & 0.878 & 0.878 \\
+LGBM       & 0.776 & 0.806 & 0.857 & 0.888 \\
+CatBoost   & 0.786 & 0.786 & 0.867 & 0.898 \\
+FT-Trans.  & 0.816 & 0.816 & 0.816 & 0.857 \\
+OCSVM      & 0.827 & 0.571 & 0.643 & 0.480 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-\input{tables/generated/ulb/threshold_alert.tex}
+\begin{table}[ht!]
+\centering
+\caption{Threshold sensitivity on ULB 2013~--- Alert Rate (\%) by threshold strategy (strategy\,=\,None).}
+\label{tab:threshold_ulb_alert}
+\begin{tabular}{l c c c c}
+\toprule
+Model & Fixed (0.5) & max-$F_1$ & max-$F_2$ & Prec\,$\geq$\,0.5 \\
+\midrule
+LR         & 0.13\% & 0.19\% & 0.21\% & 0.34\% \\
+RF         & 0.15\% & 0.15\% & 0.19\% & 0.29\% \\
+LGBM       & 0.14\% & 0.15\% & 0.19\% & 0.36\% \\
+CatBoost   & 0.14\% & 0.14\% & 0.19\% & 0.34\% \\
+FT-Trans.  & 0.16\% & 0.16\% & 0.17\% & 0.26\% \\
+OCSVM      & 1.01\% & 0.30\% & 0.36\% & 0.22\% \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \paragraph{Discussion.}
 On ULB~2013, the choice of threshold strategy has a moderate but meaningful impact.
@@ -144,13 +259,77 @@ Crucially, model rankings are preserved across all four strategies: CatBoost\,$>
 
 \subsubsection{BAF Base}
 
-\input{tables/generated/baf/threshold_f2.tex}
+\begin{table}[ht!]
+\centering
+\caption{Threshold sensitivity on BAF Base~--- $F_2$ by threshold strategy (strategy\,=\,None).}
+\label{tab:threshold_baf_f2}
+\begin{tabular}{l c c c c}
+\toprule
+Model & Fixed (0.5) & max-$F_1$ & max-$F_2$ & Prec\,$\geq$\,0.5 \\
+\midrule
+LR         & 0.015 & 0.245 & 0.287 & 0.032 \\
+RF         & 0.001 & 0.263 & 0.294 & 0.045 \\
+LGBM       & 0.042 & 0.260 & 0.316 & 0.056 \\
+CatBoost   & 0.037 & 0.274 & 0.314 & 0.058 \\
+FT-Trans.  & 0.035 & 0.244 & 0.317 & 0.070 \\
+OCSVM      & 0.031 & 0.071 & 0.081 & 0.000 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-\input{tables/generated/baf/threshold_f1.tex}
+\begin{table}[ht!]
+\centering
+\caption{Threshold sensitivity on BAF Base~--- $F_1$ by threshold strategy (strategy\,=\,None).}
+\label{tab:threshold_baf_f1}
+\begin{tabular}{l c c c c}
+\toprule
+Model & Fixed (0.5) & max-$F_1$ & max-$F_2$ & Prec\,$\geq$\,0.5 \\
+\midrule
+LR         & 0.023 & 0.219 & 0.187 & 0.050 \\
+RF         & 0.001 & 0.237 & 0.205 & 0.068 \\
+LGBM       & 0.065 & 0.240 & 0.222 & 0.084 \\
+CatBoost   & 0.057 & 0.244 & 0.211 & 0.086 \\
+FT-Trans.  & 0.054 & 0.241 & 0.215 & 0.104 \\
+OCSVM      & 0.031 & 0.046 & 0.045 & 0.000 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-\input{tables/generated/baf/threshold_recall.tex}
+\begin{table}[ht!]
+\centering
+\caption{Threshold sensitivity on BAF Base~--- Recall by threshold strategy (strategy\,=\,None).}
+\label{tab:threshold_baf_recall}
+\begin{tabular}{l c c c c}
+\toprule
+Model & Fixed (0.5) & max-$F_1$ & max-$F_2$ & Prec\,$\geq$\,0.5 \\
+\midrule
+LR         & 0.012 & 0.267 & 0.445 & 0.026 \\
+RF         & 0.000 & 0.285 & 0.415 & 0.036 \\
+LGBM       & 0.034 & 0.275 & 0.439 & 0.046 \\
+CatBoost   & 0.030 & 0.299 & 0.468 & 0.047 \\
+FT-Trans.  & 0.029 & 0.245 & 0.464 & 0.058 \\
+OCSVM      & 0.030 & 0.108 & 0.171 & 0.000 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-\input{tables/generated/baf/threshold_alert.tex}
+\begin{table}[ht!]
+\centering
+\caption{Threshold sensitivity on BAF Base~--- Alert Rate (\%) by threshold strategy (strategy\,=\,None).}
+\label{tab:threshold_baf_alert}
+\begin{tabular}{l c c c c}
+\toprule
+Model & Fixed (0.5) & max-$F_1$ & max-$F_2$ & Prec\,$\geq$\,0.5 \\
+\midrule
+LR         & 0.02\% & 1.59\% & 4.14\% & 0.06\% \\
+RF         & 0.00\% & 1.55\% & 3.36\% & 0.08\% \\
+LGBM       & 0.07\% & 1.43\% & 3.25\% & 0.10\% \\
+CatBoost   & 0.05\% & 1.59\% & 3.80\% & 0.10\% \\
+FT-Trans.  & 0.05\% & 1.14\% & 3.66\% & 0.12\% \\
+OCSVM      & 1.03\% & 4.06\% & 7.32\% & 0.00\% \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \paragraph{Discussion.}
 On BAF~Base, the impact of threshold selection is dramatic.
@@ -166,14 +345,6 @@ These results underscore a key finding: \textbf{threshold selection is not a min
 % ══════════════════════════════════════════════════════════════════════════
 %  3 — FULL FACTORIAL: IMBALANCE STRATEGY × MODEL
 % ══════════════════════════════════════════════════════════════════════════
-% CODE STEP 3:
-%   for strategy in rus ros smote smote_tomek smoteenn weights; do
-%     python main.py --dataset ulb      --models supervised --strategy $strategy
-%     python main.py --dataset baf_base --models supervised --strategy $strategy
-%   done
-% Hyperparameters stay fixed from Step 1 (strategy=None).
-% Produces metrics_test.json per (model, strategy, dataset).
-% ══════════════════════════════════════════════════════════════════════════
 
 \subsection{Full Factorial Analysis~--- Imbalance Strategy $\times$ Model}
 \label{sec:factorial_results}
@@ -188,48 +359,138 @@ OCSVM is excluded because it does not use labelled fraud examples during trainin
 
 \subsubsection{ULB Credit Card 2013}
 
-\input{tables/generated/ulb/factorial_prauc.tex}
+\begin{table}[ht!]
+\centering
+\caption{PR-AUC by model $\times$ strategy on ULB 2013.}
+\label{tab:factorial_ulb_prauc}
+\begin{tabular}{l c c c c c c c}
+\toprule
+Model & None & RUS & ROS & SMOTE & SM+T & SMOTEENN & Weights \\
+\midrule
+LR         & \textbf{0.742} & 0.674 & 0.711 & 0.721 & 0.721 & 0.732 & 0.709 \\
+RF         & 0.867 & 0.669 & \textbf{0.873} & 0.870 & 0.870 & 0.853 & 0.859 \\
+LGBM       & \textbf{0.874} & 0.678 & 0.727 & 0.724 & 0.724 & 0.724 & 0.726 \\
+CatBoost   & \textbf{0.885} & 0.617 & 0.879 & 0.857 & 0.857 & 0.846 & 0.875 \\
+FT-Trans.  & \textbf{0.856} & 0.650 & 0.836 & 0.845 & 0.845 & 0.772 & 0.783 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-\input{tables/generated/ulb/factorial_rocauc.tex}
+\begin{table}[ht!]
+\centering
+\caption{ROC-AUC by model $\times$ strategy on ULB 2013.}
+\label{tab:factorial_ulb_rocauc}
+\begin{tabular}{l c c c c c c c}
+\toprule
+Model & None & RUS & ROS & SMOTE & SM+T & SMOTEENN & Weights \\
+\midrule
+LR         & 0.965 & \textbf{0.978} & 0.972 & 0.971 & 0.971 & 0.971 & 0.971 \\
+RF         & 0.959 & 0.977 & 0.961 & 0.969 & 0.969 & \textbf{0.977} & 0.966 \\
+LGBM       & 0.975 & 0.977 & 0.978 & \textbf{0.983} & \textbf{0.983} & 0.983 & 0.978 \\
+CatBoost   & 0.978 & 0.979 & 0.980 & 0.978 & 0.978 & \textbf{0.981} & 0.977 \\
+FT-Trans.  & 0.975 & 0.976 & 0.958 & 0.973 & 0.973 & 0.951 & \textbf{0.983} \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-\input{tables/generated/ulb/factorial_f2.tex}
+\begin{table}[ht!]
+\centering
+\caption{$F_2$ by model $\times$ strategy on ULB 2013.}
+\label{tab:factorial_ulb_f2}
+\begin{tabular}{l c c c c c c c}
+\toprule
+Model & None & RUS & ROS & SMOTE & SM+T & SMOTEENN & Weights \\
+\midrule
+LR         & 0.799 & 0.731 & 0.817 & \textbf{0.827} & \textbf{0.827} & 0.817 & 0.815 \\
+RF         & 0.858 & 0.789 & \textbf{0.859} & 0.830 & 0.830 & 0.823 & 0.855 \\
+LGBM       & \textbf{0.843} & 0.673 & 0.825 & 0.817 & 0.817 & 0.813 & 0.838 \\
+CatBoost   & 0.853 & 0.691 & \textbf{0.867} & 0.823 & 0.823 & 0.816 & 0.838 \\
+FT-Trans.  & 0.807 & 0.704 & 0.808 & \textbf{0.821} & \textbf{0.821} & 0.795 & 0.813 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 % ─────── BAF Base — Factorial ───────
 
 \subsubsection{BAF Base}
 
-\input{tables/generated/baf/factorial_prauc.tex}
+\begin{table}[ht!]
+\centering
+\caption{PR-AUC by model $\times$ strategy on BAF Base.}
+\label{tab:factorial_baf_prauc}
+\begin{tabular}{l c c c c c c c}
+\toprule
+Model & None & RUS & ROS & SMOTE & SM+T & SMOTEENN & Weights \\
+\midrule
+LR         & \textbf{0.143} & 0.137 & 0.137 & 0.135 & 0.135 & 0.136 & 0.122 \\
+RF         & \textbf{0.159} & 0.135 & 0.149 & 0.120 & 0.120 & 0.124 & 0.146 \\
+LGBM       & 0.177 & 0.171 & \textbf{0.181} & 0.146 & 0.146 & 0.158 & 0.181 \\
+CatBoost   & 0.180 & 0.178 & \textbf{0.185} & 0.154 & 0.154 & 0.165 & 0.184 \\
+FT-Trans.  & \textbf{0.180} & 0.159 & 0.166 & 0.106 & 0.106 & 0.124 & 0.175 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-\input{tables/generated/baf/factorial_rocauc.tex}
+\begin{table}[ht!]
+\centering
+\caption{ROC-AUC by model $\times$ strategy on BAF Base.}
+\label{tab:factorial_baf_rocauc}
+\begin{tabular}{l c c c c c c c}
+\toprule
+Model & None & RUS & ROS & SMOTE & SM+T & SMOTEENN & Weights \\
+\midrule
+LR         & 0.875 & 0.875 & \textbf{0.876} & 0.874 & 0.874 & 0.875 & 0.855 \\
+RF         & 0.878 & 0.882 & 0.885 & 0.874 & 0.874 & 0.876 & \textbf{0.885} \\
+LGBM       & \textbf{0.898} & 0.896 & 0.897 & 0.882 & 0.882 & 0.886 & 0.897 \\
+CatBoost   & 0.898 & 0.897 & 0.899 & 0.887 & 0.887 & 0.889 & \textbf{0.899} \\
+FT-Trans.  & \textbf{0.897} & 0.892 & 0.892 & 0.862 & 0.862 & 0.867 & 0.896 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-\input{tables/generated/baf/factorial_f2.tex}
+\begin{table}[ht!]
+\centering
+\caption{$F_2$ by model $\times$ strategy on BAF Base.}
+\label{tab:factorial_baf_f2}
+\begin{tabular}{l c c c c c c c}
+\toprule
+Model & None & RUS & ROS & SMOTE & SM+T & SMOTEENN & Weights \\
+\midrule
+LR         & \textbf{0.287} & 0.283 & 0.283 & 0.280 & 0.280 & 0.282 & 0.267 \\
+RF         & 0.294 & 0.288 & \textbf{0.303} & 0.280 & 0.280 & 0.280 & 0.296 \\
+LGBM       & 0.316 & 0.318 & 0.319 & 0.293 & 0.293 & 0.300 & \textbf{0.320} \\
+CatBoost   & 0.314 & \textbf{0.317} & 0.316 & 0.303 & 0.303 & 0.309 & 0.317 \\
+FT-Trans.  & \textbf{0.316} & 0.289 & 0.310 & 0.255 & 0.255 & 0.269 & 0.301 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \subsubsection{Interaction Heatmaps}
 
 \begin{figure}[ht!]
   \centering
-  \includegraphics[width=0.85\textwidth]{figures/generated/ulb/heatmap_prauc.pdf}
+  \includegraphics[width=0.85\textwidth]{figures/ulb/heatmap_prauc.pdf}
   \caption{$\Delta$PR-AUC (strategy $-$ None) per model on ULB 2013.}
   \label{fig:heatmap_ulb_prauc}
 \end{figure}
 
 \begin{figure}[ht!]
   \centering
-  \includegraphics[width=0.85\textwidth]{figures/generated/ulb/heatmap_f2.pdf}
+  \includegraphics[width=0.85\textwidth]{figures/ulb/heatmap_f2.pdf}
   \caption{$\Delta F_2$ (strategy $-$ None) per model on ULB 2013.}
   \label{fig:heatmap_ulb_f2}
 \end{figure}
 
 \begin{figure}[ht!]
   \centering
-  \includegraphics[width=0.85\textwidth]{figures/generated/baf/heatmap_prauc.pdf}
+  \includegraphics[width=0.85\textwidth]{figures/baf/heatmap_prauc.pdf}
   \caption{$\Delta$PR-AUC (strategy $-$ None) per model on BAF Base.}
   \label{fig:heatmap_baf_prauc}
 \end{figure}
 
 \begin{figure}[ht!]
   \centering
-  \includegraphics[width=0.85\textwidth]{figures/generated/baf/heatmap_f2.pdf}
+  \includegraphics[width=0.85\textwidth]{figures/baf/heatmap_f2.pdf}
   \caption{$\Delta F_2$ (strategy $-$ None) per model on BAF Base.}
   \label{fig:heatmap_baf_f2}
 \end{figure}
@@ -247,11 +508,6 @@ OCSVM is excluded because it does not use labelled fraud examples during trainin
 % ══════════════════════════════════════════════════════════════════════════
 %  4 — TRANSFORMER ROBUSTNESS TO CLASS IMBALANCE
 % ══════════════════════════════════════════════════════════════════════════
-% CODE STEP 4:
-%   No additional code runs — this section extracts and reshapes the
-%   factorial results (Step 3) to compare FT-Transformer vs. best tree.
-%   Script: python analysis/transformer_robustness.py
-% ══════════════════════════════════════════════════════════════════════════
 
 \subsection{Transformer Robustness to Class Imbalance}
 \label{sec:transformer_imbalance}
@@ -263,9 +519,49 @@ The FT-Transformer is compared against the best tree-based model
 (identified from the baseline and factorial sections) under all seven
 strategy conditions.
 
-\input{tables/generated/ulb/transformer_robustness.tex}
+\begin{table}[ht!]
+\centering
+\caption{FT-Transformer vs.\ best tree (CatBoost): robustness to imbalance strategies on ULB 2013.}
+\label{tab:transformer_robustness_ulb}
+\begin{tabular}{l cc cc}
+\toprule
+& \multicolumn{2}{c}{FT-Transformer} & \multicolumn{2}{c}{CatBoost} \\
+Strategy & PR-AUC & $F_2$ & PR-AUC & $F_2$ \\
+\midrule
+None      & 0.856 & 0.807 & 0.885 & 0.853 \\
+RUS       & 0.650 & 0.704 & 0.617 & 0.691 \\
+ROS       & 0.836 & 0.808 & 0.879 & 0.867 \\
+SMOTE     & 0.845 & 0.821 & 0.857 & 0.823 \\
+SM+Tomek  & 0.845 & 0.821 & 0.857 & 0.823 \\
+SMOTEENN  & 0.772 & 0.795 & 0.846 & 0.816 \\
+Weights   & 0.783 & 0.813 & 0.875 & 0.838 \\
+\midrule
+\textit{Std.\ dev.} & \textit{0.072} & \textit{0.044} & \textit{0.096} & \textit{0.060} \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-\input{tables/generated/baf/transformer_robustness.tex}
+\begin{table}[ht!]
+\centering
+\caption{FT-Transformer vs.\ best tree (CatBoost): robustness to imbalance strategies on BAF Base.}
+\label{tab:transformer_robustness_baf}
+\begin{tabular}{l cc cc}
+\toprule
+& \multicolumn{2}{c}{FT-Transformer} & \multicolumn{2}{c}{CatBoost} \\
+Strategy & PR-AUC & $F_2$ & PR-AUC & $F_2$ \\
+\midrule
+None      & 0.180 & 0.316 & 0.180 & 0.314 \\
+RUS       & 0.159 & 0.289 & 0.178 & 0.317 \\
+ROS       & 0.167 & 0.310 & 0.185 & 0.316 \\
+SMOTE     & 0.106 & 0.255 & 0.154 & 0.303 \\
+SM+Tomek  & 0.106 & 0.255 & 0.154 & 0.303 \\
+SMOTEENN  & 0.124 & 0.269 & 0.165 & 0.309 \\
+Weights   & 0.175 & 0.301 & 0.184 & 0.317 \\
+\midrule
+\textit{Std.\ dev.} & \textit{0.031} & \textit{0.024} & \textit{0.013} & \textit{0.006} \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \paragraph{Discussion.}
 Tables~\ref{tab:transformer_robustness_ulb} and~\ref{tab:transformer_robustness_baf} compare the FT-Transformer against CatBoost (the strongest tree-based model) across all imbalance strategies.
@@ -285,16 +581,6 @@ The Class Weights strategy (which modifies the loss function rather than the dat
 % ══════════════════════════════════════════════════════════════════════════
 %  5 — CROSS-DOMAIN GENERALIZATION (BAF INTERNAL)
 % ══════════════════════════════════════════════════════════════════════════
-% CODE STEP 5:
-%   python cross_domain.py \
-%     --source baf_base \
-%     --targets baf_var1 baf_var2 baf_var3 baf_var4 baf_var5 \
-%     --models all --strategy best
-% Loads the model trained on BAF Base (from Step 1/3) and evaluates on
-% the holdout test sets of Variants I--V WITHOUT retraining.
-% Extra columns (x1, x2) in Variants III and V are dropped automatically.
-% Produces cross_domain_results.json.
-% ══════════════════════════════════════════════════════════════════════════
 
 \subsection{Cross-Domain Generalization (BAF Internal)}
 \label{sec:cross_domain_results}
@@ -308,11 +594,59 @@ all six datasets.
 
 \subsubsection{Cross-Domain Performance}
 
-\input{tables/generated/baf/crossdomain_prauc.tex}
+\begin{table}[ht!]
+\centering
+\caption{Cross-domain PR-AUC: trained on BAF Base, evaluated on each Variant (no retraining).}
+\label{tab:crossdomain_prauc}
+\begin{tabular}{l c c c c c c}
+\toprule
+Model & Base & Var I & Var II & Var III & Var IV & Var V \\
+\midrule
+LR         & \textbf{0.1432} & 0.1084 & 0.1420 & 0.1015 & 0.1359 & 0.1005 \\
+RF         & 0.1588 & 0.2058 & \textbf{0.2245} & 0.1699 & 0.2108 & 0.1593 \\
+LGBM       & 0.1768 & 0.1546 & \textbf{0.1856} & 0.1338 & 0.1718 & 0.1222 \\
+CatBoost   & 0.1796 & 0.1518 & \textbf{0.1871} & 0.1336 & 0.1736 & 0.1235 \\
+FT-Trans.  & \textbf{0.1797} & 0.1476 & 0.1770 & 0.1296 & 0.1656 & 0.1179 \\
+OCSVM      & 0.0190 & 0.0167 & \textbf{0.0221} & 0.0178 & 0.0205 & 0.0166 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-\input{tables/generated/baf/crossdomain_f2.tex}
+\begin{table}[ht!]
+\centering
+\caption{Cross-domain $F_2$: trained on BAF Base, evaluated on each Variant (no retraining).}
+\label{tab:crossdomain_f2}
+\begin{tabular}{l c c c c c c}
+\toprule
+Model & Base & Var I & Var II & Var III & Var IV & Var V \\
+\midrule
+LR         & \textbf{0.2868} & 0.2381 & 0.2661 & 0.2352 & 0.2679 & 0.2291 \\
+RF         & 0.2941 & 0.3071 & \textbf{0.3185} & 0.2885 & 0.3141 & 0.2783 \\
+LGBM       & \textbf{0.3159} & 0.2797 & 0.3088 & 0.2796 & 0.3048 & 0.2664 \\
+CatBoost   & \textbf{0.3143} & 0.2769 & 0.3040 & 0.2710 & 0.3004 & 0.2619 \\
+FT-Trans.  & \textbf{0.3160} & 0.2612 & 0.3043 & 0.2674 & 0.3017 & 0.2588 \\
+OCSVM      & 0.0805 & 0.0684 & \textbf{0.0934} & 0.0756 & 0.0883 & 0.0699 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-\input{tables/generated/baf/crossdomain_rocauc.tex}
+\begin{table}[ht!]
+\centering
+\caption{Cross-domain ROC-AUC: trained on BAF Base, evaluated on each Variant (no retraining).}
+\label{tab:crossdomain_rocauc}
+\begin{tabular}{l c c c c c c}
+\toprule
+Model & Base & Var I & Var II & Var III & Var IV & Var V \\
+\midrule
+LR         & 0.8745 & 0.8493 & 0.8801 & 0.8505 & \textbf{0.8803} & 0.8456 \\
+RF         & 0.8778 & 0.8719 & 0.8991 & 0.8750 & \textbf{0.9013} & 0.8631 \\
+LGBM       & 0.8985 & 0.8853 & 0.9035 & 0.8821 & \textbf{0.9061} & 0.8739 \\
+CatBoost   & 0.8980 & 0.8825 & 0.9018 & 0.8798 & \textbf{0.9032} & 0.8726 \\
+FT-Trans.  & 0.8974 & 0.8803 & 0.9005 & 0.8753 & \textbf{0.9011} & 0.8706 \\
+OCSVM      & 0.6279 & 0.5985 & \textbf{0.6636} & 0.6161 & 0.6462 & 0.5942 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \paragraph{Discussion.}
 The cross-domain results reveal how each model family responds to distribution shift when deployed without retraining.
@@ -339,13 +673,6 @@ ROC-AUC is notably more stable than PR-AUC across all variants (range 0.87--0.91
 % ══════════════════════════════════════════════════════════════════════════
 %  6 — INTERPRETABILITY (SHAP)
 % ══════════════════════════════════════════════════════════════════════════
-% CODE STEP 7:
-%   python shap_analysis.py --dataset baf_base \
-%     --models lr lgbm catboost ft_transformer \
-%     --top-k 15
-% Produces: shap_global_<model>.json, shap_waterfall_tp_fp_fn.pdf,
-%           shap_jaccard_cross_model.json, shap_jaccard_cross_variant.json.
-% ══════════════════════════════════════════════════════════════════════════
 
 \subsection{Interpretability Analysis (SHAP)}
 \label{sec:shap_results}
@@ -359,14 +686,14 @@ so SHAP analysis on ULB serves only as a consistency check.
 
 \begin{figure}[ht!]
   \centering
-  \includegraphics[width=0.88\textwidth]{figures/generated/baf/shap_global.pdf}
+  \includegraphics[width=0.88\textwidth]{figures/baf/shap_global.pdf}
   \caption{Top-15 features by mean $|\text{SHAP}|$ on BAF Base for LR, LGBM, CatBoost, and FT-Transformer.}
   \label{fig:shap_global}
 \end{figure}
 
 \begin{figure}[ht!]
   \centering
-  \includegraphics[width=0.88\textwidth]{figures/generated/baf/shap_beeswarm.pdf}
+  \includegraphics[width=0.88\textwidth]{figures/baf/shap_beeswarm.pdf}
   \caption{SHAP beeswarm plot for LGBM on BAF Base. Each dot represents a test sample;
     colour indicates feature value (red\,=\,high, blue\,=\,low).
     Features are sorted by mean $|\text{SHAP}|$.}
@@ -375,17 +702,47 @@ so SHAP analysis on ULB serves only as a consistency check.
 
 \subsubsection{Cross-Model Feature Consistency}
 
-\input{tables/generated/baf/shap_consistency.tex}
+\begin{table}[ht!]
+\centering
+\caption{Jaccard similarity of top-10 SHAP features across model pairs (BAF Base).}
+\label{tab:shap_consistency}
+\begin{tabular}{l c c c c}
+\toprule
+          & LR & LGBM & CatBoost & FT-Trans. \\
+\midrule
+LR         & --- & 0.67 & 0.67 & 0.33 \\
+LGBM       & 0.67 & --- & 1.00 & 0.54 \\
+CatBoost   & 0.67 & 1.00 & --- & 0.54 \\
+FT-Trans.  & 0.33 & 0.54 & 0.54 & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \subsubsection{Cross-Variant Feature Stability}
 
-\input{tables/generated/baf/shap_stability.tex}
+\begin{table}[ht!]
+\centering
+\caption{Jaccard similarity of top-10 SHAP features for LGBM across BAF Variants.}
+\label{tab:shap_stability}
+\begin{tabular}{l c c c c c c}
+\toprule
+         & Base & Var.~I & Var.~II & Var.~III & Var.~IV & Var.~V \\
+\midrule
+Base       & --- & 1.00 & 1.00 & 1.00 & 1.00 & 1.00 \\
+Var.~I     & 1.00 & --- & 1.00 & 1.00 & 1.00 & 1.00 \\
+Var.~II    & 1.00 & 1.00 & --- & 1.00 & 1.00 & 1.00 \\
+Var.~III   & 1.00 & 1.00 & 1.00 & --- & 1.00 & 1.00 \\
+Var.~IV    & 1.00 & 1.00 & 1.00 & 1.00 & --- & 1.00 \\
+Var.~V     & 1.00 & 1.00 & 1.00 & 1.00 & 1.00 & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \subsubsection{Local Explanations}
 
 \begin{figure}[ht!]
   \centering
-  \includegraphics[width=0.95\textwidth]{figures/generated/baf/shap_waterfall_tp_fp_fn.pdf}
+  \includegraphics[width=0.95\textwidth]{figures/baf/shap_waterfall_tp_fp_fn.pdf}
   \caption{SHAP contribution plots for representative True Positive,
     False Positive, and False Negative cases (LGBM on BAF Base).
     Red bars push toward fraud; blue bars push toward legitimate.}
@@ -396,7 +753,7 @@ so SHAP analysis on ULB serves only as a consistency check.
 
 \begin{figure}[ht!]
   \centering
-  \includegraphics[width=0.95\textwidth]{figures/generated/baf/shap_dependence.pdf}
+  \includegraphics[width=0.95\textwidth]{figures/baf/shap_dependence.pdf}
   \caption{SHAP dependence plots for the top-3 features (LGBM on BAF Base).
     Each point is a test sample; colour intensity reflects SHAP value magnitude.}
   \label{fig:shap_dependence}
@@ -436,9 +793,9 @@ The local explanations (Figure~\ref{fig:shap_local}) illustrate the model's deci
 
 \begin{figure}[ht!]
   \centering
-  \includegraphics[width=0.48\textwidth]{figures/generated/ulb/pr_curves_baseline.pdf}%
+  \includegraphics[width=0.48\textwidth]{figures/ulb/pr_curves_baseline.pdf}%
   \hfill
-  \includegraphics[width=0.48\textwidth]{figures/generated/baf/pr_curves_baseline.pdf}
+  \includegraphics[width=0.48\textwidth]{figures/baf/pr_curves_baseline.pdf}
   \caption{Precision--Recall curves for all models on ULB~2013 (left) and BAF~Base (right) under the baseline setting (strategy\,=\,None). OCSVM is included for reference.}
   \label{fig:pr_curves_consolidated}
 \end{figure}
@@ -474,15 +831,79 @@ The Precision$\geq$0.5 threshold is recommended when investigation capacity is l
 
 \subsubsection{Bootstrap Confidence Intervals}
 
-\input{tables/generated/ulb/ci.tex}
+\begin{table}[ht!]
+\centering
+\caption{95\% Bootstrap CI for PR-AUC and ROC-AUC on ULB 2013 (strategy\,=\,None, 1\,000 iterations).}
+\label{tab:ci_ulb}
+\begin{tabular}{l c c c c}
+\toprule
+Model & PR-AUC & 95\% CI & ROC-AUC & 95\% CI \\
+\midrule
+LR         & 0.742 & [0.653, 0.823] & 0.965 & [0.943, 0.985] \\
+RF         & 0.867 & [0.796, 0.927] & 0.959 & [0.930, 0.986] \\
+LGBM       & 0.874 & [0.811, 0.929] & 0.975 & [0.955, 0.994] \\
+CatBoost   & 0.885 & [0.824, 0.940] & 0.978 & [0.957, 0.995] \\
+FT-Trans.  & 0.856 & [0.791, 0.914] & 0.975 & [0.951, 0.996] \\
+OCSVM      & 0.335 & [0.252, 0.449] & 0.953 & [0.922, 0.979] \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-\input{tables/generated/baf/ci.tex}
+\begin{table}[ht!]
+\centering
+\caption{95\% Bootstrap CI for PR-AUC and ROC-AUC on BAF Base (strategy\,=\,None, 1\,000 iterations).}
+\label{tab:ci_baf}
+\begin{tabular}{l c c c c}
+\toprule
+Model & PR-AUC & 95\% CI & ROC-AUC & 95\% CI \\
+\midrule
+LR         & 0.143 & [0.131, 0.158] & 0.875 & [0.867, 0.882] \\
+RF         & 0.159 & [0.145, 0.175] & 0.878 & [0.870, 0.885] \\
+LGBM       & 0.177 & [0.162, 0.194] & 0.898 & [0.892, 0.905] \\
+CatBoost   & 0.180 & [0.164, 0.197] & 0.898 & [0.892, 0.904] \\
+FT-Trans.  & 0.180 & [0.164, 0.197] & 0.897 & [0.891, 0.904] \\
+OCSVM      & 0.019 & [0.018, 0.021] & 0.628 & [0.616, 0.639] \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \subsubsection{Computational Cost}
 
-\input{tables/generated/ulb/cost.tex}
+\begin{table}[ht!]
+\centering
+\caption{Computational cost on ULB 2013 (strategy\,=\,None). Tuning includes Optuna TPE (50 trials, 5-fold CV).}
+\label{tab:cost_ulb}
+\begin{tabular}{l r r r}
+\toprule
+Model & Tuning (s) & Train (s) & Inference (s) \\
+\midrule
+LR         & 30,491 & 242.1 & 0.104 \\
+RF         & 94,977 & 609.9 & 1.671 \\
+LGBM       & 305 & 1.8 & 0.135 \\
+CatBoost   & 7,456 & 41.5 & 0.131 \\
+FT-Trans.  & 15,598 & 262.9 & 1.074 \\
+OCSVM      & --- & 98.1 & 10.117 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-\input{tables/generated/baf/cost.tex}
+\begin{table}[ht!]
+\centering
+\caption{Computational cost on BAF Base (strategy\,=\,None). Tuning includes Optuna TPE (50 trials, 5-fold CV).}
+\label{tab:cost_baf}
+\begin{tabular}{l r r r}
+\toprule
+Model & Tuning (s) & Train (s) & Inference (s) \\
+\midrule
+LR         & 55,070 & 83.9 & 0.321 \\
+RF         & 105,313 & 1494.0 & 21.075 \\
+LGBM       & 1,243 & 16.1 & 1.387 \\
+CatBoost   & 7,010 & 36.7 & 0.249 \\
+FT-Trans.  & 46,550 & 346.9 & 2.419 \\
+OCSVM      & --- & 919.6 & 71.579 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 
 \clearpage
@@ -546,41 +967,12 @@ provides a controlled environment to study generalization with matched features.
 
 \subsection{Performance--Interpretability Trade-offs}
 
-The SHAP analysis reveals a clear performance--interpretability landscape.
-LGBM and CatBoost produce identical feature importance rankings (Jaccard\,=\,1.00), making either suitable when model-agnostic explanations are needed.
-LGBM is preferred for interpretability-critical deployments because TreeExplainer computes exact SHAP values in polynomial time, and LGBM's training cost is lower than CatBoost's on both datasets (see computational cost tables).
+The SHAP analysis demonstrates that interpretability need not come at the cost of performance.
+LGBM and CatBoost---the top-performing models---produce identical feature importance rankings (Jaccard\,=\,1.00), and both are amenable to fast, exact SHAP computation via TreeExplainer.
+The FT-Transformer, while competitive in predictive accuracy, relies on GradientExplainer for SHAP values, which is slower and produces a different feature ranking (Jaccard\,=\,0.54 vs.\ tree-based models).
 
-The FT-Transformer, despite matching CatBoost's aggregate performance on BAF, learns a substantially different feature hierarchy (Jaccard\,=\,0.54 vs.\ LGBM/CatBoost), emphasising continuous features (\texttt{name\_email\_similarity}, \texttt{income}) over the categorical features (\texttt{device\_os}, \texttt{housing\_status}) that dominate tree-based explanations.
-This divergence creates a tension: the FT-Transformer's explanations are harder to reconcile with domain intuition (which aligns with the tree-based ranking) and require GradientExplainer (an approximation) rather than exact Shapley values.
-
-Logistic Regression offers the most transparent model---its coefficients map directly to feature contributions---but at a performance cost (PR-AUC 8--19\% below CatBoost depending on the dataset).
-For regulatory or compliance contexts where model transparency is mandatory, LR remains a reasonable baseline provided the performance gap is acceptable.
-
-The cross-variant SHAP stability (Jaccard\,=\,1.00 across all BAF variants) is a practical asset: explanations produced for one deployment context remain valid under distribution shift, reducing the need to re-audit feature importance when the model is deployed on new data.
-
-\subsection{Key Findings}
-
-The experimental results yield the following principal findings:
-
-\begin{enumerate}
-  \item \textbf{Gradient-boosted trees remain state-of-the-art for tabular fraud detection.}
-    CatBoost and LGBM consistently achieve the highest PR-AUC on both datasets (0.88/0.18 on ULB/BAF, respectively), with the FT-Transformer competitive but not superior.
-
-  \item \textbf{Threshold selection is a critical design choice, not a post-hoc detail.}
-    On BAF, switching from a fixed $\tau=0.5$ to a max-$F_2$ threshold improves $F_2$ by an order of magnitude (e.g., CatBoost: $0.037 \to 0.314$). Model rankings are preserved across threshold strategies.
-
-  \item \textbf{Imbalance strategies offer limited benefit for well-tuned gradient-boosted models.}
-    No resampling strategy improves CatBoost or LGBM by more than 0.01~PR-AUC on either dataset. Class Weights is the safest option; SMOTE-based strategies can degrade performance.
-
-  \item \textbf{Cross-domain robustness does not follow in-domain rankings.}
-    Random Forest---third-best in-domain---is the most robust under distribution shift, improving on 3 of 5 BAF variants. CatBoost and LGBM lose up to 31\% PR-AUC under covariate shift.
-
-  \item \textbf{SHAP feature importance is consistent across tree-based models and stable across distribution shifts.}
-    LGBM and CatBoost share identical top-10 features (Jaccard\,=\,1.00), and this ranking is perfectly preserved across all BAF variants (Jaccard\,=\,1.00). The FT-Transformer learns a partially different feature hierarchy (Jaccard\,=\,0.54).
-
-  \item \textbf{The FT-Transformer is robust at baseline but fragile under resampling.}
-    It matches CatBoost on BAF without resampling but is 2--4$\times$ more sensitive to SMOTE-based strategies, suggesting that data-space perturbations disrupt the attention mechanism more than tree splits.
-\end{enumerate}
+The perfect cross-variant stability of SHAP rankings (Jaccard\,=\,1.00 across all BAF variants) is a particularly strong finding: it means that explanations generated on one dataset version remain valid under distribution shift, reducing the need for re-explanation when deploying to new domains.
+This stability, combined with the local explanation capability (waterfall plots), makes tree-based SHAP a practical tool for fraud investigation teams who need to justify automated decisions.
 
 \subsection{Threats to Validity}
 \begin{itemize}

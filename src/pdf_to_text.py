@@ -1,9 +1,9 @@
-"""Convert PDF articles in thesis/relatedWork/ to plain text files."""
+"""Convert PDF articles in results_thesis/relatedWork/ to plain text files."""
 
 import fitz  # PyMuPDF
 from pathlib import Path
 
-RELATED_WORK_DIR = Path(__file__).resolve().parent.parent / "thesis" / "relatedWork"
+RELATED_WORK_DIR = Path(__file__).resolve().parent.parent / "results_thesis" / "relatedWork"
 
 
 def pdf_to_text(pdf_path: Path) -> str:

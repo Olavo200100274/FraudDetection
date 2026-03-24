@@ -6,8 +6,7 @@ Usage:
     python generate_results.py
 
 Reads from:  ../results/ulb_2013/<model>/none/<run>/
-Writes to:   ../thesis/tables/{ulb,baf}/ and ../thesis/figures/{ulb,baf}/
-             plus a mirror under ../Overleaf/tables/generated and ../Overleaf/figures/generated
+Writes to:   ../results_thesis/tables/{ulb,baf}/ and ../results_thesis/figures/{ulb,baf}/
 """
 
 import json
@@ -24,31 +23,8 @@ import numpy as np
 # ── paths ────────────────────────────────────────────────────────────────
 ROOT = Path(__file__).resolve().parent.parent
 RESULTS_DIR = ROOT / "results"
-TABLES_BASE = ROOT / "thesis" / "tables"
-FIGURES_BASE = ROOT / "thesis" / "figures"
-
-# Overleaf project mirror — generated artifacts are copied here automatically
-OVERLEAF_ROOT = ROOT / "Overleaf"
-OVERLEAF_TABLES = OVERLEAF_ROOT / "tables" / "generated"
-OVERLEAF_FIGURES = OVERLEAF_ROOT / "figures" / "generated"
-
-import shutil
-
-def _mirror_to_overleaf(src: Path):
-    """Copy a thesis/ artifact into the Overleaf project at the same relative path."""
-    # Determine if it's under tables/ or figures/
-    try:
-        rel = src.relative_to(TABLES_BASE)
-        dst = OVERLEAF_TABLES / rel
-    except ValueError:
-        try:
-            rel = src.relative_to(FIGURES_BASE)
-            dst = OVERLEAF_FIGURES / rel
-        except ValueError:
-            return  # not a tables/figures file
-    if OVERLEAF_ROOT.exists():
-        dst.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(src, dst)
+TABLES_BASE = ROOT / "results_thesis" / "tables"
+FIGURES_BASE = ROOT / "results_thesis" / "figures"
 
 def _tables_dir(filename):
     d = TABLES_BASE / filename
@@ -61,8 +37,7 @@ def _figures_dir(filename):
     return d
 
 def _emit(out: Path):
-    """Print path and mirror the file to the Overleaf project."""
-    _mirror_to_overleaf(out)
+    """Print generated file path."""
     print(f"  → {out}")
 
 # ── display ordering & names ─────────────────────────────────────────────
@@ -1398,9 +1373,7 @@ def main():
     generate_all_shap()
 
     print("\n" + "=" * 60)
-    print("  Done! Check thesis/tables/{ulb,baf}/ and thesis/figures/{ulb,baf}/")
-    if OVERLEAF_ROOT.exists():
-        print("  Mirrored to Overleaf/tables/generated and Overleaf/figures/generated")
+    print("  Done! Check results_thesis/tables/{ulb,baf}/ and results_thesis/figures/{ulb,baf}/")
     print("=" * 60)
 
 

@@ -99,7 +99,7 @@ ax.set_xlim([0.0, 1.0])
 ax.set_ylim([0.0, 0.5])  # BAF has low precision values
 ax.grid(True, alpha=0.3)
 
-figures_dir = os.path.join("thesis", "figures", "baf")
+figures_dir = os.path.join("results_thesis", "figures", "baf")
 os.makedirs(figures_dir, exist_ok=True)
 out_path = os.path.join(figures_dir, "pr_curves_baseline.pdf")
 fig.savefig(out_path, bbox_inches="tight", dpi=300)

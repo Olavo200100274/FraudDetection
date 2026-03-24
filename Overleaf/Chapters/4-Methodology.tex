@@ -46,7 +46,7 @@ Figure~\ref{fig:pipeline} provides a high-level overview of the end-to-end exper
 \definecolor{clrEval}{HTML}{00B050}      % Green
 \definecolor{clrShap}{HTML}{7030A0}      % Purple
 
-\begin{figure}[H]
+\begin{figure}[ht!]
 \centering
 \begin{tikzpicture}[
     node distance=0.6cm,
@@ -223,7 +223,7 @@ For each (model, strategy, dataset), the final configuration is trained on the f
 \definecolor{clrValStep}{HTML}{548235}      % Green (validation steps)
 \definecolor{clrWarn}{HTML}{CC0000}         % Red (warning annotations)
 
-\begin{figure}[H]
+\begin{figure}[ht!]
 \centering
 \begin{tikzpicture}[
     >={Stealth[length=2.5mm]},
@@ -331,6 +331,8 @@ For each (model, strategy, dataset), the final configuration is trained on the f
 \label{fig:cv_protocol}
 \end{figure}
 
+\clearpage
+
 % ──────────────────────────────────────────────────────────────────────────
 \subsection{Threshold Selection Study}
 \label{sec:threshold_study}
@@ -401,7 +403,7 @@ Cross-dataset transfer between ULB~2013 and the BAF suite is not feasible due to
 \definecolor{clrInDomain}{HTML}{548235}  % Green (in-domain)
 \definecolor{clrDrop}{HTML}{CC0000}      % Red (degradation)
 
-\begin{figure}[H]
+\begin{figure}[ht!]
 \centering
 \begin{tikzpicture}[
     >={Stealth[length=2.5mm]},
@@ -486,6 +488,8 @@ Cross-dataset transfer between ULB~2013 and the BAF suite is not feasible due to
 \caption{Cross-domain generalization protocol within the BAF suite. A model trained on BAF~Base is applied directly to Variants~I--V without retraining (top arrows). Each variant is also trained and evaluated in-domain (green boxes) to establish upper-bound performance. The difference between cross-domain and in-domain metrics quantifies robustness to distribution shift.}
 \label{fig:cross_domain}
 \end{figure}
+
+\clearpage
 
 % ──────────────────────────────────────────────────────────────────────────
 \subsection{Evaluation Metrics}
