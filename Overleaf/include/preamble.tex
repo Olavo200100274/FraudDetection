@@ -8,6 +8,7 @@
 \usepackage{cite}
 \usepackage{booktabs}
 \usepackage{colortbl}
+\usepackage{xcolor}
 
 % Packages
 %\usepackage{slashbox,multirow}
@@ -41,19 +42,20 @@
 \usepackage{mathrsfs}
 \usepackage{mathbbol}
 \usepackage{bm}
-\usepackage{tikz}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usepgfplotslibrary{groupplots}
 \usetikzlibrary{datavisualization}
 \usetikzlibrary{datavisualization.formats.functions}
 \usetikzlibrary{arrows.meta, shapes.geometric, positioning, fit, backgrounds, calc, decorations.pathreplacing, shadows}
 \usepackage{fancybox}
-\usepackage{booktabs}
 \usepackage{dcolumn}
 \newcolumntype{d}{D{.}{.}{-1}}
 \usepackage{float}
+\usepackage[section]{placeins}   % auto \FloatBarrier at every \section
 
 \usepackage{algorithm}
 \usepackage{algorithmicx}
-\usepackage{enumitem}
 \usepackage[noend]{algpseudocode}
 \usepackage{amsthm}
 \theoremstyle{definition}
@@ -68,11 +70,8 @@
 \usepackage{fancyhdr}	
 \usepackage{eso-pic}	
 \usepackage{makeidx}
-\usepackage{pdfpages}
 \usepackage[toc,page]{appendix}
-\usepackage{caption}
 \usepackage{subcaption}
-\usepackage{mathbbol}
 \usepackage{bbold}
 \usepackage{epigraph}
 
@@ -96,9 +95,9 @@
 % \linespread{1.6}
 \onehalfspacing
 
-% subchapter levels
-\setcounter{secnumdepth}{6}
-\setcounter{tocdepth}{6}
+% subchapter levels (chapter=0, section=1, subsection=2, subsubsection=3)
+\setcounter{secnumdepth}{3}
+\setcounter{tocdepth}{3}
 
 % defining new commands [simplify work]
 \newcommand{\eg}{\emph{e.g. }}

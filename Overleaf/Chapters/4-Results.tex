@@ -22,19 +22,15 @@
 \definecolor{clrLR}{HTML}{9467bd}
 \definecolor{clrOCSVM}{HTML}{7f7f7f}
 
-\section{Results}
-\label{sec:results}
-
-This section is organised in practical execution order:
-each subsection corresponds to a well-defined experimental step whose artefacts (tables, figures, metrics JSON files) are produced by a specific code pipeline run.
-Sections are numbered sequentially—no phase labels are used.
+This chapter is organised in practical execution order:
+each section corresponds to a well-defined experimental step whose artefacts (tables, figures, metrics JSON files) are produced by a specific code pipeline run.
 All metrics are defined in Section~\ref{sec:metrics} of the Methodology chapter.
 
 % ══════════════════════════════════════════════════════════════════════════
 %  1 — BASELINE MODEL COMPARISON
 % ══════════════════════════════════════════════════════════════════════════
 
-\subsection{Baseline Model Comparison (No Imbalance Strategy)}
+\section{Baseline Model Comparison (No Imbalance Strategy)}
 \label{sec:baseline_results}
 
 This section compares all models tuned via Optuna TPE (50 trials,
@@ -49,7 +45,7 @@ where alternative threshold strategies are applied \emph{without retraining}.
 
 % ─────────────────── ULB 2013 ───────────────────
 
-\subsubsection{ULB Credit Card 2013}
+\subsection{ULB Credit Card 2013}
 
 \begin{table}[ht!]
 \centering
@@ -96,7 +92,7 @@ OCSVM      & 0.00362 & 2.2698 & 0.2430 & 0.7041 & 284 \\
 
 % ─────────────────── BAF Base ───────────────────
 
-\subsubsection{BAF Base}
+\subsection{BAF Base}
 
 \begin{table}[ht!]
 \centering
@@ -153,7 +149,7 @@ OCSVM      & 0.07321 & 37.7328 & 0.0300 & 0.0136 & 1000 \\
 %  2 — THRESHOLD SENSITIVITY ANALYSIS
 % ══════════════════════════════════════════════════════════════════════════
 
-\subsection{Threshold Sensitivity Analysis}
+\section{Threshold Sensitivity Analysis}
 \label{sec:threshold_sensitivity}
 
 This section investigates how the choice of decision threshold strategy
@@ -172,7 +168,7 @@ No retraining is performed~--- the same probability scores from the baseline are
 
 % ─────── ULB 2013 — Threshold Study ───────
 
-\subsubsection{ULB Credit Card 2013}
+\subsection{ULB Credit Card 2013}
 
 \begin{table}[ht!]
 \centering
@@ -257,7 +253,7 @@ Crucially, model rankings are preserved across all four strategies: CatBoost\,$>
 
 % ─────── BAF Base — Threshold Study ───────
 
-\subsubsection{BAF Base}
+\subsection{BAF Base}
 
 \begin{table}[ht!]
 \centering
@@ -346,7 +342,7 @@ These results underscore a key finding: \textbf{threshold selection is not a min
 %  3 — FULL FACTORIAL: IMBALANCE STRATEGY × MODEL
 % ══════════════════════════════════════════════════════════════════════════
 
-\subsection{Full Factorial Analysis~--- Imbalance Strategy $\times$ Model}
+\section{Full Factorial Analysis~--- Imbalance Strategy \texorpdfstring{$\times$}{x} Model}
 \label{sec:factorial_results}
 
 This subsection presents results for all (model, strategy) combinations
@@ -357,7 +353,7 @@ OCSVM is excluded because it does not use labelled fraud examples during trainin
 
 % ─────── ULB 2013 — Factorial ───────
 
-\subsubsection{ULB Credit Card 2013}
+\subsection{ULB Credit Card 2013}
 
 \begin{table}[ht!]
 \centering
@@ -412,7 +408,7 @@ FT-Trans.  & 0.807 & 0.704 & 0.808 & \textbf{0.821} & \textbf{0.821} & 0.795 & 0
 
 % ─────── BAF Base — Factorial ───────
 
-\subsubsection{BAF Base}
+\subsection{BAF Base}
 
 \begin{table}[ht!]
 \centering
@@ -465,7 +461,7 @@ FT-Trans.  & \textbf{0.316} & 0.289 & 0.310 & 0.255 & 0.255 & 0.269 & 0.301 \\
 \end{tabular}
 \end{table}
 
-\subsubsection{Interaction Heatmaps}
+\subsection{Interaction Heatmaps}
 
 \begin{figure}[ht!]
   \centering
@@ -509,7 +505,7 @@ FT-Trans.  & \textbf{0.316} & 0.289 & 0.310 & 0.255 & 0.255 & 0.269 & 0.301 \\
 %  4 — TRANSFORMER ROBUSTNESS TO CLASS IMBALANCE
 % ══════════════════════════════════════════════════════════════════════════
 
-\subsection{Transformer Robustness to Class Imbalance}
+\section{Transformer Robustness to Class Imbalance}
 \label{sec:transformer_imbalance}
 
 This section directly addresses the hypothesis:
@@ -582,7 +578,7 @@ The Class Weights strategy (which modifies the loss function rather than the dat
 %  5 — CROSS-DOMAIN GENERALIZATION (BAF INTERNAL)
 % ══════════════════════════════════════════════════════════════════════════
 
-\subsection{Cross-Domain Generalization (BAF Internal)}
+\section{Cross-Domain Generalization (BAF Internal)}
 \label{sec:cross_domain_results}
 
 Models are trained on BAF~Base and evaluated on the holdout test sets
@@ -592,7 +588,7 @@ The extra columns (\texttt{x1}, \texttt{x2}) present in Variants~III
 and~V are excluded to maintain a consistent 30-feature input across
 all six datasets.
 
-\subsubsection{Cross-Domain Performance}
+\subsection{Cross-Domain Performance}
 
 \begin{table}[ht!]
 \centering
@@ -674,7 +670,7 @@ ROC-AUC is notably more stable than PR-AUC across all variants (range 0.87--0.91
 %  6 — INTERPRETABILITY (SHAP)
 % ══════════════════════════════════════════════════════════════════════════
 
-\subsection{Interpretability Analysis (SHAP)}
+\section{Interpretability Analysis (SHAP)}
 \label{sec:shap_results}
 
 Interpretability analysis uses SHAP (SHapley Additive exPlanations)
@@ -682,7 +678,7 @@ on the BAF~Base dataset, where features have semantic meaning.
 ULB~2013 features (PCA components V1--V28) are not interpretable,
 so SHAP analysis on ULB serves only as a consistency check.
 
-\subsubsection{Global Feature Importance}
+\subsection{Global Feature Importance}
 
 \begin{figure}[ht!]
   \centering
@@ -700,7 +696,7 @@ so SHAP analysis on ULB serves only as a consistency check.
   \label{fig:shap_beeswarm}
 \end{figure}
 
-\subsubsection{Cross-Model Feature Consistency}
+\subsection{Cross-Model Feature Consistency}
 
 \begin{table}[ht!]
 \centering
@@ -718,7 +714,7 @@ FT-Trans.  & 0.33 & 0.54 & 0.54 & --- \\
 \end{tabular}
 \end{table}
 
-\subsubsection{Cross-Variant Feature Stability}
+\subsection{Cross-Variant Feature Stability}
 
 \begin{table}[ht!]
 \centering
@@ -738,7 +734,7 @@ Var.~V     & 1.00 & 1.00 & 1.00 & 1.00 & 1.00 & --- \\
 \end{tabular}
 \end{table}
 
-\subsubsection{Local Explanations}
+\subsection{Local Explanations}
 
 \begin{figure}[ht!]
   \centering
@@ -749,7 +745,7 @@ Var.~V     & 1.00 & 1.00 & 1.00 & 1.00 & 1.00 & --- \\
   \label{fig:shap_local}
 \end{figure}
 
-\subsubsection{Feature Dependence}
+\subsection{Feature Dependence}
 
 \begin{figure}[ht!]
   \centering
@@ -786,10 +782,10 @@ The local explanations (Figure~\ref{fig:shap_local}) illustrate the model's deci
 %  7 — CONSOLIDATED SUMMARY
 % ══════════════════════════════════════════════════════════════════════════
 
-\subsection{Consolidated Summary}
+\section{Consolidated Summary}
 \label{sec:consolidated}
 
-\subsubsection{PR Curves~--- All Models Overlaid (Baseline)}
+\subsection{PR Curves~--- All Models Overlaid (Baseline)}
 
 \begin{figure}[ht!]
   \centering
@@ -802,7 +798,7 @@ The local explanations (Figure~\ref{fig:shap_local}) illustrate the model's deci
 
 The PR curves visually confirm the quantitative findings from the baseline tables. On ULB~2013, CatBoost, LGBM, RF, and FT-Transformer produce curves that dominate the upper-right region, while LR is slightly lower and OCSVM collapses near the origin. On BAF~Base, all curves are compressed into the low-precision region, reflecting the inherent difficulty of the dataset; the supervised models are tightly clustered, with OCSVM again clearly separated.
 
-\subsubsection{Decision Framework}
+\subsection{Decision Framework}
 
 \begin{table}[ht!]
 \centering
@@ -829,7 +825,7 @@ For cross-domain scenarios where distribution shift is expected, Random Forest i
 When interpretability is a requirement, LGBM offers the best balance of performance and SHAP-based explainability (Section~\ref{sec:shap_results}), as its feature importance ranking is identical to CatBoost's (Jaccard\,=\,1.00) while being computationally lighter.
 The Precision$\geq$0.5 threshold is recommended when investigation capacity is limited, accepting lower recall to ensure that at least half of all alerts are genuine fraud.
 
-\subsubsection{Bootstrap Confidence Intervals}
+\subsection{Bootstrap Confidence Intervals}
 
 \begin{table}[ht!]
 \centering
@@ -867,7 +863,7 @@ OCSVM      & 0.019 & [0.018, 0.021] & 0.628 & [0.616, 0.639] \\
 \end{tabular}
 \end{table}
 
-\subsubsection{Computational Cost}
+\subsection{Computational Cost}
 
 \begin{table}[ht!]
 \centering
@@ -939,7 +935,7 @@ BAF models, facing a less extreme imbalance ratio but more complex feature inter
 From a practical standpoint, these results confirm that \textbf{any deployment of a fraud detection system must include an explicit threshold calibration step}.
 Using a fixed 0.5 threshold---the default in most ML frameworks---is acceptable only when the positive class is already well-separated in score space, which cannot be assumed in general.
 
-\subsection{Imbalance Strategy $\times$ Model Interaction}
+\subsection{Imbalance Strategy \texorpdfstring{$\times$}{x} Model Interaction}
 
 The full factorial analysis yields a nuanced picture: no single imbalance strategy uniformly improves all models on both datasets.
 On ULB~2013, RUS degrades every model---discarding majority-class samples from an already small dataset removes decision-boundary information.
