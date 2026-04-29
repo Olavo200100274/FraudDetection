@@ -209,6 +209,67 @@ class FTTransformer(nn.Module):
 
         return logit
 
+    @torch.no_grad()
+    def forward_with_attention(self, x_num, x_cat=None):
+        """
+        Like forward(), but also returns per-layer attention weights.
+
+        Uses forward hooks on self_attn to capture weights without
+        modifying the standard forward pass.
+
+        Returns
+        -------
+        logits : (batch,) float tensor
+        attn_weights : list[Tensor]
+            One (batch, n_tokens, n_tokens) tensor per Transformer layer.
+            Each row sums to 1.0 (softmax over keys).
+        """
+        self.eval()
+        batch_size = x_num.size(0)
+
+        # ── Tokenize (identical to forward()) ──
+        tokens = self.num_tokenizer(x_num)
+
+        if x_cat is not None and len(self.cat_embeddings) > 0:
+            cat_tokens = []
+            for i, emb in enumerate(self.cat_embeddings):
+                idx = x_cat[:, i].clamp(min=0, max=emb.num_embeddings - 1)
+                cat_tokens.append(emb(idx))
+            cat_tokens = torch.stack(cat_tokens, dim=1)
+            tokens = torch.cat([tokens, cat_tokens], dim=1)
+
+        cls = self.cls_token.expand(batch_size, -1, -1)
+        tokens = torch.cat([cls, tokens], dim=1)
+        tokens = tokens + self.pos_embedding
+
+        # ── Manual loop through encoder layers (Pre-LN) ──
+        attn_weights = []
+        for layer in self.transformer.layers:
+            # Pre-LN: norm before attention
+            normed = layer.norm1(tokens)
+            attn_out, weights = layer.self_attn(
+                normed, normed, normed,
+                need_weights=True,
+                average_attn_weights=True,  # average over heads → (batch, seq, seq)
+            )
+            tokens = tokens + layer.dropout1(attn_out)
+
+            # FFN with Pre-LN
+            normed2 = layer.norm2(tokens)
+            ff_out = layer.linear2(layer.dropout(layer.activation(layer.linear1(normed2))))
+            tokens = tokens + layer.dropout2(ff_out)
+
+            attn_weights.append(weights)  # (batch, n_tokens, n_tokens)
+
+        tokens = self.residual_dropout(tokens)
+
+        # [CLS] output → logit
+        cls_out = tokens[:, 0]
+        cls_out = self.head_norm(cls_out)
+        logit = self.head(cls_out).squeeze(-1)
+
+        return logit, attn_weights
+
 
 # ═══════════════════════════════════════════════════════════════════════════
 #  Training utilities
