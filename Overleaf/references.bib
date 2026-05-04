@@ -248,3 +248,48 @@
   publisher = {Independently published},
   url       = {https://christophm.github.io/interpretable-ml-book/}
 }
+
+% ============================================================
+% ULB-related references (Phase 2 part 1 curation, 2026-05-04)
+% ============================================================
+
+@article{leevy2023binary,
+  title   = {Comparative analysis of binary and one-class classification techniques for credit card fraud data},
+  author  = {Leevy, Joffrey L. and Hancock, John and Khoshgoftaar, Taghi M.},
+  journal = {Journal of Big Data},
+  year    = {2023},
+  note    = {Open Access. Compares 5 BCC vs 3 OCC learners on ULB dataset; CatBoost wins overall, supporting our OCSVM-as-baseline finding}
+}
+
+@article{singh2025benchmarking,
+  title   = {Benchmarking Credit Card Fraud Detection Models: A Comprehensive Evaluation Across Diverse Datasets},
+  author  = {Singh, Deepankur and Singh, Simranjit and Kumar, Neeraj},
+  journal = {Computational Economics},
+  year    = {2025},
+  doi     = {10.1007/s10614-025-11234-2},
+  note    = {15 ML algorithms (incl. TabNet) on ULB 2013 + synthetic 2019 + real 2023 with SMOTE/ADASYN + SHAP}
+}
+
+@inproceedings{thimonier2024comparative,
+  title     = {Comparative Evaluation of Anomaly Detection Methods for Fraud Detection in Online Credit Card Payments},
+  author    = {Thimonier, Hugo and Popineau, Fabrice and Rimmel, Arpad and Doan, Bich-Li{\^e}n and Daniel, Fabrice},
+  booktitle = {Proceedings of an academic conference},
+  year      = {2024},
+  note      = {Universit{\'e} Paris-Saclay + LUSIS AI. Finding: LightGBM significantly outperforms anomaly detection methods on credit card fraud --- directly supports thesis OCSVM-vs-supervised finding}
+}
+
+@article{imani2026why,
+  title   = {Why {ROC-AUC} Is Misleading for Highly Imbalanced Data: In-Depth Evaluation of {MCC}, {F2}-Score, {H}-Measure, and {AUC}-Based Metrics Across Diverse Classifiers},
+  author  = {Imani, Mehdi and Joudaki, Majid and Bagheri, Ayoub and Arabnia, Hamid R.},
+  journal = {Information (or appropriate MDPI journal)},
+  year    = {2026},
+  note    = {MDPI. Stockholm Univ + Utrecht Univ + Univ Georgia. Empirically demonstrates ROC-AUC ceiling effect under extreme imbalance using ULB 2013 (0.17\%); recommends MCC/F2/PR-AUC. Directly supports thesis PR-AUC-as-primary-metric choice}
+}
+
+@article{grover2022fdb,
+  title   = {Fraud Dataset Benchmark and Applications},
+  author  = {Grover, Prince and Xu, Julia and Tittelfitz, Justin and Cheng, Anqi and Li, Zheng and Zablocki, Jakub and Liu, Jianbo and Zhou, Hao},
+  journal = {arXiv preprint arXiv:2208.14417},
+  year    = {2022},
+  note    = {Amazon. Compilation of public fraud datasets with consistent API for class-imbalance treatment, supervised comparison, label noise, semi-supervised}
+}
