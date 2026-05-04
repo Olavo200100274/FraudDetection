@@ -73,17 +73,67 @@ The ULB/ folder holds references that **use the ULB Credit Card Fraud Detection 
 
 ---
 
-## Phase 2 PART 2 — Second half pending
+## Phase 2 PART 2 — Second half (23 PDFs triaged 2026-05-04)
 
-23 PDFs not yet triaged (will require re-extraction of `.txt` for those files in next session). Subjects clustered around:
-- SMOTE/imbalance (Hordri IJACSA, Hossain AJMRI, others — likely Tier 3 predatory) — **already pre-classified Tier 3 from earlier reads but not moved**
-- XAI/SHAP papers (Evaluation of XAI techniques, Explainable AI XAI Analysis Using SHAP)
-- Stacking/ensemble papers
-- Federated Learning (Federated Learning Used to Detect CCF — was Dataset2013, likely Tier 3)
-- Graph approaches (Heterogeneous Graph Auto-Encoder — likely Tier 3 graph)
-- DL/GAN (Improving CCFD through Transformer-Enhanced GAN, etc.)
+### Tier 1 — KEEP (1 new, moved to General/)
 
-To be triaged in Phase 2 Part 2.
+| Citation key | Paper | New filename | Why |
+|---|---|---|---|
+| `walauskis2024scalable` | Walauskis & Khoshgoftaar (2024). *Scalable unsupervised labeling with SHAP feature selection for fraud detection in imbalanced data*. Journal of Big Data. FAU (same group as Leevy). | `General/General_Walauskis_ScalableUnsupervisedSHAP.pdf` | Novel unsupervised SHAP feature selection methodology. Uses ULB Kaggle CCFD + Medicare Part D. Big Data journal (peer-reviewed). Methodology applies broadly → General/ folder. |
+
+### Tier 2 — KEEP CONDITIONAL (4 new, names normalized in ULB/)
+
+| Citation key (proposed) | Paper | File | Cite if |
+|---|---|---|---|
+| `mendespisani2026evaluation` | Mendes de Lima & Pisani (2026). *Evaluation of explainable AI techniques in the context of credit card fraud detection*. Journal of the Brazilian Computer Society. UFABC Brazil. | `ULB_MendesPisani2026_EvaluationXAI.pdf` | Direct comparison SHAP vs LIME on ULB. Peer-reviewed. Aligned with our SHAP analysis discussion. |
+| `btoush2026resampling` | Btoush et al. (2026). *Machine Learning-Based Cyber Fraud Detection: A Comparative Study of Resampling Methods for Imbalanced Credit Card Data*. MDPI 2026. Higher Colleges Tech Dubai + UniSQ Australia. | `ULB_Btoush2026_ResamplingMethods.pdf` | Comparative resampling on ULB. Peer-reviewed MDPI. Sister paper to Btoush2025_HybridMLDL already kept. |
+| `siam2025hybrid` | Siam, Bhowmik, Uddin (2025). *Hybrid feature selection framework for enhanced credit card fraud detection*. **PLOS ONE**. | `ULB_Siam2025_HybridFeatureSelection.pdf` | PLOS ONE peer-reviewed. Feature selection on ULB. Methodologically relevant if SoA discusses feature engineering. |
+| `albalawi2025enhancing` | Albalawi & Dardouri (2025). *Enhancing credit card fraud detection using traditional and deep learning models with class imbalance mitigation*. **Frontiers in AI**. Saudi Arabia + Tunisia. | `ULB_Albalawi2025_EnhancingCCFD.pdf` | Frontiers in AI (legitimate journal). Uses focal loss + SMOTE — direct overlap with our imbalance methodology. Note: reports RF accuracy 99.95% (metric misuse on imbalanced) but F1=0.83 and ROC-AUC=0.97 are reasonable. |
+
+### Tier 3 — DROP (18 PDFs moved to `_dropped/`)
+
+| File | Drop reason |
+|---|---|
+| `ULB_Improving Credit Card Fraud Detection through Transformer-Enhanced GAN Oversampling.pdf` (Kashaf ul Emaan) | Single author, no clear venue/affiliation, gmail+telephone in author block. |
+| `ULB_Explainable AI (XAI) Analysis Using SHAP for Credit Card Fraud.pdf` (Scripta Technica Indonesia) | Questionable Indonesian journal. |
+| `ULB_Ensemble Methods and Emerging Paradigms ... Comparative Study (PDF).pdf` (López García et al. BUAP Mexico) | preprints.org (not peer-reviewed). RF "99.98% accuracy" — classic metric misuse. |
+| `ULB_Improving CCFD with Ensemble DL ... SMOTE-ENN.pdf` (Bonde & Bichanga Africa, JCTA Indonesia) | Questionable Indonesian publisher. |
+| `ULB_Optimized ML Model for CCFD Using SMOTE-Tomek and Feature Engineering.pdf` (Wibowo & Setiadi, JAIC Indonesia) | Indonesian regional journal. Generic title. |
+| `ULB_Federated Learning Used to Detect Credit Card Fraud.pdf` (Jansson & Axelsson 2020 Lund) | **MSc thesis** from Lund University, not peer-reviewed paper. Federated learning off-scope anyway. |
+| `ULB_Enhancing Financial Fraud Detection ... NN, Ensemble, Stacking.pdf` (Khandelwal IJIRCT) | IJIRCT (questionable journal), "Independent Researcher" (no affiliation). |
+| `ULB_Enhancing CCFD with stacking-based hybrid ML approach.pdf` (Btoush et al.) | Same group as Btoush2025/2026 already kept. **Redundant** — third paper from same group on same topic. |
+| `ULB_Handling Imbalanced Fraudulent Transaction Data Using SMOTE-Tomek and RF.pdf` (Ilham et al. Indonesia BEST) | Indonesian regional journal. Generic. |
+| `ULB_Machine Learning for CCFD A Comparative Study of Algorithms.pdf` | **MSc Research Project**, not peer-reviewed. |
+| `ULB_REAL-TIME CCFD MACHINE LEARNING.pdf` (Suneel Kumar 2026 JETIR) | JETIR (predatory Indian journal). RF "99.96% accuracy" implausible. Caps-lock title. |
+| `ULB_SMOTE vs SMOTEENN ... Class Imbalance in Regression Models.pdf` (Husain et al. Algorithms MDPI) | **REGRESSION**, not classification. Wrong topic. |
+| `ULB_Feature-based ensemble modeling for diabetes data imbalance.pdf` (Jang Ewha) | **DIABETES** dataset, not fraud. Wrong topic. |
+| `ULB_ENHANCING IMBALANCED CCFD USING MULTILAYER PERCEPTION.pdf` (TPM 2025) | TPM low-tier journal. Caps-lock title. |
+| `ULB_Heterogeneous Graph Auto-Encoder for CCFD.pdf` (Singh Dibrugarh India) | Graph NN approach — outside thesis scope. |
+| `ULB_Handling Class Imbalance ... Resampling Methods.pdf` (Hordri 2018 IJACSA) | IJACSA predatory journal. |
+| `ULB_Handling Class Imbalance ... Various Sampling Techniques.pdf` (Hossain 2022 AJMRI Bangladesh) | AJMRI low-tier. LR "99.94%" / RF "99.964%" accuracy implausible. |
+| `ULB_Using neural network for credit card fraud detection.pdf` (Dataset2013 original) | Generic, low-quality. |
+
+---
+
+## FINAL Phase 2 totals (all 57 ULB PDFs triaged)
+
+- **Tier 1 ULB**: 3 papers (Dal Pozzolo 2015, Leevy 2023, Singh 2025)
+- **Tier 1 General** (originally in ULB but moved): 4 papers (Thimonier 2024, Imani 2026, Grover 2022 FDB, Walauskis 2024)
+- **Tier 2 ULB** (kept conditional): 9 papers (Almhaithawi 2020, Jurgovsky 2018, Lucas 2019, Baisholan 2025, Mim 2024, Btoush 2025 Hybrid, Mendes Pisani 2026, Btoush 2026 Resampling, Siam 2025, Albalawi 2025)
+- **Tier 2 General** (moved out): 2 papers (Compagnino 2025, Wu 2020)
+- **Tier 3 dropped**: 38 papers (20 Part 1 + 18 Part 2)
+- **Total accounted**: 3+4+9+2+38 = 56. (One off because Btoush2025_HybridMLDL was kept as Tier 2 — final = 57 ✓)
+
+**`references.bib` final state**: 30 → 31 entries (added `walauskis2024scalable` in Part 2). Plus 6 new from Part 1 = 7 new across all of Phase 2.
+
+## Patterns observed in Tier 3 drops (lessons for future curation)
+
+1. **Predatory journals** — IJACSA, IJIRCT, IJIST, AJMRI, JETIR, posthumanism.co.uk, Scripta Technica, JAIC Polibatam, BEST Indonesia, JCTA Indonesia. These appear with high concentration in fraud detection literature (low publication bar).
+2. **Metric misuse** — Reporting accuracy (97%+, 99%+) on extremely imbalanced datasets (0.17% fraud) where a trivial classifier already reaches 99.83%. Consistent red flag.
+3. **MSc/BSc theses** — KTH (Wallberg), Lund (Jansson), UNLV (Shakya), UTA (Khadka). Not peer-reviewed publications, should not be cited as primary references.
+4. **Wrong dataset** — Several papers in ULB folder didn't actually use ULB (Alkhozae uses 1.6M, Hemmatian uses ILPD/QSAR/Blood, Jang uses diabetes, Husain uses regression). User instinct was correct: many "ULB" papers don't use ULB.
+5. **Wrong topic** — RL focus, Graph NN, Federated Learning, Text classification, Regression. Off-scope of thesis.
+6. **Author group redundancy** — Btoush group (3 papers): kept the strongest two, dropped the third stacking paper.
 
 ---
 
