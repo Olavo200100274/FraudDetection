@@ -301,3 +301,111 @@
   year    = {2024},
   note    = {FAU. Unsupervised SHAP feature selection on Kaggle CCFD + Medicare Part D, evaluated with MCC/JI/Precision/Recall/F1}
 }
+
+% ============================================================
+% Foundational references — added 2026-05-05 to fill identified gaps
+% ============================================================
+
+@article{shwartzziv2022tabular,
+  title   = {Tabular Data: Deep Learning is Not All You Need},
+  author  = {Shwartz-Ziv, Ravid and Armon, Amitai},
+  journal = {Information Fusion},
+  volume  = {81},
+  pages   = {84--90},
+  year    = {2022},
+  doi     = {10.1016/j.inffus.2021.11.011},
+  note    = {Intel. Rigorous comparison showing XGBoost outperforms tabular DL models. Central reference for thesis framing}
+}
+
+@article{chawla2002smote,
+  title   = {{SMOTE}: Synthetic Minority Over-sampling Technique},
+  author  = {Chawla, Nitesh V. and Bowyer, Kevin W. and Hall, Lawrence O. and Kegelmeyer, W. Philip},
+  journal = {Journal of Artificial Intelligence Research},
+  volume  = {16},
+  pages   = {321--357},
+  year    = {2002},
+  doi     = {10.1613/jair.953}
+}
+
+@article{batista2004balancing,
+  title   = {A Study of the Behavior of Several Methods for Balancing Machine Learning Training Data},
+  author  = {Batista, Gustavo E. A. P. A. and Prati, Ronaldo C. and Monard, Maria Carolina},
+  journal = {{ACM} {SIGKDD} Explorations Newsletter},
+  volume  = {6},
+  number  = {1},
+  pages   = {20--29},
+  year    = {2004},
+  doi     = {10.1145/1007730.1007735},
+  note    = {Original paper defining SMOTE+Tomek and SMOTE+ENN combinations used in thesis factorial study}
+}
+
+@inproceedings{vaswani2017attention,
+  title     = {Attention Is All You Need},
+  author    = {Vaswani, Ashish and Shazeer, Noam and Parmar, Niki and Uszkoreit, Jakob and Jones, Llion and Gomez, Aidan N. and Kaiser, {\L}ukasz and Polosukhin, Illia},
+  booktitle = {Advances in Neural Information Processing Systems},
+  volume    = {30},
+  year      = {2017},
+  note      = {NeurIPS 2017. Foundational Transformer paper}
+}
+
+@article{saito2015precision,
+  title   = {The Precision-Recall Plot Is More Informative than the {ROC} Plot When Evaluating Binary Classifiers on Imbalanced Datasets},
+  author  = {Saito, Takaya and Rehmsmeier, Marc},
+  journal = {{PLOS} {ONE}},
+  volume  = {10},
+  number  = {3},
+  pages   = {e0118432},
+  year    = {2015},
+  doi     = {10.1371/journal.pone.0118432},
+  note    = {Seminal paper supporting thesis choice of PR-AUC as primary metric under extreme imbalance}
+}
+
+@article{borisov2022deep,
+  title   = {Deep Neural Networks and Tabular Data: A Survey},
+  author  = {Borisov, Vadim and Leemann, Tobias and Se{\ss}ler, Kathrin and Haug, Johannes and Pawelczyk, Martin and Kasneci, Gjergji},
+  journal = {{IEEE} Transactions on Neural Networks and Learning Systems},
+  year    = {2022},
+  doi     = {10.1109/TNNLS.2022.3229161},
+  note    = {Comprehensive survey of tabular DL models including FT-Transformer and TabTransformer}
+}
+
+@article{krawczyk2016learning,
+  title   = {Learning from imbalanced data: open challenges and future directions},
+  author  = {Krawczyk, Bartosz},
+  journal = {Progress in Artificial Intelligence},
+  volume  = {5},
+  number  = {4},
+  pages   = {221--232},
+  year    = {2016},
+  doi     = {10.1007/s13748-016-0094-0}
+}
+
+@article{hegarcia2009learning,
+  title   = {Learning from Imbalanced Data},
+  author  = {He, Haibo and Garcia, Edwardo A.},
+  journal = {{IEEE} Transactions on Knowledge and Data Engineering},
+  volume  = {21},
+  number  = {9},
+  pages   = {1263--1284},
+  year    = {2009},
+  doi     = {10.1109/TKDE.2008.239},
+  note    = {Classical survey on imbalanced learning, foundational reference}
+}
+
+@inproceedings{ribeiro2016lime,
+  title     = {``Why Should {I} Trust You?'': Explaining the Predictions of Any Classifier},
+  author    = {Ribeiro, Marco Tulio and Singh, Sameer and Guestrin, Carlos},
+  booktitle = {Proceedings of the 22nd {ACM} {SIGKDD} International Conference on Knowledge Discovery and Data Mining ({KDD})},
+  pages     = {1135--1144},
+  year      = {2016},
+  doi       = {10.1145/2939672.2939778},
+  note      = {LIME paper, complementary XAI method to SHAP}
+}
+
+@inproceedings{gorishniy2022embeddings,
+  title     = {On Embeddings for Numerical Features in Tabular Deep Learning},
+  author    = {Gorishniy, Yury and Rubachev, Ivan and Babenko, Artem},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+  year      = {2022},
+  note      = {Same group as gorishniy2021revisiting (FT-Transformer). Periodic embeddings for numerical features}
+}
