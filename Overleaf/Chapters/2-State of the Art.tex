@@ -1,51 +1,193 @@
 \chapter{State of the Art}
 \label{sec:stateoftheart}
 
+The detection of fraud in financial transactions is a challenging problem at the intersection of machine learning, class imbalance, and operational deployment constraints. This chapter surveys the literature across five dimensions that define this work: the fraud detection problem and its benchmark datasets, evaluation methodology under extreme class imbalance, classical machine learning approaches, deep learning and transformer-based models for tabular data, and explainability techniques. The chapter concludes with a synthesis of recurring methodological limitations and the research gaps that motivate the experimental design of this thesis.
+
+% ============================================================
 \section{Fraud Detection in Financial Transactions}
 \label{sec:sota-fraud-detection-financial}
+% ============================================================
 
-% ------------------------------------------------------------
+\subsection{The Financial Fraud Problem}
+\label{subsec:sota-fraud-nature}
 
+Financial fraud in electronic payment systems causes significant economic harm, with annual global losses consistently estimated in the hundreds of billions of dollars \cite{rymantubb2018survey}. The term encompasses a broad range of adversarial behaviours — card-not-present fraud, account takeover, synthetic identity fraud, and money laundering — each exhibiting distinct statistical signatures in transaction data \cite{hilal2022financial}. What unites these phenomena from a machine learning perspective is a combination of extreme class imbalance, concept drift as fraudsters adapt to detection systems, and the asymmetric cost of errors: a missed fraud (false negative) is typically far more costly than a legitimate transaction incorrectly flagged (false positive) \cite{ali2022financial}.
+
+Rule-based expert systems were historically the dominant detection paradigm, offering interpretability and direct encoding of domain knowledge at the cost of constant manual maintenance and poor generalisation across novel attack patterns \cite{rymantubb2018survey}. Supervised machine learning, trained on historical labelled transactions, models complex feature interactions and adapts as new data is collected without requiring explicit rule specification. The practical limitation is data availability: fraud labels are costly to produce, may arrive with delay, and the underlying distribution shifts as fraudsters respond to deployed models \cite{hernandezaros2024financial}. This motivates both the adoption of benchmark datasets that standardise evaluation and the design of models robust to distribution shift.
+
+\subsection{Benchmark Datasets}
+\label{subsec:sota-datasets}
+
+Reproducible comparative studies require publicly available, realistic datasets. Two benchmark collections are foundational to this field and to this thesis.
+
+The \textbf{ULB Credit Card Fraud dataset} \cite{dalpozzolo2017realistic} comprises 284\,807 transactions made by European cardholders over two days in September 2013, with 492 fraudulent transactions (fraud rate 0.172\%). Sensitive features have been transformed via principal component analysis (PCA), yielding 28 anonymous numeric components (V1--V28) alongside the raw \texttt{Time} elapsed and transaction \texttt{Amount}. The PCA transformation satisfies privacy constraints while preserving statistical structure relevant to fraud modelling. Its primary limitations are temporal: the two-day window prevents meaningful temporal generalisation studies, and the transformed feature space precludes domain-specific feature engineering. Despite these constraints, the ULB dataset remains the most widely cited benchmark in academic fraud detection research \cite{ali2022financial, mienye2024deep}.
+
+The \textbf{Bank Account Fraud (BAF)} dataset suite \cite{jesus2022turning}, introduced at NeurIPS 2022, provides a synthetic yet realistic alternative designed to overcome several limitations of ULB. BAF Base contains one million bank account opening applications with thirty features — twenty-five numeric and five categorical (\texttt{payment\_type}, \texttt{employment\_status}, \texttt{housing\_status}, \texttt{source}, \texttt{device\_os}) — and a fraud rate of approximately 1.1\%. Unlike ULB, BAF preserves semantically meaningful feature names, enabling interpretation of model decisions in domain terms. Crucially, the suite includes five distribution-shifted variants (Variants I--V) with controlled modifications: Variant II introduces label shift only; Variants III and V combine covariate shift with partial feature removal; Variants I and IV vary the fraud rate. This structured collection enables rigorous cross-domain generalisation evaluation without requiring access to production environments.
+
+These two datasets span different problem regimes. ULB is a dense, low-dimensional binary classification problem with extreme imbalance in a temporally constrained snapshot. BAF is a large-scale, semantically rich multi-variant benchmark designed to expose robustness limitations. Training and evaluating models across both datasets under an identical protocol enables conclusions that generalise beyond any single data regime, as argued in the context of multi-dataset fraud benchmarks \cite{grover2022fdb}.
+
+% ============================================================
 \section{Evaluation of Fraud Detection Systems under Class Imbalance}
 \label{subsec:fraud_detection_class_imbalance}
+% ============================================================
 
-(focus on PR-AUC/AUPRC, precision/recall/F1, thresholding, and probability calibration) 
+\subsection{The Accuracy Paradox and Metric Selection}
+\label{subsec:sota-accuracy-paradox}
 
+Under extreme class imbalance — where fraud constitutes 0.1\%--2\% of all transactions — a classifier that predicts every transaction as legitimate achieves accuracy above 98\% without detecting a single fraud. This \textit{accuracy paradox} renders overall accuracy uninformative and motivates the use of metrics that directly measure performance on the minority class \cite{hegarcia2009learning}.
 
-% ------------------------------------------------------------
+The area under the receiver operating characteristic curve (ROC-AUC) is widely reported in fraud detection literature. It measures the probability that a randomly chosen positive instance is ranked higher than a randomly chosen negative instance. However, under extreme imbalance, the large number of true negatives inflates the true negative rate, producing high ROC-AUC values even for classifiers with poor recall of the fraud class \cite{saito2015precision}. Empirical evidence on the ULB dataset confirms this effect: classifiers can exceed 0.97 ROC-AUC while their precision-recall behaviour is substantially worse, leading to systematically over-optimistic published claims \cite{imani2026why}. The use of ROC-AUC as the primary optimisation target has thus been a source of misleading comparisons in the fraud detection literature.
 
+The area under the precision-recall curve (PR-AUC, also known as average precision) directly measures the trade-off between precision and recall on the minority class, making it the recommended primary metric for imbalanced classification \cite{saito2015precision}. A random classifier achieves PR-AUC equal to the class prevalence (e.g., 0.011 on BAF Base), providing a meaningful lower bound absent in ROC-AUC. This thesis adopts PR-AUC as its primary metric throughout, complemented by F$_1$ and the recall-weighted F$_2$ score at an optimised threshold.
+
+\subsection{Threshold Selection and Probability Calibration}
+\label{subsec:sota-threshold}
+
+Point metrics — precision, recall, F$_1$, and F$_\beta$ — are defined for a specific decision threshold $\tau$ applied to the model's output probabilities. The choice of $\tau$ has a disproportionate effect under class imbalance: a threshold of 0.5, appropriate for balanced classification, is rarely optimal for fraud detection, where the Bayes-optimal threshold is shifted toward the minority class. Selecting $\tau$ on the test set constitutes evaluation bias; it must be chosen on a held-out validation set strictly separated from the test data \cite{luzio2024decoupling}.
+
+Multiple threshold selection strategies have been proposed. Fixing $\tau = 0.5$ is simple but frequently suboptimal. Data-driven alternatives include selecting the threshold that maximises F$_1$ (equal weight on precision and recall), maximising F$_2$ (double weight on recall, penalising missed fraud more than false alarms), or constraining precision to a minimum operationally acceptable level before maximising recall \cite{dalpozzolo2015calibrating}. A pre-condition for meaningful threshold selection is probability calibration: the model's output probabilities must reflect true posterior fraud probabilities. Under-sampling strategies that alter the class ratio during training distort these posteriors and require post-hoc calibration correction \cite{dalpozzolo2015calibrating}. The interaction between threshold strategy, calibration, and model architecture is an understudied aspect of the fraud detection literature.
+
+\subsection{Class Imbalance Correction Strategies}
+\label{subsec:sota-imbalance-strategies}
+
+A large body of work addresses class imbalance at the data level. \textit{Synthetic Minority Oversampling Technique} (SMOTE) \cite{chawla2002smote} is the most widely adopted oversampling method, generating synthetic minority-class instances as convex combinations of existing ones in feature space. Extensions such as SMOTE+Tomek and SMOTEENN \cite{batista2004balancing} add boundary cleaning steps to remove ambiguous majority instances after oversampling, seeking a cleaner decision boundary.
+
+Random undersampling (RUS) discards majority-class instances to achieve a target ratio. This is computationally efficient but discards potentially informative negative examples. Class-weight adjustment, wherein the loss function is weighted inversely to class frequency, achieves a similar effect without discarding data and is the preferred alternative when the majority class contains non-trivial patterns.
+
+Survey evidence \cite{hegarcia2009learning, krawczyk2016learning} cautions that no single strategy consistently dominates across all datasets and model families. A critical implementation constraint is that oversampling must be applied exclusively within the training fold during cross-validation: applying it before the split introduces data leakage that inflates reported performance \cite{hayat2025leakage}. The factorial interaction between imbalance strategy and model architecture — particularly relevant for neural models sensitive to distributional changes from synthetic oversampling — is a gap that the experimental design of this thesis explicitly addresses.
+
+% ============================================================
 \section{Classical Machine Learning for Fraud Detection}
 \label{subsec:classicML}
+% ============================================================
 
-(baselines, interpretability, strengths/limitations in tabular fraud)
+\subsection{Linear Models and Ensemble Methods}
+\label{subsec:sota-linear-ensemble}
 
+Logistic regression remains a standard baseline in fraud detection research. Its linear decision boundary, direct interpretability of coefficients, and native output of calibrated probabilities make it a natural starting point for practitioners \cite{dalpozzolo2017realistic}. Its limitation is expressive capacity: linear models cannot capture the nonlinear interaction patterns that characterise sophisticated fraud, particularly across high-cardinality categorical features.
 
-% ------------------------------------------------------------
+Random forests improve over logistic regression by constructing an ensemble of decorrelated decision trees via bootstrap aggregation and random feature subsets. The variance reduction from averaging substantially improves robustness on noisy financial datasets. However, random forests are prone to bias toward the majority class under severe imbalance, and their relatively uniform tree structure does not exploit the sequential error correction that gradient boosting achieves.
 
+\subsection{Gradient Boosted Decision Trees}
+\label{subsec:sota-gbdt}
+
+Gradient boosted decision trees (GBDTs) have emerged as the consistently dominant model family on tabular data \cite{shwartzziv2022tabular}. The gradient boosting framework constructs an additive ensemble of shallow trees, each fitted to the pseudo-residuals of the current ensemble, sequentially focusing successive weak learners on the most difficult instances.
+
+LightGBM \cite{ke2017lightgbm} introduces leaf-wise tree growth and histogram-based approximate gradient computation, achieving order-of-magnitude speedups over earlier implementations while preserving predictive quality at scale. CatBoost \cite{prokhorenkova2018catboost} adds ordered boosting — a sequential scheme that eliminates prediction shift bias during training — alongside a specialised categorical feature encoder that avoids target leakage within the tree construction process. This property is particularly relevant for financial datasets containing high-cardinality categorical fields such as device type or employment status.
+
+Comparative studies on the ULB dataset consistently rank CatBoost and LightGBM at the top of the performance ranking among classical models \cite{leevy2023binary, singh2025benchmarking, thimonier2024comparative}. Their practical advantages are well-established: robustness to feature scale without normalisation, native handling of missing values, well-calibrated probability outputs under moderate imbalance, and computationally efficient exact feature attribution via TreeSHAP \cite{lundberg2020local}.
+
+\subsection{Cost-Sensitive and Anomaly Detection Approaches}
+\label{subsec:sota-anomaly}
+
+Cost-sensitive learning \cite{hoppner2021idcs} offers an alternative to resampling by directly incorporating the asymmetric misclassification costs into the model's objective function. Rather than modifying the training data distribution, cost-sensitive methods specify a loss matrix and optimise expected cost rather than expected error rate. This approach avoids the distributional distortion introduced by oversampling and is particularly natural for fraud detection, where the cost ratio between false negatives and false positives can be quantified from operational data.
+
+One-class classification treats fraud detection as an anomaly detection problem: a model trained exclusively on legitimate transactions flags deviations as potential fraud. The one-class support vector machine (OCSVM) \cite{hegarcia2009learning} is the canonical baseline in this paradigm, learning a compact hypersphere in a kernel-mapped feature space around the density of normal transactions. These approaches are appealing when labelled fraud examples are scarce, but under the standard evaluation protocol of this thesis — labelled datasets with defined train/test splits — supervised methods consistently outperform one-class approaches by a substantial margin \cite{leevy2023binary, thimonier2024comparative}. On BAF, the OCSVM is limited to performance near the random baseline due to the high-dimensional, heterogeneous feature space.
+
+% ============================================================
 \section{Deep Learning for Fraud Detection}
 \label{subsec:deep_learning}
+% ============================================================
 
-(supervised deep learning + semi-supervised/unsupervised paradigms and their evaluation challenges)
+Deep learning methods have been applied to fraud detection across a range of architectures, with uneven results. A recent review \cite{mienye2024deep} surveys the deployment of convolutional networks, recurrent models, and autoencoders across credit card fraud benchmarks.
 
+Fully-connected networks (MLPs) offer increased model capacity relative to logistic regression but require careful regularisation and hyperparameter tuning to avoid overfitting on imbalanced datasets. Their lack of inductive bias for tabular structure means they do not benefit automatically from the permutation invariance and effective independence of tabular features in the way that tree-based models do \cite{borisov2022deep}.
 
-% ------------------------------------------------------------
+Sequence models — LSTMs and GRUs — are natural when transactions form meaningful temporal sequences with state-dependent fraud patterns. The ULB dataset, however, presents PCA-transformed features with no recoverable temporal semantics beyond a raw timestamp, and BAF represents account opening applications rather than transaction streams. This mismatch between architectural assumption and data structure limits the practical contribution of recurrent models in these specific benchmarks.
 
+Autoencoder-based anomaly detection trains a reconstruction network on legitimate transactions, deriving anomaly scores from reconstruction error. Under labelled supervised conditions, reconstruction-based approaches cannot compete with discriminative models that directly optimise the classification objective \cite{hilal2022financial}. A unifying limitation of all deep learning approaches in the fraud detection context is sensitivity to extreme class imbalance: unlike GBDT implementations that handle class imbalance via native weighting, deep learning models typically require explicit handling through loss reweighting or oversampling — and this interaction between architecture and imbalance strategy is a key empirical variable in this thesis.
+
+% ============================================================
 \section{Transformers for Tabular Fraud Detection}
 \label{subsec:transformers_tabular}
+% ============================================================
 
-(motivation, key families/ideas, empirical evidence, implementation considerations, open challenges, explicit coverage of TabTransformer and FT-Transformer)
+\subsection{The Transformer Architecture}
+\label{subsec:sota-transformer-arch}
 
+The Transformer architecture \cite{vaswani2017attention} demonstrated that sequence modelling tasks previously dominated by recurrent networks could be solved with superior efficiency using only attention mechanisms. The core innovation is \textit{multi-head self-attention}: each position in the input sequence attends to all other positions, with attention weights learned end-to-end via scaled dot-products. The Transformer's success in natural language processing and computer vision motivated attempts to extend its mechanism to tabular data — a fundamentally different modality with no inherent sequential or spatial structure among features.
 
-% ------------------------------------------------------------
+\subsection{Tabular Transformer Architectures}
+\label{subsec:sota-tabular-transformers}
 
+\textbf{TabTransformer} \cite{huang2020tabtransformer} was among the first applications of self-attention to tabular data. Its design applies column-wise attention exclusively to categorical feature embeddings, treating numeric features as pass-through inputs concatenated to the attention output. This reflects the intuition that categorical features benefit most from contextual encoding, while numeric features are already in a well-ordered continuous space. The limitation is that numeric features — which constitute the majority of predictors in ULB and a substantial fraction in BAF — receive no attention-based transformation.
+
+\textbf{SAINT} (Self-Attention and Intersample Attention Transformer) \cite{somepalli2021saint} extends attention along two axes: column-wise attention across features within a row, and row-wise attention across samples within a batch. The dual attention mechanism is designed to capture inter-sample dependencies, which may be relevant in fraud detection when groups of transactions share coordinated patterns. SAINT reports competitive performance against GBDT models on several tabular benchmarks, though results are inconsistent across datasets and tasks.
+
+\textbf{FT-Transformer} (Feature Tokenization Transformer) \cite{gorishniy2021revisiting} provides the most principled design for tabular data. It tokenizes all features — both categorical and numeric — as dense embedding vectors, applying multi-head self-attention over the full set of feature tokens. A class token is appended for classification, following the vision transformer (\textit{ViT}) convention. A subsequent contribution \cite{gorishniy2022embeddings} demonstrated that replacing linear numeric embeddings with periodic (piecewise-linear or Fourier-basis) embeddings substantially improves performance on datasets where numeric features dominate — a property relevant to financial fraud datasets such as ULB, where all discriminative features are continuous. The FT-Transformer is the architecture employed in this thesis as the representative tabular transformer.
+
+\subsection{The GBDT vs.\ Deep Learning Debate on Tabular Data}
+\label{subsec:sota-dl-gbdt-debate}
+
+The empirical question of whether tabular transformers outperform GBDTs has generated a structured research debate. Shwartz-Ziv and Armon \cite{shwartzziv2022tabular} conducted a controlled benchmark across multiple tabular datasets and found that GBDT methods — when properly tuned — match or outperform tabular deep learning methods in the majority of cases. Their central finding is that the inductive biases of GBDTs are better aligned with the statistical properties of tabular data than the self-attention mechanism, which was designed for correlated sequential tokens. Borisov et al. \cite{borisov2022deep} reach a similar conclusion in a comprehensive survey: tabular transformers have closed the gap with GBDTs on some benchmarks, but the advantage persists for GBDTs on heterogeneous, small-to-medium tabular datasets, and no single deep learning architecture consistently outperforms well-tuned GBDTs.
+
+In the specific domain of financial fraud, Thimonier et al. \cite{thimonier2024comparative} find that LightGBM significantly outperforms anomaly detection baselines on credit card fraud data, reinforcing the dominance of discriminative tree-based models in this domain. On the BAF dataset, Sun et al. \cite{sun2025objective} demonstrate that the choice of objective function matters more than architectural differences between models — a finding that further challenges the notion that sophisticated transformer architectures deliver systematic gains over simpler optimised models.
+
+Several structural reasons explain why GBDTs may hold an advantage on financial tabular data. First, self-attention assumes that input tokens carry relational meaning that benefits from cross-token interaction — an assumption that holds for words in a sentence or patches in an image but is less justified for independent tabular features whose semantics do not depend on each other's values. Second, GBDTs produce inherently well-calibrated probability outputs under moderate imbalance, whereas transformers typically require post-hoc calibration. Third, transformers are data-hungry: multi-head attention introduces a large number of parameters that require substantial training data and careful regularisation to avoid overfitting, particularly challenging under extreme class imbalance where only hundreds to thousands of positive examples may be available. Fourth, the combination of synthetic oversampling and neural training is more disruptive than for GBDTs: generating synthetic minority instances in a high-dimensional continuous space affects the loss landscape of a gradient-based neural model more fundamentally than it affects a tree partitioning procedure.
+
+Whether these theoretical considerations translate into consistent empirical gaps on fraud-specific benchmarks — and whether they can be diagnosed mechanistically — is an open question that this thesis addresses.
+
+% ============================================================
 \section{Explainable Artificial Intelligence in Fraud Detection}
 \label{subsec:XAI}
+% ============================================================
 
-(motivation, key families/ideas, empirical evidence, implementation considerations, open challenges, explicit coverage of TabTransformer and FT-Transformer)
+\subsection{Motivation: Compliance, Trust, and Operational Constraints}
+\label{subsec:sota-xai-motivation}
 
-% ------------------------------------------------------------
+The deployment of machine learning systems in financial decision-making is increasingly subject to regulatory requirements for transparency and justifiability. Regulations such as the European General Data Protection Regulation (GDPR) and national banking supervisory frameworks impose accountability obligations on automated credit and fraud decisions, meaning that opaque black-box models cannot be deployed without accompanying interpretability mechanisms \cite{nesvijevskaia2021accuracy}. Beyond regulatory compliance, operational teams require explanations to audit model decisions, identify systematic errors, and maintain justified confidence in automated systems.
 
+The trade-off between predictive accuracy and interpretability is well-documented \cite{molnar2022interpretable}. Logistic regression and shallow decision trees are inherently interpretable but lack the expressive capacity of ensemble and deep models. Post-hoc explanation methods address this tension by providing local or global attributions of black-box model decisions without requiring inspection of model internals.
+
+\subsection{SHAP: Shapley Additive Explanations}
+\label{subsec:sota-shap}
+
+SHAP \cite{lundberg2017unified} is the most widely adopted post-hoc explanation method in fraud detection research. It grounds feature attributions in cooperative game theory: the SHAP value of feature $j$ for instance $i$ is the Shapley value — the average marginal contribution of feature $j$ to the model's prediction across all possible feature coalitions. This formulation satisfies the axiomatic properties of efficiency (attributions sum to the prediction gap from baseline), consistency (higher-contributing features always receive higher attribution), and local accuracy (the sum of SHAP values equals the model output for the explained instance).
+
+For tree-based models, TreeSHAP \cite{lundberg2020local} computes exact Shapley values in polynomial time by exploiting the tree structure, making it computationally feasible for large ensembles. For neural networks, kernel SHAP and gradient-based approximations are required, at greater computational cost and with reduced exactness. This asymmetry is practically significant: SHAP explanations for GBDTs are exact and efficient, whereas those for FT-Transformer are approximate.
+
+A common conflation in the deep learning literature is treating attention weights as feature importance. Attention weights indicate which tokens a given position attends to during the forward pass, but they do not constitute a faithful attribution of model output to input features in the Shapley value sense \cite{molnar2022interpretable}. SHAP must be applied post-hoc as a separate computation even when attention is available.
+
+\subsection{Interpretability Consistency Across Model Families}
+\label{subsec:sota-xai-cross-model}
+
+Whether different model families identify the same features as important — cross-model interpretability consistency — is understudied in the fraud detection literature. Walauskis and Khoshgoftaar \cite{walauskis2024scalable} apply SHAP-based feature selection to large-scale tabular data but do not compare SHAP ranking consistency across model types. In practice, a GBDT and a transformer may achieve similar aggregate PR-AUC while generating qualitatively different feature attributions: if the two models disagree on which features drive fraud predictions, a model governance team cannot readily validate either model's reasoning.
+
+LIME \cite{ribeiro2016lime} provides an alternative post-hoc explanation approach: for a given instance, it fits a locally linear approximation to the model's predictions in a neighbourhood of that instance. LIME attributions are approximate by construction and may be less stable across repeated evaluations than SHAP. In fraud detection applications where individual transaction explanations must be reproducible for audit purposes, SHAP is generally preferred \cite{molnar2022interpretable}.
+
+% ============================================================
 \section{Synthesis, Limitations of Existing Work, and Research Gaps}
 \label{subsec:limitations_research}
+% ============================================================
 
-(comparative synthesis, common pitfalls, gaps mapped to RQs, positioning and contributions)
+\subsection{Recurring Methodological Limitations}
+\label{subsec:sota-limitations}
+
+A systematic examination of the fraud detection literature reveals four recurring methodological problems that compromise the reliability and comparability of published results.
+
+\textbf{Data leakage via incorrect resampling.} The most consequential error is the application of oversampling prior to the train/test split, or within cross-validation folds without isolating the resampling operation to the training portion of each fold. Hayat et al. \cite{hayat2025leakage} demonstrate empirically that this practice inflates reported PR-AUC and F1 scores by margins sufficient to alter the reported ranking of competing methods. Despite being well-understood in the methodology literature, this error persists in peer-reviewed fraud detection publications.
+
+\textbf{Inappropriate evaluation metrics.} The use of ROC-AUC as the primary metric, as detailed in Section~\ref{subsec:fraud_detection_class_imbalance}, is misleading under extreme class imbalance \cite{saito2015precision, imani2026why}. Many published papers report only ROC-AUC or accuracy, providing an incomplete and systematically optimistic characterisation of fraud detection capability.
+
+\textbf{Ad hoc threshold selection.} The decision threshold is rarely treated as a principled experimental variable. Papers that fix $\tau = 0.5$ without justification, or that optimise $\tau$ on the test set, introduce evaluation bias that conflates threshold selection with model quality. The calibration of probabilities — a prerequisite for meaningful threshold selection — is equally rarely discussed.
+
+\textbf{Single-dataset studies without robustness assessment.} The overwhelming majority of published comparisons use the ULB dataset alone. While ULB is a valuable benchmark, its two-day temporal window, PCA-transformed features, and specific imbalance ratio limit the generalisability of conclusions drawn from it. The BAF suite, designed explicitly for distribution shift evaluation, remains underutilised in comparative model studies.
+
+\subsection{Research Gaps and Positioning of This Work}
+\label{subsec:sota-gaps}
+
+The preceding limitations identify specific gaps that this thesis addresses through six experimental contributions.
+
+\textit{Gap 1: No joint, leakage-free comparison of GBDTs and tabular transformers on fraud data.} No published study provides a simultaneous, methodologically rigorous comparison of classical gradient-boosted models and the FT-Transformer on both ULB and BAF under an identical evaluation protocol. The tabular benchmarks of Shwartz-Ziv and Armon \cite{shwartzziv2022tabular} and Borisov et al. \cite{borisov2022deep} suggest GBDTs remain competitive, but fraud datasets differ structurally from general tabular benchmarks — extreme imbalance, regulated context, behavioural and device features — and the comparison under these specific conditions is missing.
+
+\textit{Gap 2: Threshold selection is not treated as a first-class experimental variable.} No existing fraud detection study systematically evaluates multiple threshold strategies (fixed, max-F1, max-F2, precision-constrained) across all models on both datasets under a leakage-free protocol, nor analyses their interaction with probability calibration.
+
+\textit{Gap 3: Factorial interactions between imbalance strategy and model type are unstudied.} The existing literature treats imbalance strategies and model choice as largely independent decisions. A full factorial design crossing seven strategies with five supervised models on two datasets has not been conducted.
+
+\textit{Gap 4: Cross-domain generalisation on BAF variants has not been assessed across all model families.} Understanding which architectures are robust to distribution shift — and whether GBDTs and transformers respond differently to covariate shift and label shift — has direct operational relevance but remains unexplored.
+
+\textit{Gap 5: SHAP consistency across model families and dataset variants is unknown.} Whether models that agree on PR-AUC also agree on which features drive fraud predictions, and whether this agreement is stable across distribution-shifted variants, is unstudied.
+
+\textit{Gap 6: The internal mechanism of tabular transformers on fraud data is unexamined.} Specifically, whether the attention patterns in FT-Transformer reflect discriminative feature dependencies or degenerate to uniform attention — and what this implies about the model's capacity on fraud data — has not been analysed.
+
+These six gaps map directly to the six experimental contributions of this thesis, detailed in Chapter~\ref{sec:methodology}.

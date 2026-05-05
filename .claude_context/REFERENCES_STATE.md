@@ -1,6 +1,6 @@
 # REFERENCES_STATE.md
 **Last updated**: 2026-05-05  
-**Total .bib entries**: 41  
+**Total .bib entries**: 43  
 
 ---
 
@@ -80,6 +80,10 @@ Overleaf/references/
 - `akiba2019optuna` — Akiba 2019, KDD (**3,000+ cit**) — Optuna TPE sampler
 - `hoppner2021idcs` — Höppner 2021, EJOR — instance-dependent cost-sensitive credit card fraud
 - `yesilkanat2020adaptive` — Yesilkanat 2020, App. Soft Comp — adaptive credit card fraud detection
+
+### GBDT implementations (added 2026-05-05 for SoA)
+- `ke2017lightgbm` — Ke et al. 2017, NeurIPS — LightGBM original paper (leaf-wise growth, histogram-based gradients)
+- `prokhorenkova2018catboost` — Prokhorenkova et al. 2018, NeurIPS — CatBoost original paper (ordered boosting, native categoricals)
 
 ---
 

@@ -1,6 +1,6 @@
 # PLAN.md — Sequential plan to thesis + article
 **Last updated**: 2026-05-05  
-**Current position**: ✅ Step 1 (reference curation) COMPLETE → entering Step 2
+**Current position**: ✅ Steps 1–3 COMPLETE → entering Step 4 (Introduction)
 
 ---
 
@@ -13,7 +13,7 @@
 - Foundational gap fill (10 PDFs): +10 critical entries (SMOTE, Vaswani, Shwartz-Ziv, etc.)
 - **Final .bib: 41 entries. All 6 thesis contributions covered.**
 
-### ⏭️ Step 2 — Decide and FREEZE SoA chapter structure
+### ✅ Step 2 — Decide and FREEZE SoA chapter structure (COMPLETE 2026-05-05)
 Before writing a single line, commit to the section headings.  
 Proposed structure (NOT yet frozen):
 ```
@@ -27,7 +27,7 @@ Proposed structure (NOT yet frozen):
 **Key: Section 4 is where Maryam's framing lives.** Must build to "why GBDT matches/beats Transformer."  
 **Key: Section 6 is where thesis is "sold" — each gap maps to one contribution.**
 
-### Step 3 — Write State of the Art chapter
+### ✅ Step 3 — Write State of the Art chapter (COMPLETE 2026-05-05)
 Section by section in order. Each section:
 - Opens with function (what this covers and why)
 - Synthesizes literature (argues, not enumerates)

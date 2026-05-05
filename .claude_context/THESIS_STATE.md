@@ -1,5 +1,5 @@
 # THESIS_STATE.md
-**Last updated**: 2026-05-05
+**Last updated**: 2026-05-05 (SoA written)
 
 ---
 
@@ -33,7 +33,7 @@ Overleaf/
 | Abstract EN | ❌ | Wrong keywords (drug discovery remnant), needs full rewrite |
 | Abstract PT | ❌ | Lorem Ipsum placeholder |
 | 1-Introduction | ❌ | Empty — to write AFTER SoA (depends on it for motivation) |
-| 2-State of the Art | ❌ | Empty — NEXT MAJOR TASK |
+| 2-State of the Art | ✅ | Complete — 7 sections, 43 BibTeX entries, frozen structure |
 | 3-Methodology | ✅ | Complete, 3 TikZ figures (pipeline, leakage-free CV, cross-domain) |
 | 4-Results | ✅ | Complete — baseline, threshold, factorial, FT-T robustness, cross-domain, SHAP, consolidated, discussion, threats to validity |
 | 5-Conclusion | ❌ | 1 sentence — needs: contributions summary, RQ answers, limitations, future work |
