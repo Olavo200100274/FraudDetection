@@ -1,22 +1,72 @@
 \chapter{Introduction}
 \label{sec:introduction}
 
+% ──────────────────────────────────────────────────────────────────────────
 \section{Context}
 \label{subsec:context}
+% ──────────────────────────────────────────────────────────────────────────
 
+Financial fraud in electronic payment systems is a persistent and escalating threat to the global economy, with annual losses consistently estimated in the hundreds of billions of dollars and a steady expansion in attack surface as digital payment channels proliferate \cite{rymantubb2018survey}. Card-not-present fraud, account takeover, and synthetic identity fraud exploit the scale and speed of modern payment infrastructure in ways that manual review processes cannot address at operational velocity \cite{hilal2022financial}. Automated fraud detection systems, trained on historical transaction data, have become a critical component of financial institutions' defence infrastructure.
+
+The machine learning problem underlying fraud detection is characterised by three structural challenges that distinguish it from standard classification benchmarks. First, class imbalance is extreme: fraud rates typically range from 0.1\% to 2\%, meaning that a naive classifier predicting all transactions as legitimate achieves accuracy above 98\% without detecting a single fraud \cite{hegarcia2009learning}. Second, the distribution of fraud patterns is non-stationary: fraudsters adapt their behaviour in response to deployed detection systems, inducing concept drift that degrades model performance over time \cite{jesus2022turning}. Third, the operational context imposes asymmetric error costs — a missed fraud imposes direct financial and reputational losses, while an excessive false-positive rate burdens human investigators and degrades customer experience \cite{nesvijevskaia2021accuracy}.
+
+Against this background, the machine learning research community has produced a substantial body of work on fraud detection methods, spanning classical ensemble models, deep learning architectures, and hybrid approaches. The dominant empirical finding, consistent across benchmark studies, is that gradient-boosted decision tree (GBDT) models — in particular LightGBM \cite{ke2017lightgbm} and CatBoost \cite{prokhorenkova2018catboost} — deliver state-of-the-art performance on tabular financial data \cite{thimonier2024comparative, leevy2023binary}. At the same time, the transformer architecture \cite{vaswani2017attention}, which has driven step-change improvements in natural language processing and computer vision, has been adapted for tabular data in architectures such as TabTransformer \cite{huang2020tabtransformer}, SAINT \cite{somepalli2021saint}, and FT-Transformer \cite{gorishniy2021revisiting}. Whether these architectures can match or exceed GBDT performance on fraud-specific tabular data remains an open question with direct practical implications.
+
+% ──────────────────────────────────────────────────────────────────────────
 \section{Motivation}
-
 \label{subsec:motivation}
+% ──────────────────────────────────────────────────────────────────────────
 
+Despite the volume of published work on fraud detection, a systematic review of the literature reveals recurring methodological limitations that undermine the reliability of reported conclusions and prevent a fair comparison between model families.
 
-\section{Objectives}
+The most consequential problem is \textbf{data leakage}: the application of oversampling techniques such as SMOTE \cite{chawla2002smote} prior to the train/test split, or within cross-validation folds without isolating resampling to the training portion, inflates reported performance metrics by margins sufficient to reverse model rankings \cite{hayat2025leakage}. A second limitation is the widespread use of ROC-AUC as the primary evaluation metric, which is systematically misleading under extreme class imbalance: the large number of true negatives inflates the true negative rate regardless of model behaviour on the minority class, making high ROC-AUC values compatible with near-zero fraud recall \cite{saito2015precision, imani2026why}. Third, the decision threshold applied to model output probabilities — which determines the operational trade-off between precision and recall — is rarely treated as an explicit experimental variable; most studies either fix it at 0.5 without justification or select it on the test set, introducing a further form of evaluation bias \cite{luzio2024decoupling}. Fourth, the overwhelming majority of comparative studies are conducted on a single dataset, most often the ULB Credit Card Fraud benchmark \cite{dalpozzolo2017realistic}, limiting the generalisability of conclusions drawn from a two-day transaction snapshot with PCA-anonymised features.
+
+Beyond methodological inconsistencies, a specific research gap motivates the central experimental question of this thesis. The tabular machine learning literature \cite{shwartzziv2022tabular, borisov2022deep} provides evidence that well-tuned GBDT models match or outperform tabular deep learning methods on general benchmarks — yet the extent to which this holds under the specific conditions of financial fraud detection (extreme imbalance, regulated context, mixed numeric and categorical features) has not been established in a controlled, leakage-free study that simultaneously evaluates both model families. More importantly, the \emph{reasons} behind any observed performance gap — whether attributable to calibration differences, sensitivity to imbalance strategies, architectural mismatch between attention and permutation-invariant tabular features, or dataset ceiling effects — have not been examined mechanistically. Understanding why a simple gradient-boosted model performs comparably to or better than a sophisticated tabular transformer is scientifically more valuable than reporting the gap alone \cite{shwartzziv2022tabular}.
+
+% ──────────────────────────────────────────────────────────────────────────
+\section{Objectives and Research Questions}
 \label{subsec:objectives}
+% ──────────────────────────────────────────────────────────────────────────
 
+This thesis conducts a rigorous, leakage-free comparative study of classical machine learning models and the FT-Transformer architecture for financial fraud detection under extreme class imbalance, across two structurally distinct benchmark datasets. The work is organised around five research questions, each addressing a specific gap identified in the state of the art.
 
+\begin{description}
 
-\section{Workflow}
+  \item[\textbf{RQ1} — Comparative performance under a leakage-free protocol.]
+  Under an identical, leakage-free evaluation protocol applied consistently across model families and datasets, how do classical supervised models (Logistic Regression, Random Forest, LightGBM, CatBoost) and the FT-Transformer compare on financial fraud detection? Does the performance gap between GBDTs and the transformer depend on the dataset characteristics (ULB vs.\ BAF)?
+
+  \item[\textbf{RQ2} — Impact of threshold selection strategy.]
+  How does the choice of decision threshold strategy — fixed at 0.5, maximising F$_1$, maximising F$_2$, or constrained by a minimum precision target — affect model rankings and operational metrics? Can threshold selection be standardised as a first-class experimental variable separate from model quality?
+
+  \item[\textbf{RQ3} — Factorial interaction of imbalance strategies and model type.]
+  What is the effect of seven class imbalance handling strategies (no resampling, RUS, ROS, SMOTE, SMOTE+Tomek, SMOTEENN, class weighting) on model performance across datasets, and how do these effects interact with model architecture? Do resampling strategies affect GBDT and transformer models differently?
+
+  \item[\textbf{RQ4} — Cross-domain generalisation under distribution shift.]
+  Do fraud detection models trained on BAF Base generalise to the five BAF Variants — which exhibit label shift, covariate shift, or combinations thereof — without retraining? Which model families are most robust to distribution shift, and does cross-domain robustness correlate with in-domain performance?
+
+  \item[\textbf{RQ5} — Feature attribution consistency and transformer attention diagnostics.]
+  Do SHAP-based feature attributions agree across model families on the same dataset, and do LGBM attributions remain stable across BAF variants under distribution shift? What do FT-Transformer attention patterns reveal about how the architecture processes fraud data, and do these patterns provide a mechanistic explanation for observed performance?
+
+\end{description}
+
+% ──────────────────────────────────────────────────────────────────────────
+\section{Research Approach}
 \label{subsec:workflow}
+% ──────────────────────────────────────────────────────────────────────────
 
+To address the five research questions, this thesis designs and executes a structured experimental pipeline across two benchmark datasets: the ULB Credit Card Fraud dataset \cite{dalpozzolo2017realistic} and the Bank Account Fraud (BAF) suite \cite{jesus2022turning}. Six model families are evaluated — Logistic Regression, Random Forest, LightGBM, CatBoost, One-Class SVM, and FT-Transformer — under seven class imbalance handling strategies in a full factorial design. All experiments follow a leakage-free protocol: an outer stratified 80/20 holdout separates the test set from all training, tuning, resampling, and threshold selection operations; hyperparameter optimisation uses Optuna \cite{akiba2019optuna} with 5-fold inner cross-validation for classical models and a single holdout split for the FT-Transformer. The primary evaluation metric is PR-AUC; threshold selection is treated as a separate experimental variable with four strategies evaluated systematically. Cross-domain generalisation is assessed by applying models trained on BAF Base to each of the five BAF Variants without retraining. Interpretability is analysed via SHAP \cite{lundberg2017unified}, including cross-model feature ranking consistency (Jaccard similarity) and FT-Transformer attention diagnostics.
 
-\section{Document Structure} % Document overview
+% ──────────────────────────────────────────────────────────────────────────
+\section{Document Structure}
 \label{subsec:structure}
+% ──────────────────────────────────────────────────────────────────────────
+
+The remainder of this thesis is organised as follows.
+
+\textbf{Chapter~\ref{sec:stateoftheart} — State of the Art} surveys the literature across five dimensions: fraud detection benchmarks and datasets, evaluation methodology under class imbalance, classical machine learning for fraud detection, transformer-based tabular models and the GBDT vs.\ deep learning debate, and explainability techniques. The chapter concludes with a synthesis of methodological limitations and the six research gaps that motivate this work.
+
+\textbf{Chapter~\ref{sec:chapterMethodology} — Methodology} details the experimental design, including the two datasets, six model families, seven imbalance strategies, leakage-free evaluation protocol, threshold selection study, hyperparameter tuning strategy, cross-domain generalisation protocol, evaluation metrics, and SHAP interpretability analysis.
+
+\textbf{Chapter~\ref{sec:chapterResults} — Results} presents the experimental findings in five parts: baseline model comparison under no resampling, threshold selection study, full factorial analysis of imbalance strategies, cross-domain generalisation on BAF Variants, and SHAP interpretability including FT-Transformer attention diagnostics. Each part is followed by a discussion of its implications.
+
+\textbf{Chapter~\ref{sec:conclusion} — Conclusion} summarises the contributions of the thesis, provides direct answers to the five research questions, discusses limitations of the work, and identifies directions for future research.

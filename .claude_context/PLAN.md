@@ -1,6 +1,6 @@
 # PLAN.md — Sequential plan to thesis + article
 **Last updated**: 2026-05-05  
-**Current position**: ✅ Steps 1–3 COMPLETE → entering Step 4 (Introduction)
+**Current position**: ✅ Steps 1–4 COMPLETE → entering Step 5 (Conclusion)
 
 ---
 
@@ -37,7 +37,7 @@ Section by section in order. Each section:
 **File**: `Overleaf/Chapters/2-State of the Art.tex`  
 **Current state**: empty (only headings)
 
-### Step 4 — Write Introduction chapter
+### ✅ Step 4 — Write Introduction chapter (COMPLETE 2026-05-05)
 AFTER SoA — depends on it for the "motivation" section.
 Structure: Context → Motivation → Research Questions (4-5 RQs mapping to 6 contributions) → Objectives → Document Structure
 

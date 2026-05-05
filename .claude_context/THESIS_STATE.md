@@ -32,7 +32,7 @@ Overleaf/
 |---------|--------|-------|
 | Abstract EN | ❌ | Wrong keywords (drug discovery remnant), needs full rewrite |
 | Abstract PT | ❌ | Lorem Ipsum placeholder |
-| 1-Introduction | ❌ | Empty — to write AFTER SoA (depends on it for motivation) |
+| 1-Introduction | ✅ | Complete — 5 sections, 5 RQs, cross-references verified |
 | 2-State of the Art | ✅ | Complete — 7 sections, 43 BibTeX entries, frozen structure |
 | 3-Methodology | ✅ | Complete, 3 TikZ figures (pipeline, leakage-free CV, cross-domain) |
 | 4-Results | ✅ | Complete — baseline, threshold, factorial, FT-T robustness, cross-domain, SHAP, consolidated, discussion, threats to validity |
