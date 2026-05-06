@@ -8,8 +8,14 @@
 ```
 Overleaf/
 ├── main.tex                      # document class, chapter inputs
+├── glossary.tex                  # ✅ abbreviations glossary (37 entries — fraud detection specific)
 ├── references.bib                # 43 BibTeX entries (see REFERENCES_STATE.md)
-├── include/preamble.tex          # all \usepackage declarations
+├── include/
+│   ├── preamble.tex              # all \usepackage declarations
+│   ├── 0-titlepage-EN.tex        # ✅ COMPLETE (title, author, supervisors, Junho 2026)
+│   ├── acknowledgments.tex       # ✅ COMPLETE (supervisors + colleagues + professors)
+│   ├── epigraph.tex              # ✅ Donald Knuth quote (kept as-is)
+│   └── copyright.tex             # ✅ standard PT+EN text (no changes needed)
 ├── Chapters/
 │   ├── abstract/abstract-EN.tex  # ❌ PLACEHOLDER (needs writing + fix wrong keywords)
 │   ├── abstract/abstract-PT.tex  # ❌ PLACEHOLDER (Lorem Ipsum)
