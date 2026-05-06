@@ -38,7 +38,7 @@ Overleaf/
 | 3-Methodology | ✅ | 11 sections, 3 TikZ figures (pipeline, leakage-free CV, cross-domain). Model and strategy selection now justified. |
 | 4-Results | ✅ | 9 sections: baseline, threshold, factorial, transformer robustness, cross-domain, SHAP, **attention diagnostics (Sec 7 — NEW)**, consolidated, discussion. 4 factual errors corrected. |
 | 5-Conclusion | ✅ | 4 sections: contributions summary, RQ answers (×5 with numbers), limitations (×5), future work (×5 concrete directions). |
-| 6-Appendices | ❌ | Lorem Ipsum — Step 7: decide whether to add hyperparameter tables or remove |
+| 6-Appendices | ✅ | Complete — Appendix A: hyperparameter tables (ULB+BAF, all models); Appendix B: 6 attention bar charts (FP/FN cases) |
 
 ---
 

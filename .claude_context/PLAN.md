@@ -1,6 +1,6 @@
 # PLAN.md — Sequential plan to thesis + article
 **Last updated**: 2026-05-06  
-**Current position**: ✅ Steps 1–6 COMPLETE → entering Step 7 (Appendices)
+**Current position**: ✅ Steps 1–7 COMPLETE → entering Step 8 (Final review pass)
 
 ---
 
@@ -54,7 +54,7 @@ Structure: Summary of contributions → Answers to RQs → Limitations → Futur
 LAST — after all chapters done. ~250 words EN, careful PT translation.  
 **Fix**: remove wrong keywords (drug discovery) from Abstract EN.
 
-### Step 7 — Polish Appendices
+### ✅ Step 7 — Polish Appendices (COMPLETE 2026-05-06)
 Decide: add real content (hyperparameter tables, bootstrap tables) or remove placeholders.  
 **File**: `Overleaf/Chapters/6-appendices.tex`  
 **Current state**: Lorem Ipsum

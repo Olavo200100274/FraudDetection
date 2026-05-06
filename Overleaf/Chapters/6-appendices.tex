@@ -1,16 +1,169 @@
-\appendix 
-\chapter{Appendix} \label{chapter:annex}
+\appendix
+\chapter{Appendix}
+\label{chapter:annex}
 
-\null\newpage
-\section*{Appendix A}
+% ══════════════════════════════════════════════════════════════════════════
+\section{Optimal Hyperparameter Configurations}
 \label{appendixA}
+% ══════════════════════════════════════════════════════════════════════════
 
+All supervised models were tuned using Optuna with the TPE sampler and MedianPruner (50 trials, PR-AUC objective, 5-fold stratified cross-validation for classical models; single 80/20 holdout within DEV for FT-Transformer). The best hyperparameter configurations found on each dataset are reported below. One-Class SVM was evaluated with default scikit-learn parameters and was excluded from the Optuna search. Hyperparameters are reported for the baseline condition (strategy\,=\,None); these same configurations were reused for all resampling strategy experiments.
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum sed efficitur magna, et laoreet elit. Praesent sed nulla est. Cras in sem nec sem posuere hendrerit eget eu ligula. Duis tincidunt, lacus quis sollicitudin porttitor, nibh lorem tempor elit, nec tempus nunc ante id felis.
+\begin{table}[ht!]
+\centering
+\small
+\caption{Best hyperparameter configurations found by Optuna on ULB 2013 (strategy\,=\,None).}
+\label{tab:hyperparams_ulb}
+\begin{tabular}{l l r}
+\toprule
+Model & Hyperparameter & Best Value \\
+\midrule
+\multirow{2}{*}{Logistic Regression$^\dagger$}
+  & $C$ (inverse regularisation strength) & 0.0783 \\
+  & \texttt{l1\_ratio}$^\dagger$ & 0.791 \\
+\midrule
+\multirow{4}{*}{Random Forest}
+  & \texttt{n\_estimators} & 400 \\
+  & \texttt{max\_depth} & 30 \\
+  & \texttt{min\_samples\_split} & 6 \\
+  & \texttt{min\_samples\_leaf} & 2 \\
+\midrule
+\multirow{8}{*}{LightGBM}
+  & \texttt{num\_leaves} & 24 \\
+  & \texttt{learning\_rate} & 0.01186 \\
+  & \texttt{min\_child\_samples} & 24 \\
+  & \texttt{reg\_alpha} & 0.0606 \\
+  & \texttt{reg\_lambda} & 3.114 \\
+  & \texttt{subsample} & 0.966 \\
+  & \texttt{colsample\_bytree} & 0.762 \\
+  & \texttt{n\_estimators} & 511 \\
+\midrule
+\multirow{5}{*}{CatBoost}
+  & \texttt{learning\_rate} & 0.01664 \\
+  & \texttt{depth} & 10 \\
+  & \texttt{l2\_leaf\_reg} & 2.485 \\
+  & \texttt{min\_data\_in\_leaf} & 65 \\
+  & \texttt{iterations} & 534 \\
+\midrule
+\multirow{10}{*}{FT-Transformer}
+  & \texttt{d\_token} & 256 \\
+  & \texttt{n\_blocks} & 2 \\
+  & \texttt{attention\_n\_heads} & 8 \\
+  & \texttt{attention\_dropout} & 0.209 \\
+  & \texttt{ffn\_d\_hidden\_factor} & 2.431 \\
+  & \texttt{ffn\_dropout} & 0.157 \\
+  & \texttt{residual\_dropout} & 0.168 \\
+  & \texttt{learning\_rate} & $1.92 \times 10^{-4}$ \\
+  & \texttt{weight\_decay} & $4.30 \times 10^{-4}$ \\
+  & \texttt{batch\_size} & 512 \\
+\midrule
+OCSVM & \multicolumn{2}{l}{Default scikit-learn parameters (no HPO)} \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-\null\newpage
-\section*{Appendix B}
+\footnotetext[$\dagger$]{Logistic Regression was tuned with \texttt{solver=`saga'} and default \texttt{penalty=`l2'}. Optuna suggested \texttt{l1\_ratio} during the search, but this parameter only applies to \texttt{penalty=`elasticnet'} and has no effect here. The effective tuned parameter is $C$ only.}
+
+\begin{table}[ht!]
+\centering
+\small
+\caption{Best hyperparameter configurations found by Optuna on BAF Base (strategy\,=\,None).}
+\label{tab:hyperparams_baf}
+\begin{tabular}{l l r}
+\toprule
+Model & Hyperparameter & Best Value \\
+\midrule
+\multirow{2}{*}{Logistic Regression$^\dagger$}
+  & $C$ (inverse regularisation strength) & 0.0391 \\
+  & \texttt{l1\_ratio}$^\dagger$ & 0.291 \\
+\midrule
+\multirow{4}{*}{Random Forest}
+  & \texttt{n\_estimators} & 500 \\
+  & \texttt{max\_depth} & 40 \\
+  & \texttt{min\_samples\_split} & 13 \\
+  & \texttt{min\_samples\_leaf} & 7 \\
+\midrule
+\multirow{8}{*}{LightGBM}
+  & \texttt{num\_leaves} & 15 \\
+  & \texttt{learning\_rate} & 0.01379 \\
+  & \texttt{min\_child\_samples} & 18 \\
+  & \texttt{reg\_alpha} & 7.077 \\
+  & \texttt{reg\_lambda} & $1.39 \times 10^{-5}$ \\
+  & \texttt{subsample} & 0.791 \\
+  & \texttt{colsample\_bytree} & 0.839 \\
+  & \texttt{n\_estimators} & 1696 \\
+\midrule
+\multirow{5}{*}{CatBoost}
+  & \texttt{learning\_rate} & 0.03343 \\
+  & \texttt{depth} & 4 \\
+  & \texttt{l2\_leaf\_reg} & 7.853 \\
+  & \texttt{min\_data\_in\_leaf} & 22 \\
+  & \texttt{iterations} & 1394 \\
+\midrule
+\multirow{10}{*}{FT-Transformer}
+  & \texttt{d\_token} & 64 \\
+  & \texttt{n\_blocks} & 2 \\
+  & \texttt{attention\_n\_heads} & 8 \\
+  & \texttt{attention\_dropout} & 0.225 \\
+  & \texttt{ffn\_d\_hidden\_factor} & 2.247 \\
+  & \texttt{ffn\_dropout} & 0.112 \\
+  & \texttt{residual\_dropout} & 0.143 \\
+  & \texttt{learning\_rate} & $3.79 \times 10^{-4}$ \\
+  & \texttt{weight\_decay} & $1.77 \times 10^{-6}$ \\
+  & \texttt{batch\_size} & 512 \\
+\midrule
+OCSVM & \multicolumn{2}{l}{Default scikit-learn parameters (no HPO)} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\clearpage
+
+% ══════════════════════════════════════════════════════════════════════════
+\section{FT-Transformer Attention Diagnostics --- Individual Case Bar Charts}
 \label{appendixB}
+% ══════════════════════════════════════════════════════════════════════════
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum sed efficitur magna, et laoreet elit. Praesent sed nulla est. Cras in sem nec sem posuere hendrerit eget eu ligula. Duis tincidunt, lacus quis sollicitudin porttitor, nibh lorem tempor elit, nec tempus nunc ante id felis.
+The following figures supplement Section~\ref{sec:attention_diagnostics} of the Results chapter. Each bar chart shows the per-feature attention weight for a single test case, with categorical features in orange and numerical features in blue. The dashed horizontal line marks the uniform attention baseline ($1/31 \approx 3.2\%$). All six cases are borderline: their predicted fraud scores lie within $0.001$ of the decision threshold ($\tau = 0.058$), making them the most ambiguous predictions in the test set.
 
+Even at this individual, maximally uncertain level, no feature receives substantially elevated attention relative to the uniform baseline. This confirms that the Foggy Vision pattern observed in the aggregate (Figure~\ref{fig:attention_aggregate}) is not an averaging artefact but a genuine property of how the FT-Transformer processes these inputs.
+
+\vspace{1em}
+
+\begin{figure}[ht!]
+\centering
+\begin{subfigure}[b]{0.32\textwidth}
+  \includegraphics[width=\textwidth]{figures/baf/attention_bar_FP_1.png}
+  \caption{FP Case 1 (score\,$=\,0.05844$)}
+\end{subfigure}
+\hfill
+\begin{subfigure}[b]{0.32\textwidth}
+  \includegraphics[width=\textwidth]{figures/baf/attention_bar_FP_2.png}
+  \caption{FP Case 2 (score\,$=\,0.05844$)}
+\end{subfigure}
+\hfill
+\begin{subfigure}[b]{0.32\textwidth}
+  \includegraphics[width=\textwidth]{figures/baf/attention_bar_FP_3.png}
+  \caption{FP Case 3 (score\,$=\,0.05844$)}
+\end{subfigure}
+
+\vspace{1em}
+
+\begin{subfigure}[b]{0.32\textwidth}
+  \includegraphics[width=\textwidth]{figures/baf/attention_bar_FN_1.png}
+  \caption{FN Case 1 (score\,$=\,0.05842$)}
+\end{subfigure}
+\hfill
+\begin{subfigure}[b]{0.32\textwidth}
+  \includegraphics[width=\textwidth]{figures/baf/attention_bar_FN_2.png}
+  \caption{FN Case 2 (score\,$=\,0.05829$)}
+\end{subfigure}
+\hfill
+\begin{subfigure}[b]{0.32\textwidth}
+  \includegraphics[width=\textwidth]{figures/baf/attention_bar_FN_3.png}
+  \caption{FN Case 3 (score\,$=\,0.05828$)}
+\end{subfigure}
+
+\caption{Per-feature attention weights for three False Positive cases (top row) and three False Negative cases (bottom row) from the BAF Base test set. Orange bars\,=\,categorical features; blue bars\,=\,numerical features. Dashed line\,=\,uniform attention baseline ($1/31 \approx 3.2\%$). Decision threshold $\tau = 0.058$. All cases are borderline (score $\approx \tau$). The near-uniform distribution across all cases confirms the Foggy Vision pattern at the individual-case level.}
+\label{fig:attention_bar_cases}
+\end{figure}
