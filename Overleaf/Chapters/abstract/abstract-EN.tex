@@ -1,11 +1,15 @@
 \section*{Abstract}
 \label{sec:abstract}
 
-%Drug discovery is a highly time-consuming, complex, and expensive process with low rates of success. Recent estimates point that to launch a new drug, an average \$1.8 billion and twelve years are required \cite{sinha2018drug}. This is partly due to the high dimensional of the chemical space, which has been estimated to include between $10^{33}$ and $10^{60}$  synthetically accessible molecules \cite{polishchuk2013estimation}. Evaluating the entire chemical space is prohibitively expensive, so it is of the utmost importance to find ways of narrowing down the search space.
+Financial fraud detection under extreme class imbalance is a challenging machine learning problem with direct economic and operational consequences. Despite a large body of published work, the literature exhibits recurring methodological limitations — data leakage through incorrect resampling, reliance on ROC-AUC as the primary metric under severe imbalance, implicit threshold selection, and single-dataset evaluations — that prevent reliable comparison between classical and deep learning model families.
 
+This thesis presents a controlled, leakage-free comparative study of six model families — Logistic Regression, Random Forest, LightGBM, CatBoost, One-Class SVM, and the FT-Transformer — across two benchmark datasets: the ULB Credit Card Fraud dataset and the Bank Account Fraud (BAF) suite. A full factorial design evaluates seven class imbalance handling strategies across five supervised models on both datasets. Threshold selection is treated as a first-class experimental variable with four strategies compared. Cross-domain generalisation is assessed by transferring models trained on BAF Base to five distribution-shifted variants without retraining. Post-hoc interpretability is analysed via SHAP, and FT-Transformer attention patterns are examined through an entropy-based diagnostic framework.
 
+Under the leakage-free protocol, gradient-boosted models outperform the FT-Transformer on the smaller ULB dataset (CatBoost PR-AUC 0.885 vs FT-Transformer 0.856), while both models reach identical performance on the larger BAF dataset (PR-AUC 0.180). Threshold selection proves critical: fixing $\tau=0.5$ reduces $F_2$ to near zero on BAF for all models, while the max-$F_2$ strategy recovers approximately nine-fold. SMOTE degrades FT-Transformer performance by 41\% on BAF compared to only 14\% for CatBoost, revealing an architecture-specific sensitivity to synthetic oversampling. Random Forest is the most cross-domain robust model, improving on four out of five BAF variants despite the lowest in-domain score. FT-Transformer attention diagnostics reveal a Foggy Vision pattern (normalised entropy 0.976), confirming that the shared 0.18 PR-AUC ceiling reflects the information limit of the feature space rather than a model failure.
+
+The results provide a practitioner-oriented decision framework and a mechanistic explanation for why gradient-boosted models remain competitive with sophisticated tabular transformers in financial fraud detection.
 
 \section*{Keywords}
 \label{sec:keywords}
 
-Deep Learning, Recurrent Neural Networks, Drug Design, Drug Generation, RNN, LSTM, GRU, SMILES. 
+Financial fraud detection, machine learning, gradient boosted decision trees, tabular transformers, class imbalance, leakage-free evaluation, SHAP, attention diagnostics, cross-domain generalization.

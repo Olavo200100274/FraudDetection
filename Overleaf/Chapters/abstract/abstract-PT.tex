@@ -1,13 +1,15 @@
 \section*{Resumo}
 \label{sec:resumo}
 
+A deteção de fraude financeira sob extremo desequilíbrio de classes é um problema de aprendizagem automática com consequências económicas e operacionais diretas. Apesar do elevado volume de trabalho publicado, a literatura apresenta limitações metodológicas recorrentes — fuga de dados através de reamostragem incorreta, utilização de ROC-AUC como métrica principal em cenários de desequilíbrio severo, seleção implícita de limiar de decisão e avaliações em conjunto de dados único — que impedem comparações fiáveis entre famílias de modelos clássicos e de aprendizagem profunda.
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum sed efficitur magna, et laoreet elit. Praesent sed nulla est. Cras in sem nec sem posuere hendrerit eget eu ligula. Duis tincidunt, lacus quis sollicitudin porttitor, nibh lorem tempor elit, nec tempus nunc ante id felis.
+Esta dissertação apresenta um estudo comparativo controlado e livre de fuga de dados envolvendo seis famílias de modelos — Regressão Logística, Random Forest, LightGBM, CatBoost, One-Class SVM e o FT-Transformer — em dois conjuntos de dados de referência: o ULB Credit Card Fraud e o Bank Account Fraud (BAF). Um desenho fatorial completo avalia sete estratégias de tratamento de desequilíbrio de classes em cinco modelos supervisionados e dois conjuntos de dados. A seleção de limiar de decisão é tratada como variável experimental de primeira ordem, com quatro estratégias comparadas. A generalização entre domínios é avaliada transferindo modelos treinados no BAF Base para cinco variantes com desvio de distribuição, sem reajuste. A interpretabilidade é analisada com SHAP e os padrões de atenção do FT-Transformer são examinados através de um enquadramento diagnóstico baseado em entropia.
 
+Sob o protocolo livre de fuga de dados, os modelos de gradiente boosting superam o FT-Transformer no conjunto de dados ULB, de menor dimensão (CatBoost PR-AUC 0,885 vs FT-Transformer 0,856), enquanto ambos atingem desempenho idêntico no BAF, de maior escala (PR-AUC 0,180). A seleção de limiar revela-se crítica: fixar $\tau=0{,}5$ reduz $F_2$ a valores próximos de zero no BAF para todos os modelos, enquanto a estratégia max-$F_2$ recupera aproximadamente nove vezes esse valor. O SMOTE degrada o FT-Transformer em 41\% no BAF, comparado com apenas 14\% no CatBoost, revelando uma sensibilidade à sobreamostragem sintética específica à arquitetura. O Random Forest é o modelo mais robusto na generalização entre domínios, melhorando em quatro das cinco variantes do BAF apesar de apresentar o menor desempenho no domínio de treino. Os diagnósticos de atenção do FT-Transformer revelam um padrão de Visão Nebulosa (entropia normalizada 0,976), confirmando que o teto de desempenho de PR-AUC 0,18 reflete o limite informativo do espaço de características e não uma falha do modelo.
 
-
+Os resultados fornecem um enquadramento de decisão para profissionais e uma explicação mecanística para a razão pela qual os modelos de gradiente boosting permanecem competitivos face a transformers tabulares sofisticados na deteção de fraude financeira.
 
 \section*{Palavras-Chave}
 \label{sec:palavras}
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum sed efficitur magna, et laoreet elit. Praesent sed nulla est. Cras in sem nec sem posuere hendrerit eget eu ligula. Duis tincidunt, lacus quis sollicitudin porttitor, nibh lorem tempor elit, nec tempus nunc ante id felis. 
+Deteção de fraude financeira, aprendizagem automática, gradient boosted decision trees, transformers tabulares, desequilíbrio de classes, avaliação livre de fuga de dados, SHAP, diagnósticos de atenção, generalização entre domínios.

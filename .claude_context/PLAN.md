@@ -1,6 +1,6 @@
 # PLAN.md — Sequential plan to thesis + article
 **Last updated**: 2026-05-06  
-**Current position**: ✅ Steps 1–5 COMPLETE → entering Step 6 (Abstract)
+**Current position**: ✅ Steps 1–6 COMPLETE → entering Step 7 (Appendices)
 
 ---
 
@@ -50,7 +50,7 @@ Structure: Summary of contributions → Answers to RQs → Limitations → Futur
 **File**: `Overleaf/Chapters/5-conclusion.tex`  
 **Current state**: 1 sentence ("In this thesis we performed a comprehensive study of")
 
-### Step 6 — Write Abstract EN + PT
+### ✅ Step 6 — Write Abstract EN + PT (COMPLETE 2026-05-06)
 LAST — after all chapters done. ~250 words EN, careful PT translation.  
 **Fix**: remove wrong keywords (drug discovery) from Abstract EN.
 

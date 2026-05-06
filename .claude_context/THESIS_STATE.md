@@ -31,8 +31,8 @@ Overleaf/
 
 | Chapter | Status | Notes |
 |---------|--------|-------|
-| Abstract EN | ❌ | Wrong keywords (drug discovery remnant), needs full rewrite (~250 words) |
-| Abstract PT | ❌ | Lorem Ipsum placeholder — translate from EN after EN is written |
+| Abstract EN | ✅ | Complete — 4 paragraphs, ~280 words, 9 keywords |
+| Abstract PT | ✅ | Complete — faithful translation of EN |
 | 1-Introduction | ✅ | 5 sections: Context, Motivation, Objectives+RQs (×5), Research Approach, Document Structure. 8 citations. |
 | 2-State of the Art | ✅ | 7 sections, 43 BibTeX entries. Sec 5.3 carries Maryam's GBDT-vs-Transformer framing. Sec 7 maps 6 gaps to 6 contributions. |
 | 3-Methodology | ✅ | 11 sections, 3 TikZ figures (pipeline, leakage-free CV, cross-domain). Model and strategy selection now justified. |
