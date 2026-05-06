@@ -153,13 +153,13 @@ The ULB and BAF datasets have incompatible feature spaces (PCA-anonymised vs.\ r
 % ──────────────────────────────────────────────────────────────────────────
 
 \subsection{Classical ML Models}
-The classical baseline includes:
+The classical baseline covers four levels of model complexity and two learning paradigms, selected to represent the principal families that dominate tabular fraud detection in the literature:
 \begin{itemize}
-  \item Logistic Regression (LR)
-  \item Random Forest (RF)
-  \item LightGBM (LGBM)
-  \item CatBoost (CB)
-  \item One-Class SVM (OCSVM), evaluated as an anomaly-detection baseline
+  \item \textbf{Logistic Regression (LR):} linear supervised baseline; interpretable coefficients, native probability calibration, serves as lower-bound reference.
+  \item \textbf{Random Forest (RF):} non-linear ensemble via bagging; captures feature interactions without sequential boosting, known for robustness to distribution shift.
+  \item \textbf{LightGBM (LGBM):} gradient-boosted decision trees with leaf-wise growth; state-of-the-art speed and accuracy on tabular data \cite{ke2017lightgbm}.
+  \item \textbf{CatBoost (CB):} gradient boosting with ordered boosting and native categorical encoding; selected for its strong out-of-the-box performance on mixed-type tabular datasets \cite{prokhorenkova2018catboost}.
+  \item \textbf{One-Class SVM (OCSVM):} anomaly-detection baseline trained exclusively on legitimate transactions; included to quantify how much supervised labels contribute over an unsupervised approach.
 \end{itemize}
 
 \subsection{Transformer-based Tabular Model}
@@ -170,14 +170,14 @@ A Feature Tokenizer Transformer (FT-Transformer) is used as the main deep learni
 \label{sec:imbalance_strategies}
 % ──────────────────────────────────────────────────────────────────────────
 
-To address extreme class imbalance, the following strategies are evaluated for supervised models (LR, RF, LGBM, CB, FT-Transformer):
+To address extreme class imbalance, seven strategies are evaluated for supervised models (LR, RF, LGBM, CB, FT-Transformer). The selection covers the three main paradigms identified in the literature \cite{hegarcia2009learning, krawczyk2016learning}: undersampling, oversampling (including the most widely cited synthetic variants \cite{chawla2002smote, batista2004balancing}), and cost-sensitive adjustment — together with an unmodified baseline to isolate the effect of each intervention.
 \begin{itemize}
   \item None (baseline---no resampling, no cost-sensitive adjustment)
   \item Random Under-Sampling (RUS)
   \item Random Over-Sampling (ROS)
-  \item SMOTE
-  \item SMOTE + Tomek Links
-  \item SMOTEENN
+  \item SMOTE \cite{chawla2002smote}
+  \item SMOTE + Tomek Links \cite{batista2004balancing}
+  \item SMOTEENN \cite{batista2004balancing}
   \item Class weighting (cost-sensitive learning)
 \end{itemize}
 
