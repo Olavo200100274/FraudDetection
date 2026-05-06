@@ -1,5 +1,5 @@
 # PLAN.md — Sequential plan to thesis + article
-**Last updated**: 2026-05-05  
+**Last updated**: 2026-05-06  
 **Current position**: ✅ Steps 1–5 COMPLETE → entering Step 6 (Abstract)
 
 ---

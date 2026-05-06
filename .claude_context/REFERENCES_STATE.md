@@ -16,7 +16,7 @@ Overleaf/references/
 
 ---
 
-## Current references.bib — all 41 keys
+## Current references.bib — all 43 keys
 
 ### ULB-foundational
 - `dalpozzolo2017realistic` — Pozzolo 2017, IEEE TNNLS (~700 cit) — ULB modeling
