@@ -36,7 +36,7 @@ Overleaf/
 | 2-State of the Art | ✅ | Complete — 7 sections, 43 BibTeX entries, frozen structure |
 | 3-Methodology | ✅ | Complete, 3 TikZ figures (pipeline, leakage-free CV, cross-domain) |
 | 4-Results | ✅ | Complete — baseline, threshold, factorial, FT-T robustness, cross-domain, SHAP, consolidated, discussion, threats to validity |
-| 5-Conclusion | ❌ | 1 sentence — needs: contributions summary, RQ answers, limitations, future work |
+| 5-Conclusion | ✅ | Complete — 4 sections: contributions, RQ answers (×5), limitations (×5), future work (×5) |
 | 6-Appendices | ❌ | Lorem Ipsum — decide: keep with real content or remove |
 
 ---

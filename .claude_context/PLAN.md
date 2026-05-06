@@ -1,6 +1,6 @@
 # PLAN.md — Sequential plan to thesis + article
 **Last updated**: 2026-05-05  
-**Current position**: ✅ Steps 1–4 COMPLETE → entering Step 5 (Conclusion)
+**Current position**: ✅ Steps 1–5 COMPLETE → entering Step 6 (Abstract)
 
 ---
 
@@ -44,7 +44,7 @@ Structure: Context → Motivation → Research Questions (4-5 RQs mapping to 6 c
 **File**: `Overleaf/Chapters/1-Introduction.tex`  
 **Current state**: empty (only section headings)
 
-### Step 5 — Write Conclusion chapter
+### ✅ Step 5 — Write Conclusion chapter (COMPLETE 2026-05-06)
 Structure: Summary of contributions → Answers to RQs → Limitations → Future Work
 
 **File**: `Overleaf/Chapters/5-conclusion.tex`  
