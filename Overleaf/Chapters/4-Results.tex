@@ -779,7 +779,63 @@ The local explanations (Figure~\ref{fig:shap_local}) illustrate the model's deci
 
 \clearpage
 % ══════════════════════════════════════════════════════════════════════════
-%  7 — CONSOLIDATED SUMMARY
+%  7 — FT-TRANSFORMER ATTENTION DIAGNOSTICS
+% ══════════════════════════════════════════════════════════════════════════
+
+\section{FT-Transformer Attention Diagnostics}
+\label{sec:attention_diagnostics}
+
+The attention mechanism is the defining component of the FT-Transformer architecture. Analysing the learned attention weights provides a mechanistic account of how the model processes tabular features — and whether any pathological patterns explain the observed performance behaviour.
+
+Four attention patterns are considered as candidate diagnostics for tabular transformers:
+\begin{itemize}
+  \item \textbf{Tunnel Vision:} one or very few features receive nearly all attention, ignoring the rest.
+  \item \textbf{Self-Obsession:} the \texttt{[CLS]} classification token attends primarily to itself, blocking information flow from feature tokens.
+  \item \textbf{Categorical Trap:} categorical feature tokens receive disproportionately high attention relative to numerical tokens.
+  \item \textbf{Foggy Vision:} attention is near-uniformly distributed across all tokens, providing no selective emphasis on informative features.
+\end{itemize}
+
+Diagnostics were computed on 200\,000 test samples from BAF Base using the best-performing FT-Transformer configuration ($\tau = 0.058$). The model operates on 31 tokens: 25 numerical features, 5 categorical features, and the \texttt{[CLS]} classification token.
+
+\subsection{Aggregate Attention Distribution}
+
+\begin{figure}[ht!]
+  \centering
+  \includegraphics[width=0.95\textwidth]{figures/baf/attention_aggregate.png}
+  \caption{Mean attention weight per feature token aggregated over all 200\,000 BAF Base test samples. Categorical features are shown in orange; numerical features in blue. Error bars represent standard deviation across samples. A perfectly uniform distribution would assign $1/31 \approx 3.2\%$ to each token.}
+  \label{fig:attention_aggregate}
+\end{figure}
+
+Figure~\ref{fig:attention_aggregate} shows the aggregate attention distribution. The key diagnostic statistics are:
+
+\begin{itemize}
+  \item \textbf{Normalised entropy:} $H_{\text{norm}} = 0.976$. The observed entropy (3.352 nats) is 97.6\% of the theoretical maximum for 31 tokens ($\ln(31) = 3.434$ nats), confirming near-uniform attention.
+  \item \textbf{\texttt{[CLS]} self-attention:} 3.1\%, indistinguishable from the uniform baseline of $1/31 \approx 3.2\%$ — ruling out Self-Obsession.
+  \item \textbf{Mean categorical vs.\ numerical attention:} 4.0\% vs.\ 3.1\% (ratio 1.28$\times$) — a slight categorical elevation, far below what would constitute a Categorical Trap.
+  \item \textbf{Top tokens by attention:} \texttt{device\_os} (6.2\%), \texttt{housing\_status} (5.0\%), \texttt{employment\_status} (3.8\%) — consistent with the SHAP-based feature importance reported in Section~\ref{sec:shap_results}.
+\end{itemize}
+
+\textbf{Diagnosis: Foggy Vision.} The model does not exhibit Tunnel Vision, Self-Obsession, or Categorical Trap. Attention is broadly and near-uniformly distributed across all 31 feature tokens.
+
+\subsection{Individual Case Attention Heatmaps}
+
+\begin{figure}[ht!]
+  \centering
+  \includegraphics[width=0.80\textwidth]{figures/baf/attention_heatmap_fp.png}
+  \caption{Full $31{\times}31$ attention matrix for a representative False Positive case (score\,$\approx\tau = 0.0584$). Each cell $(i,j)$ shows the attention weight from query token $i$ to key token $j$. The near-uniform light-blue colouration across the entire matrix confirms the Foggy Vision pattern at the individual case level.}
+  \label{fig:attention_heatmap_fp}
+\end{figure}
+
+Figure~\ref{fig:attention_heatmap_fp} shows the full attention matrix for a borderline False Positive case (score just above threshold). The matrix is dominated by near-uniform low attention, with marginal concentration on \texttt{device\_os} and \texttt{housing\_status}. False Negative cases (scores just below threshold) exhibit the same qualitative pattern. In both cases, there is no single feature that the model focuses on — the classification emerges from a broad, distributed aggregation of all feature representations.
+
+\paragraph{Discussion.}
+The Foggy Vision diagnosis has a direct interpretive implication for the thesis's central question. The FT-Transformer is not performing at 0.18~PR-AUC because its attention mechanism is broken or degenerate: no pathological pattern is present. Rather, the model genuinely integrates information across all features, but the BAF dataset does not contain sufficient discriminative signal to reward selective attention. This is consistent with the dataset-ceiling interpretation advanced in Sections~\ref{sec:baseline_results} and~\ref{sec:cross_domain_results}: the 0.18~PR-AUC reflects a limit of the available information in the feature space, not a model-specific failure.
+
+The slight residual categorical preference (1.28$\times$) aligns with the FT-Transformer's tokenisation design, in which categorical embeddings carry richer discrete representations than linear numeric projections, but does not translate into a performance advantage over tree-based models that handle the same categorical features natively via splitting. The perfect alignment between the top attention tokens (\texttt{device\_os}, \texttt{housing\_status}) and the top SHAP features of tree-based models indicates that the FT-Transformer has converged to the same information sources, through a different inductive pathway. Collectively, the attention diagnostics confirm that the competitive parity between FT-Transformer and CatBoost on BAF is genuine: further gains on this dataset would require richer features or additional data sources rather than architectural changes to the transformer.
+
+\clearpage
+% ══════════════════════════════════════════════════════════════════════════
+%  8 — CONSOLIDATED SUMMARY
 % ══════════════════════════════════════════════════════════════════════════
 
 \section{Consolidated Summary}
