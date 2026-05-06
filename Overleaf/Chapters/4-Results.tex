@@ -493,7 +493,7 @@ FT-Trans.  & \textbf{0.316} & 0.289 & 0.310 & 0.255 & 0.255 & 0.269 & 0.301 \\
 
 \paragraph{Discussion.}
   The factorial analysis reveals several noteworthy patterns.
-  On ULB~2013, Random Oversampling (ROS) consistently improves or maintains PR-AUC across all models, with CatBoost achieving the highest overall PR-AUC (0.885 with None). Conversely, Random Undersampling (RUS) degrades performance substantially for all models, likely because discarding majority-class examples in an already small dataset ($N\approx284\text{K}$) removes valuable decision-boundary information.
+  On ULB~2013, the baseline strategy (None) achieves the highest PR-AUC for gradient-boosted models and FT-Transformer, with CatBoost reaching the overall maximum of~0.885. Random Forest is the only model that benefits from oversampling: ROS raises its PR-AUC from~0.867 to~0.873, and SMOTE from~0.867 to~0.870. In contrast, ROS substantially degrades LGBM (0.874\,$\to$\,0.727, a 17\% drop), while producing only marginal decreases for CatBoost and FT-Transformer. This suggests that random duplication of minority samples disrupts the gradient-boosted learning process on ULB, likely by introducing redundant examples that distort the pseudo-residual landscape without providing new discriminative information. Conversely, Random Undersampling (RUS) degrades performance substantially for all models, likely because discarding majority-class examples in an already small dataset ($N\approx284\text{K}$) removes valuable decision-boundary information.
   SMOTE and SMOTE+Tomek produce identical results across all models on both datasets, indicating that the Tomek Links cleaning step removes zero borderline examples in this context---an expected outcome when the minority class is extremely rare.
 
   On BAF~Base, the picture differs: CatBoost and LGBM are the top performers regardless of strategy, and the best absolute PR-AUC is achieved by CatBoost with ROS (0.185). However, the magnitude of improvement from any strategy over the baseline is modest ($<0.01$ PR-AUC), suggesting that gradient boosting models already handle class imbalance effectively via their internal loss functions. SMOTE-based strategies tend to degrade performance relative to the baseline, particularly for tree-based models, echoing recent findings in the literature that oversampling synthetic examples can introduce noise in high-dimensional feature spaces.
@@ -564,7 +564,7 @@ Tables~\ref{tab:transformer_robustness_ulb} and~\ref{tab:transformer_robustness_
 
 On ULB~2013, both architectures follow the same pattern: RUS degrades performance sharply, while the remaining strategies cluster near the baseline.
 The FT-Transformer shows lower standard deviation across strategies for $F_2$ (0.044 vs.\ 0.060), suggesting marginally more stable performance under resampling perturbations.
-However, CatBoost achieves higher absolute scores in every condition.
+However, CatBoost achieves higher absolute PR-AUC in all conditions except RUS, where both models degrade substantially and FT-Transformer marginally outperforms CatBoost (0.650 vs.\ 0.617).
 
 On BAF~Base, the FT-Transformer matches CatBoost at baseline (PR-AUC\,=\,0.180 vs.\ 0.180; $F_2$\,=\,0.316 vs.\ 0.314), but is \emph{more sensitive} to imbalance strategies.
 SMOTE and SMOTE+Tomek degrade FT-Transformer PR-AUC by 41\% (0.180\,$\to$\,0.106), compared to only 14\% for CatBoost (0.180\,$\to$\,0.154).
@@ -652,10 +652,10 @@ This is expected: Variant~II alters only the fraud prevalence, not the feature d
 \textbf{Variant~IV (bias conditions)} shows a similar pattern---feature distributions remain close to Base, and performance degradation is modest.
 
 \textbf{Variants~III and~V}, which introduce covariate shift (and originally included extra features \texttt{x1}, \texttt{x2} that are dropped for alignment), cause the largest degradation.
-LGBM and CatBoost lose 24--31\% of their Base PR-AUC on these variants, while RF is more resilient (only 6--7\% loss on Var~III, near-zero on Var~V).
+LGBM and CatBoost lose 24--31\% of their Base PR-AUC on these variants, while RF is more resilient, actually \emph{gaining} 7\% on Variant~III (0.159\,$\to$\,0.170) and remaining stable on Variant~V (0.159\,$\to$\,0.159).
 This suggests that gradient boosting models, despite being the strongest in-domain, may overfit to Base-specific feature distributions more than RF.
 
-\textbf{Random Forest} is the most robust model under cross-domain transfer: it \emph{improves} on Variants~I, II, and IV (PR-AUC from 0.159 to 0.206--0.224) and shows only mild degradation on III and V.
+\textbf{Random Forest} is the most robust model under cross-domain transfer: it \emph{improves} on four out of five variants (Variants~I, II, III, and IV; PR-AUC from 0.159 to 0.170--0.224) and is essentially stable on Variant~V (0.159\,$\to$\,0.159).
 This robustness likely stems from the decorrelation introduced by feature subsampling in individual trees.
 
 \textbf{OCSVM} remains uniformly weak (PR-AUC\,$<$\,0.023), confirming that one-class anomaly detection without fraud labels is insufficient for this task regardless of domain.
@@ -1007,7 +1007,7 @@ These results support the practical recommendation that practitioners should def
 
 The cross-domain experiment confirms that model robustness under distribution shift does not follow the same ranking as in-domain performance.
 LGBM and CatBoost---the strongest models on BAF Base---suffer PR-AUC losses of 24--31\% on Variants~III and~V, which combine covariate shift with feature-space changes.
-In contrast, Random Forest is the most transfer-resilient model, \emph{improving} on three out of five variants.
+In contrast, Random Forest is the most transfer-resilient model, \emph{improving} on four out of five variants (I, II, III, and IV) and remaining stable on Variant~V.
 This finding has practical implications: in deployment scenarios where the data distribution may drift over time, an ensemble strategy or periodic recalibration may be preferable to relying on a single high-performing model.
 
 Variant~II (label shift only) is the easiest transfer target for all models, confirming that changes in fraud prevalence alone do not degrade discriminative performance when feature distributions remain stable.
