@@ -82,12 +82,21 @@ Overleaf/
 - The 3 GBDT advantages to highlight: (a) calibration, (b) robustness to imbalance strategies (SMOTE 41% vs 14%), (c) no architectural mismatch (Transformer built for sequences, tabular ≠ sequential)
 - Foggy Vision is the mechanistic explanation: FT-T finds all available signal but signal is limited → dataset ceiling
 
-### Article (IEEE TPAMI target)
-- Venue: IEEE Transactions on Pattern Analysis and Machine Intelligence
-- TPAMI: top-tier Q1, ~20-25% acceptance, 6+ months review, ~14 pages
-- Tone: measured, rigorous
-- Title direction: "A Leakage-Free Comparative Study of Classical ML and Tabular Transformers for Financial Fraud Detection"
-- Article comes AFTER thesis completion (Part 2 of plan, Steps 9-16)
+### Two papers (revised 2026-05-07 — Discord)
+Originally a single TPAMI article. Maryam revised the plan: split into **two distinct papers** by topic and audience.
+
+| | **Paper 1 — Benchmark + Threshold** | **Paper 2 — Mechanistic / Robustness** |
+|---|---|---|
+| Folder | `Article 1/` | `Article 2/` |
+| Centrepiece | Threshold sensitivity (9× F₂ swing on BAF) | FT-Transformer attention diagnostics (Foggy Vision) |
+| Owns Results §§ | 1, 2, 3 + bootstrap CIs + cost tables | 4, 5, 6, 7 + Discussion |
+| Audience | Practitioners | ML/AI research community |
+| Target venues | Expert Systems with Applications / DSS / Information Sciences (all Elsevier CAS) | IEEE TNNLS / Neural Networks / Applied Soft Computing |
+| Length | 10–12K words, table-heavy | 9–11K words, figure-heavy |
+| Working title | "Threshold Selection as a Critical Design Choice in Financial Fraud Detection..." | "Why LightGBM Generalises Better Than Tabular Transformers Under Distribution Shift..." |
+| Plan part | Part 2 (Steps 9–14) | Part 3 (Steps 15–20) |
+
+**Writing order:** Paper 1 first (establishes leakage-free protocol + decision framework), then Paper 2 (cites Paper 1 for shared protocol).
 
 ---
 
