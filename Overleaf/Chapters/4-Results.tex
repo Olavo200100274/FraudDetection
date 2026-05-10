@@ -1000,7 +1000,7 @@ On BAF~Base, the picture is starker: no strategy improves CatBoost or LGBM beyon
 
 The interaction between model and strategy is the key finding.
 SMOTE and SMOTE+Tomek consistently produce identical results (the Tomek cleaning removes zero borderline examples under extreme imbalance), and both degrade tree-based models on BAF while offering no benefit on ULB.
-Class Weights is the most consistently safe strategy across all model families: it never degrades performance substantially and occasionally improves it (e.g., LR on ULB).
+Class Weights is, on balance, the safest strategy across model families: it preserves or improves baseline PR-AUC for the FT-Transformer and the gradient-boosted models on BAF, and only occasionally degrades performance substantially (the main exception being LGBM on ULB, which drops by roughly 17\% under Class Weights, in line with its sensitivity to every non-baseline strategy on that dataset).
 These results support the practical recommendation that practitioners should default to no resampling or class weighting for gradient-boosted models and reserve SMOTE-based strategies for specific scenarios where they have been validated on the target data.
 
 \subsection{Cross-Domain Generalization}

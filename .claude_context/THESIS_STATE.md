@@ -1,5 +1,5 @@
 # THESIS_STATE.md
-**Last updated**: 2026-05-06 (Conclusion written — all main chapters complete)
+**Last updated**: 2026-05-10 (Step 8 final review pass complete — thesis finished)
 
 ---
 

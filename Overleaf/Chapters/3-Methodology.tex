@@ -549,3 +549,10 @@ The analysis comprises four components:
 \end{enumerate}
 
 For categorical features that are one-hot encoded during preprocessing, SHAP values are aggregated back to the original feature level (sum of absolute SHAP values across one-hot columns) to enable meaningful cross-model comparison.
+
+% ──────────────────────────────────────────────────────────────────────────
+\section{Summary}
+\label{sec:methodology_summary}
+% ──────────────────────────────────────────────────────────────────────────
+
+Together, the experimental provisions described in this chapter — from the leakage-free outer holdout and inner stratified cross-validation, through the unified Optuna tuning budget, the seven imbalance strategies and four threshold strategies applied without retraining, the cross-domain transfer protocol on BAF Variants, and the architecture-matched SHAP analysis with feature-level aggregation — ensure that all results reported in Chapter~\ref{sec:chapterResults} are reproducible and that all comparisons across model families and datasets are conducted on strictly equal footing. Each design choice is motivated by a specific methodological concern identified in the State of the Art (Sections~\ref{subsec:fraud_detection_class_imbalance} and~\ref{subsec:limitations_research}), and no result presented in the next chapter depends on a step taken outside the protocol described here.

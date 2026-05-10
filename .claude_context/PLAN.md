@@ -1,6 +1,6 @@
 # PLAN.md — Sequential plan to thesis + article
-**Last updated**: 2026-05-06  
-**Current position**: ✅ Steps 1–7 COMPLETE → entering Step 8 (Final review pass)
+**Last updated**: 2026-05-10  
+**Current position**: ✅ Steps 1–8 COMPLETE → THESIS DONE → entering Step 9 (Paper 1 venue + title)
 
 ---
 
@@ -59,12 +59,19 @@ Decide: add real content (hyperparameter tables, bootstrap tables) or remove pla
 **File**: `Overleaf/Chapters/6-appendices.tex`  
 **Current state**: Lorem Ipsum
 
-### Step 8 — Final review pass (BOTH Methodology AND Results)
-- Check Results for redundant tables/figures that "raise more questions than they answer" → remove them
-- Cross-references and citations all resolve
-- Notation consistency across chapters
-- LaTeX compiles without new warnings
-- Narrative coherence: read Introduction→Conclusion as a single story
+### ✅ Step 8 — Final review pass (COMPLETE 2026-05-10)
+Verified during this pass:
+- All `\ref{}` cross-references resolve; all `\cite{}` citations resolve (43 BibTeX entries)
+- Notation consistent across chapters (PR-AUC, $\tau$, F$_2$, strategy names)
+- 5 RQs in Introduction match 5 RQ headings in Conclusion verbatim
+- 6 contributions enumerated in Conclusion match the 6 listed in THESIS_STATE.md
+
+Concrete fixes applied:
+- **Methodology** — added a new closing `Summary` section synthesising the protocol (replaced ending in SHAP one-hot detail)
+- **Conclusion + Results** — corrected factual error: "RF the weakest in-domain model among supervised classifiers" was wrong (LR=0.143 < RF=0.159 on BAF); rephrased as "weakest of the high-capacity supervised classifiers" / "trailing the gradient-boosted models in-domain"
+- **Conclusion + Results** — softened "Class Weights is consistently safe across all model families / never degrades substantially" — LGBM on ULB drops 17% under Class Weights, contradicting the absolute claim. Now framed as "safest default, with caveat for LGBM on ULB"
+
+Threshold sensitivity tables (8 total) and SHAP Jaccard table audited and kept — each conveys complementary information not derivable from prose alone.
 
 ---
 
