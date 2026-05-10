@@ -1,6 +1,6 @@
 # PLAN.md — Sequential plan to thesis + article
 **Last updated**: 2026-05-10  
-**Current position**: ✅ Steps 1–8 COMPLETE → THESIS DONE → entering Step 9 (Paper 1 venue + title)
+**Current position**: ✅ Steps 1–13 COMPLETE → THESIS DONE → Paper 1 draft complete → entering Step 14 (Maryam review)
 
 ---
 
@@ -92,23 +92,24 @@ Threshold sensitivity tables (8 total) and SHAP Jaccard table audited and kept �
 3. SMOTE+Tomek = SMOTE exactly under extreme imbalance (Tomek removes nothing)
 4. Actionable decision framework for practitioners
 
-### Step 9 — Choose venue + freeze title
-- Candidates: **Expert Systems with Applications**, Decision Support Systems, Information Sciences (all Elsevier)
-- Title direction: *"Threshold Selection as a Critical Design Choice in **Financial** Fraud Detection: A Systematic Comparison of Classical ML and Tabular Transformers"* (broaden from "Credit Card" — thesis covers BOTH ULB and BAF; the 9× threshold finding is empirically strongest on BAF)
-- Confirm CAS template is appropriate for chosen venue
-- Length target: 10,000–12,000 words, table-heavy
+### ✅ Step 9 — Choose venue + freeze title (COMPLETE 2026-05-10)
+- **Venue**: Expert Systems with Applications (ESWA, Elsevier, Scopus Q1) — applied, practitioner-oriented, table-heavy ✅
+- **Title**: *"Threshold Selection as a Critical Design Choice in Financial Fraud Detection: A Systematic Comparison of Classical Machine Learning Models and Tabular Transformers"*
+- **Short title**: *"Threshold Selection in Financial Fraud Detection"*
+- **Template**: `Article 1/cas-sc-template.tex` (Elsevier CAS single-column) ✅
+- **Bibliography**: `Article 1/cas-refs.bib` replaced with thesis `Overleaf/references.bib` (43 entries) ✅
 
-### Step 10 — Draft Method (compact ~2 pages)
-Keep: leakage-free protocol, 6 models, 7 strategies, 4 threshold strategies. Cut: cross-domain, SHAP, attention (those belong to Paper 2).
+### ✅ Step 10 — Draft Method (COMPLETE 2026-05-10)
+Wrote §3 Experimental Framework: datasets, 6 models, 7 strategies, 4 threshold strategies, leakage-free protocol, Optuna HPO, metrics. Cross-domain, SHAP, attention excluded.
 
-### Step 11 — Draft Results (table-heavy)
-Baseline PR-AUC tables (ULB + BAF), threshold sensitivity tables (centrepiece), full factorial 7×5×2 tables, bootstrap CIs, computational cost tables.
+### ✅ Step 11 — Draft Results (COMPLETE 2026-05-10)
+All tables written: baseline ULB + BAF (Tables 2–3), threshold sensitivity F₂ ULB + BAF + Alert Rate (Tables 4–6, centrepiece), full factorial PR-AUC + F₂ (Tables 7–9), bootstrap CIs + computational cost (Tables 10–11).
 
-### Step 12 — Draft Discussion + Decision Framework
-The 4 main claims above. Decision framework table (recommended configuration by deployment scenario) is the headline practitioner deliverable.
+### ✅ Step 12 — Draft Discussion + Decision Framework (COMPLETE 2026-05-10)
+§5 Discussion with 4 subsections (threshold dominates; no strategy universally dominates; architecture-specific SMOTE sensitivity; decision framework Table 12). Companion paper pointer in §5.3.
 
-### Step 13 — Draft Introduction + Related Work + Conclusion + Abstract
-Related Work focuses on threshold selection + class imbalance + leakage in fraud detection (~10–15 refs). Less emphasis on tabular-DL debate (that's Paper 2's territory).
+### ✅ Step 13 — Draft Introduction + Related Work + Conclusion + Abstract (COMPLETE 2026-05-10)
+§1 Introduction (4 contributions C1–C4), §2 Related Work (3 subsections, ~12 refs), §6 Conclusion (4 paragraphs), Abstract (~250 words), 5 highlights, 7 keywords. File: `Article 1/cas-sc-template.tex`.
 
 ### Step 14 — Maryam review → iterate → submit
 
