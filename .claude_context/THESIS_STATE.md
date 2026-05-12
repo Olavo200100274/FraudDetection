@@ -1,5 +1,5 @@
 # THESIS_STATE.md
-**Last updated**: 2026-05-10 (Step 8 final review pass complete — thesis finished)
+**Last updated**: 2026-05-11 (Step 13.5 polish complete — minipage layout fix, hypcap warnings suppressed, Results chapter prose revised)
 
 ---
 
@@ -42,7 +42,7 @@ Overleaf/
 | 1-Introduction | ✅ | 5 sections: Context, Motivation, Objectives+RQs (×5), Research Approach, Document Structure. 8 citations. |
 | 2-State of the Art | ✅ | 7 sections, 43 BibTeX entries. Sec 5.3 carries Maryam's GBDT-vs-Transformer framing. Sec 7 maps 6 gaps to 6 contributions. |
 | 3-Methodology | ✅ | 11 sections, 3 TikZ figures (pipeline, leakage-free CV, cross-domain). Model and strategy selection now justified. |
-| 4-Results | ✅ | 9 sections: baseline, threshold, factorial, transformer robustness, cross-domain, SHAP, **attention diagnostics (Sec 7 — NEW)**, consolidated, discussion. 4 factual errors corrected. |
+| 4-Results | ✅ | 9 sections: baseline, threshold, factorial, transformer robustness, cross-domain, SHAP, attention diagnostics, consolidated, **synthesis + threats to validity (renamed from "discussion" in Step 13.5)**. Prose revised so discussion is integrated inline rather than collected into per-section `\paragraph{Discussion.}` blocks. 30 tables, 13 figures, 43 labels. |
 | 5-Conclusion | ✅ | 4 sections: contributions summary, RQ answers (×5 with numbers), limitations (×5), future work (×5 concrete directions). |
 | 6-Appendices | ✅ | Complete — Appendix A: hyperparameter tables (ULB+BAF, all models); Appendix B: 6 attention bar charts (FP/FN cases) |
 
@@ -120,6 +120,8 @@ Originally a single TPAMI article. Maryam revised the plan: split into **two dis
 - Chapter hierarchy → limited to 3 levels (x.x.x) via secnumdepth=3 ✅
 - `\paragraph` used only for inline bold headings (not in TOC) ✅
 - Missing BibTeX citations (Optuna, FT-Transformer, SHAP, LightGBM, CatBoost) → all added ✅
+- **Float drift (2026-05-11)** — tables and figures were appearing far from their definition. Fix: convert every `\begin{table}/\begin{figure}` to `\noindent\begin{minipage}{\linewidth}\centering ... \end{minipage}` + `\captionof{table/figure}{...}`. Minipages are not floats so they appear exactly where placed. Exception: Appendix B's two subfigure groups stay as `\begin{figure}[H]` (with `float` package, already in preamble), because `subcaption` errors out when `subfigure` is used outside a real float ✅
+- **Caption hypcap warnings (2026-05-11)** — `\captionof` inside a minipage triggers "Package caption Warning: hypcap=true will be ignored" for every caption. Fix: add `\captionsetup{hypcap=false}` to `preamble.tex` after the `caption` package is loaded ✅
 
 ---
 

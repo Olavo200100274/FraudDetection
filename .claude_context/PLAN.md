@@ -1,6 +1,6 @@
 # PLAN.md — Sequential plan to thesis + article
-**Last updated**: 2026-05-10  
-**Current position**: ✅ Steps 1–13 COMPLETE → THESIS DONE → Paper 1 draft complete → entering Step 14 (Maryam review)
+**Last updated**: 2026-05-11  
+**Current position**: ✅ Steps 1–13.5 COMPLETE → THESIS DONE (with LaTeX layout polish) → Paper 1 draft + polish complete → ready for Step 14 (Maryam review)
 
 ---
 
@@ -96,8 +96,8 @@ Threshold sensitivity tables (8 total) and SHAP Jaccard table audited and kept �
 - **Venue**: Expert Systems with Applications (ESWA, Elsevier, Scopus Q1) — applied, practitioner-oriented, table-heavy ✅
 - **Title**: *"Threshold Selection as a Critical Design Choice in Financial Fraud Detection: A Systematic Comparison of Classical Machine Learning Models and Tabular Transformers"*
 - **Short title**: *"Threshold Selection in Financial Fraud Detection"*
-- **Template**: `Article 1/cas-sc-template.tex` (Elsevier CAS single-column) ✅
-- **Bibliography**: `Article 1/cas-refs.bib` replaced with thesis `Overleaf/references.bib` (43 entries) ✅
+- **Template**: `Article 1/main.tex` (Elsevier CAS single-column; renamed from `cas-sc-template.tex` by the user on Overleaf) ✅
+- **Bibliography**: `Article 1/cas-refs.bib` replaced with thesis `Overleaf/references.bib` (43 entries; +4 added in Step 13.5 for tibshirani1996regression, breiman2001random, scholkopf2001estimating, fernandez2018smote) ✅
 
 ### ✅ Step 10 — Draft Method (COMPLETE 2026-05-10)
 Wrote §3 Experimental Framework: datasets, 6 models, 7 strategies, 4 threshold strategies, leakage-free protocol, Optuna HPO, metrics. Cross-domain, SHAP, attention excluded.
@@ -109,7 +109,23 @@ All tables written: baseline ULB + BAF (Tables 2–3), threshold sensitivity F�
 §5 Discussion with 4 subsections (threshold dominates; no strategy universally dominates; architecture-specific SMOTE sensitivity; decision framework Table 12). Companion paper pointer in §5.3.
 
 ### ✅ Step 13 — Draft Introduction + Related Work + Conclusion + Abstract (COMPLETE 2026-05-10)
-§1 Introduction (4 contributions C1–C4), §2 Related Work (3 subsections, ~12 refs), §6 Conclusion (4 paragraphs), Abstract (~250 words), 5 highlights, 7 keywords. File: `Article 1/cas-sc-template.tex`.
+§1 Introduction (4 contributions C1–C4), §2 Related Work (3 subsections, ~12 refs), §6 Conclusion (4 paragraphs), Abstract (~250 words), 5 highlights, 7 keywords. File: `Article 1/cas-sc-template.tex` (renamed to `main.tex` on Overleaf in Step 13.5).
+
+### ✅ Step 13.5 — Post-draft polish (COMPLETE 2026-05-11)
+Polish work driven by Overleaf review of the compiled draft and by feedback on visual layout/text flow. Spans both the thesis and Paper 1.
+
+**Article 1 polish:**
+- **Institutional metadata corrected** — affiliation changed from IPCB/Castelo Branco (placeholder) to *Departamento de Informática e Métodos Quantitativos, Escola Superior de Gestão e Tecnologia, Instituto Politécnico de Santarém*; correct emails (`@esg.ipsantarem.pt`); real ORCIDs for Olavo, Maryam, Pedro.
+- **Missing references added** — `tibshirani1996regression`, `breiman2001random`, `scholkopf2001estimating`, `fernandez2018smote` added to `cas-refs.bib` (resolved 4 undefined citation warnings).
+- **Broken cross-reference fixed** — `\ref{tab:ops_baf}` (label never defined) corrected to `\ref{tab:baseline_baf}`.
+- **Numerical correction** — recall range "43–47%" → "41–47%" (RF recall = 0.415, not 0.43).
+- **Float placement fix (CAS template)** — root cause: `cas-sc.cls` loads `stfloats` and `cas-common.sty` redefines `table`/`figure` internally via `\@float{}`, ignoring user placement options (`[H]`, `[ht!]`, `\FloatBarrier` all silently dropped). Solution: convert every `table`/`figure` environment to a `minipage` + `\captionof` (from `capt-of`), which is *not* a float and therefore appears exactly where placed in source. Applied to all 12 tables and 2 figures in `Article 1/main.tex`.
+- **Template scaffolding cleanup** — removed `cas-grabs.pdf`, `cas-munnar-2024.jpg`, `cas-pic1.pdf` placeholder files. `cas-sc-template.tex` deleted (replaced by `main.tex` on Overleaf side).
+
+**Thesis polish:**
+- **Float placement fix (thesis class)** — same minipage approach applied to `Overleaf/Chapters/3-Methodology.tex` (3 TikZ figures), `Overleaf/Chapters/4-Results.tex` (30 tables + 13 figures), and `Overleaf/Chapters/6-appendices.tex` (2 tables). Appendix B's 2 figures with `subfigure` content reverted to `figure[H]` because `subcaption` errors out outside a real float; `[H]` (from `float`, already in preamble) gives exact placement.
+- **Caption warning suppression** — added `\captionsetup{hypcap=false}` to `Overleaf/include/preamble.tex`; eliminates the "hypcap=true will be ignored" warning that `\captionof` triggers inside minipages (~12 warnings → 0).
+- **Results chapter prose revision (4-Results.tex)** — full pass: (1) removed every `\paragraph{Discussion.}` block (8 in total) and integrated their content into the surrounding narrative as flowing prose; (2) added a chapter-level overview paragraph that explains how the section order builds; (3) added lead-in sentences before each table/figure ("Tables X--Y report..." / "Figure X visualises...") and interpretive sentences after; (4) condensed §9 from "Discussion" (6 subsections, heavy duplication of per-section discussions) into "Synthesis and Threats to Validity" (one synthesis paragraph + 5-item validity list). File length: 1045 → 841 lines, with all 30 tables, 13 figures, 43 labels and 42 internal `\ref{}` preserved bit-for-bit.
 
 ### Step 14 — Maryam review → iterate → submit
 
