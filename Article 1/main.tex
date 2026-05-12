@@ -872,7 +872,7 @@ Balanced $F_1$, small dataset & CatBoost  & None          & max-$F_1$      \\
 High recall, large dataset   & LGBM      & None / Weights & max-$F_2$      \\
 Balanced $F_1$, large dataset & CatBoost  & ROS           & max-$F_1$      \\
 Low investigation budget     & CatBoost  & None           & Prec\,$\geq\!0.5$ \\
-Interpretability required    & LGBM      & None           & max-$F_2$      \\
+Tree-based + low compute     & LGBM      & None           & max-$F_2$      \\
 Tabular transformer (DL)     & FT-Trans. & Class Weights  & max-$F_2$      \\
 \bottomrule
 \end{tabular}
@@ -884,10 +884,13 @@ performance on both datasets.
 When investigation capacity is limited, the Precision~$\geq\!0.5$ threshold is recommended:
 it ensures at least one genuine fraud per two alerts, keeping investigator workload manageable
 at the cost of lower recall.
-When interpretability is a requirement, LGBM is preferred over CatBoost: its SHAP feature
-importance ranking is identical to CatBoost's on this task (established in our companion paper),
-while its tuning cost is $5.6\times$ lower and its training time is $2.3\times$ faster
-(Table~\ref{tab:cost_baf}).
+When the deployment constraint is a tree-based architecture with the lowest possible
+compute footprint --- a common requirement for systems compatible with tree-path SHAP
+explainers and constrained tuning budgets --- LGBM is the recommended choice. Both LGBM
+and CatBoost expose tree-path SHAP through the standard \texttt{TreeExplainer} interface,
+but LGBM achieves statistically equivalent PR-AUC at substantially lower computational
+cost: tuning is $5.6\times$ faster and training is $2.3\times$ faster than CatBoost on
+BAF Base (Table~\ref{tab:cost_baf}).
 For FT-Transformer deployments, Class~Weights is the recommended imbalance strategy ---
 SMOTE-based alternatives degrade performance substantially (Section~\ref{subsec:disc_architecture}).
 
@@ -943,6 +946,21 @@ Second, the BAF dataset is synthetically generated; whilst it is calibrated to r
 real bank account application fraud, patterns in live production systems may include
 additional complexity (label noise, adversarial adaptation, temporal feedback loops)
 not captured in the benchmark.
+
+Three directions naturally extend the present work.
+First, the four threshold rules studied here are static criteria selected once on a
+held-out validation set; production fraud streams exhibit concept drift, and an open
+question is whether periodic recalibration of $\tau$ alone is sufficient to maintain
+$F_2$ over time, or whether full model retraining is required.
+Second, the threshold rules examined are scalar optimisation criteria; rules that
+explicitly enforce an investigation-team capacity constraint (e.g.\ a fixed alert
+budget per period) would map more directly onto the operational decisions made by
+fraud-detection teams.
+Third, asymmetric loss functions designed natively for extreme imbalance --- focal
+loss, direct $F_\beta$ optimisation --- would provide a principled alternative to both
+data-level resampling and uniform class reweighting, particularly relevant for the
+FT-Transformer where SMOTE-based interventions degrade performance substantially.
+
 A mechanistic explanation of \emph{why} gradient-boosted models match or outperform
 tabular transformers on fraud data --- including FT-Transformer attention diagnostics and
 cross-domain robustness analysis across the five BAF variants --- is provided in a
