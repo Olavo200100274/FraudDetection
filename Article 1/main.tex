@@ -446,7 +446,10 @@ and ROC-AUC on the held-out test set.
 
 Tables~\ref{tab:baseline_ulb} and~\ref{tab:baseline_baf} report performance under the
 baseline condition (strategy\,=\,None, threshold\,=\,max-$F_2$) on both datasets.
-Figure~\ref{fig:prauc_baseline} shows the corresponding PR-AUC bar charts.
+Figure~\ref{fig:prauc_baseline} draws the corresponding Precision--Recall curves and
+overlays four markers per supervised model showing where each of the threshold rules
+introduced in Section~\ref{sec:framework} lands on that curve --- a visual preview
+of the threshold-sensitivity analysis that follows in Section~\ref{subsec:threshold_results}.
 
 \par\medskip\noindent\begin{minipage}{\linewidth}\centering
 \captionof{table}{Baseline performance on ULB 2013 (strategy\,=\,None, threshold\,=\,max-$F_2$).}
@@ -507,12 +510,34 @@ This result is consistent with the finding of \citet{shwartzziv2022tabular} that
 tabular transformers are competitive but rarely superior to gradient boosting on small
 tabular datasets.
 
+The geometry of the PR curves in the left panel of Fig.~\ref{fig:prauc_baseline}
+adds a qualitative observation that the PR-AUC scalar alone cannot convey: every
+supervised curve maintains precision above $\sim$0.8 across most of the recall range,
+so the four threshold rules studied in this paper land on visually overlapping
+operating points (right portion of each curve). The one exception is Logistic
+Regression, whose fixed-$\tau{=}0.5$ marker (purple circle) sits at recall~$\approx$0.63
+--- well below the operating cluster of the other models --- providing an immediate
+visual indication that LR is the only supervised model on ULB whose default decision
+threshold leaves substantial recall unused.
+
 On BAF~Base, the picture changes substantially: all supervised models exhibit PR-AUC
 near~$0.18$, reflecting the greater difficulty of this large-scale dataset.
 Notably, the FT-Transformer matches CatBoost exactly at PR-AUC~$=0.180$, suggesting
 that attention-based architectures benefit from increased training data ($N\!=\!1$M
 vs.\ $284$K) and close the gap with GBDTs.
 LGBM~(0.177) and RF~(0.159) complete the supervised tier; OCSVM collapses~(0.019).
+
+The right panel of Fig.~\ref{fig:prauc_baseline} previews the central finding of
+this paper before the threshold-sensitivity tables formalise it. Under the BAF score
+distribution, the four threshold rules do not cluster on each model's curve as they
+did on ULB --- they spread out to form a clear ladder. The fixed-$\tau{=}0.5$ rule
+(circles) lands near zero recall in a high-precision regime, but with recall too low
+to convert into useful $F_2$; max-$F_2$ (squares) sits at the rightmost operating
+point of the curve, trading precision for the recall the application actually needs;
+max-$F_1$ (triangles) and Precision~$\geq$~0.5 (diamonds) occupy intermediate positions.
+The geometric distance between the circle and the square along each curve is the
+visual analogue of the order-of-magnitude $F_2$ swing that the next section
+quantifies.
 
 \subsection{Threshold Sensitivity Analysis}
 \label{subsec:threshold_results}
