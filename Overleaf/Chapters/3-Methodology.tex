@@ -1,4 +1,4 @@
-\chapter{Methodology}
+﻿\chapter{Methodology}
 \label{sec:chapterMethodology}
 
 This chapter describes the experimental methodology adopted in this thesis. Section~\ref{sec:objective} states the research objectives and the overall experimental design. Sections~\ref{sec:datasets}--\ref{sec:models} introduce the datasets and models under study. Sections~\ref{sec:imbalance_strategies}--\ref{sec:protocol} detail the imbalance handling strategies and the leakage-free evaluation protocol. Sections~\ref{sec:threshold_study}--\ref{sec:tuning} address the threshold selection study and hyperparameter tuning strategy. Section~\ref{sec:cross_domain} describes the cross-domain generalization experiments. Finally, Sections~\ref{sec:metrics}--\ref{sec:interpretability} present the evaluation metrics, reproducibility provisions, and interpretability analysis.
@@ -43,8 +43,7 @@ Figure~\ref{fig:pipeline} provides a high-level overview of the end-to-end exper
 \definecolor{clrEval}{HTML}{00B050}      % Green
 \definecolor{clrShap}{HTML}{7030A0}      % Purple
 
-\begin{figure}[ht!]
-\centering
+\par\medskip\noindent\begin{minipage}{\linewidth}\centering
 \begin{tikzpicture}[
     node distance=0.6cm,
     >={Stealth[length=3mm]},
@@ -128,9 +127,9 @@ Figure~\ref{fig:pipeline} provides a high-level overview of the end-to-end exper
 \draw[arrow] (eval) -- (shap);
 
 \end{tikzpicture}
-\caption{End-to-end experimental pipeline for fraud detection under extreme class imbalance. Stages~3--5 operate exclusively on the DEV partition (80\%) via inner cross-validation; stages~6--7 provide a single unbiased evaluation on the held-out TEST set (20\%); stage~8 adds post-hoc explainability via SHAP.}
+\captionof{figure}{End-to-end experimental pipeline for fraud detection under extreme class imbalance. Stages~3--5 operate exclusively on the DEV partition (80\%) via inner cross-validation; stages~6--7 provide a single unbiased evaluation on the held-out TEST set (20\%); stage~8 adds post-hoc explainability via SHAP.}
 \label{fig:pipeline}
-\end{figure}
+\end{minipage}\par\medskip
 \clearpage
 
 % ──────────────────────────────────────────────────────────────────────────
@@ -220,8 +219,7 @@ For each (model, strategy, dataset), the final configuration is trained on the f
 \definecolor{clrValStep}{HTML}{548235}      % Green (validation steps)
 \definecolor{clrWarn}{HTML}{CC0000}         % Red (warning annotations)
 
-\begin{figure}[ht!]
-\centering
+\par\medskip\noindent\begin{minipage}{\linewidth}\centering
 \begin{tikzpicture}[
     >={Stealth[length=2.5mm]},
     node distance=0.5cm,
@@ -324,9 +322,9 @@ For each (model, strategy, dataset), the final configuration is trained on the f
     {Repeat for $k = 1, \ldots, K$. \quad Final $\tau = \mathrm{median}(\tau_1, \ldots, \tau_K)$.};
 
 \end{tikzpicture}
-\caption{Leakage-free inner cross-validation protocol. Within each fold, preprocessing is fitted and resampling is applied exclusively on the training subset (left); the validation subset (right) is only transformed and scored. The dashed red line represents the leakage barrier: no information may cross from right to left. The final decision threshold is the median across all $K{=}5$ folds.}
+\captionof{figure}{Leakage-free inner cross-validation protocol. Within each fold, preprocessing is fitted and resampling is applied exclusively on the training subset (left); the validation subset (right) is only transformed and scored. The dashed red line represents the leakage barrier: no information may cross from right to left. The final decision threshold is the median across all $K{=}5$ folds.}
 \label{fig:cv_protocol}
-\end{figure}
+\end{minipage}\par\medskip
 
 \clearpage
 
@@ -400,8 +398,7 @@ Cross-dataset transfer between ULB~2013 and the BAF suite is not feasible due to
 \definecolor{clrInDomain}{HTML}{548235}  % Green (in-domain)
 \definecolor{clrDrop}{HTML}{CC0000}      % Red (degradation)
 
-\begin{figure}[ht!]
-\centering
+\par\medskip\noindent\begin{minipage}{\linewidth}\centering
 \begin{tikzpicture}[
     >={Stealth[length=2.5mm]},
     node distance=0.6cm,
@@ -482,9 +479,9 @@ Cross-dataset transfer between ULB~2013 and the BAF suite is not feasible due to
     {\texttt{x1}, \texttt{x2} dropped\\in III \& V\\(32-col alignment)};
 
 \end{tikzpicture}
-\caption{Cross-domain generalization protocol within the BAF suite. A model trained on BAF~Base is applied directly to Variants~I--V without retraining (top arrows). Each variant is also trained and evaluated in-domain (green boxes) to establish upper-bound performance. The difference between cross-domain and in-domain metrics quantifies robustness to distribution shift.}
+\captionof{figure}{Cross-domain generalization protocol within the BAF suite. A model trained on BAF~Base is applied directly to Variants~I--V without retraining (top arrows). Each variant is also trained and evaluated in-domain (green boxes) to establish upper-bound performance. The difference between cross-domain and in-domain metrics quantifies robustness to distribution shift.}
 \label{fig:cross_domain}
-\end{figure}
+\end{minipage}\par\medskip
 
 \clearpage
 

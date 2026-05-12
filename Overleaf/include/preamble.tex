@@ -167,3 +167,7 @@
 \usepackage[labelfont=bf, textfont=normal,
 			justification=justified,
 			singlelinecheck=false]{caption}
+% Disable hypcap globally: \captionof in minipages cannot anchor hyperref
+% targets at the float top (since there is no float), which would otherwise
+% produce a 'hypcap=true will be ignored' warning at every \captionof call.
+\captionsetup{hypcap=false}

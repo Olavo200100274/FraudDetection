@@ -1,4 +1,4 @@
-\appendix
+﻿\appendix
 \chapter{Appendix}
 \label{chapter:annex}
 
@@ -9,10 +9,9 @@
 
 All supervised models were tuned using Optuna with the TPE sampler and MedianPruner (50 trials, PR-AUC objective, 5-fold stratified cross-validation for classical models; single 80/20 holdout within DEV for FT-Transformer). The best hyperparameter configurations found on each dataset are reported below. One-Class SVM was evaluated with default scikit-learn parameters and was excluded from the Optuna search. Hyperparameters are reported for the baseline condition (strategy\,=\,None); these same configurations were reused for all resampling strategy experiments.
 
-\begin{table}[ht!]
-\centering
+\par\medskip\noindent\begin{minipage}{\linewidth}\centering
 \small
-\caption{Best hyperparameter configurations found by Optuna on ULB 2013 (strategy\,=\,None).}
+\captionof{table}{Best hyperparameter configurations found by Optuna on ULB 2013 (strategy\,=\,None).}
 \label{tab:hyperparams_ulb}
 \begin{tabular}{l l r}
 \toprule
@@ -60,14 +59,13 @@ Model & Hyperparameter & Best Value \\
 OCSVM & \multicolumn{2}{l}{Default scikit-learn parameters (no HPO)} \\
 \bottomrule
 \end{tabular}
-\end{table}
+\end{minipage}\par\medskip
 
 {\small\noindent $^\dagger$~Logistic Regression was tuned with \texttt{solver=`saga'} and default \texttt{penalty=`l2'}. Optuna suggested \texttt{l1\_ratio} during the search, but this parameter only applies to \texttt{penalty=`elasticnet'} and has no effect here. The effective tuned parameter is $C$ only.}
 
-\begin{table}[ht!]
-\centering
+\par\medskip\noindent\begin{minipage}{\linewidth}\centering
 \small
-\caption{Best hyperparameter configurations found by Optuna on BAF Base (strategy\,=\,None).}
+\captionof{table}{Best hyperparameter configurations found by Optuna on BAF Base (strategy\,=\,None).}
 \label{tab:hyperparams_baf}
 \begin{tabular}{l l r}
 \toprule
@@ -115,7 +113,7 @@ Model & Hyperparameter & Best Value \\
 OCSVM & \multicolumn{2}{l}{Default scikit-learn parameters (no HPO)} \\
 \bottomrule
 \end{tabular}
-\end{table}
+\end{minipage}\par\medskip
 
 \clearpage
 
@@ -128,7 +126,7 @@ The following figures supplement Section~\ref{sec:attention_diagnostics} of the 
 
 Even at this individual, maximally uncertain level, no feature receives substantially elevated attention relative to the uniform baseline. This confirms that the Foggy Vision pattern observed in the aggregate (Figure~\ref{fig:attention_aggregate}) is not an averaging artefact but a genuine property of how the FT-Transformer processes these inputs.
 
-\begin{figure}[ht!]
+\begin{figure}[H]
 \centering
 \begin{subfigure}[b]{0.82\textwidth}
   \includegraphics[width=\textwidth]{figures/baf/attention_bar_FP_1.png}
@@ -155,7 +153,7 @@ Even at this individual, maximally uncertain level, no feature receives substant
 
 \clearpage
 
-\begin{figure}[ht!]
+\begin{figure}[H]
 \centering
 \begin{subfigure}[b]{0.82\textwidth}
   \includegraphics[width=\textwidth]{figures/baf/attention_bar_FN_1.png}
