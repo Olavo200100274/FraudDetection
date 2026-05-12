@@ -1,4 +1,4 @@
-%%
+﻿%%
 %% Paper 1 — Threshold Selection as a Critical Design Choice in Financial Fraud Detection
 %% Target venue: Expert Systems with Applications (Elsevier)
 %%
@@ -13,6 +13,7 @@
 \usepackage{amsmath}
 \usepackage{graphicx}
 \usepackage{enumitem}
+\usepackage{capt-of}  % \captionof for non-floating tables and figures
 
 %% Consistent model colours (match thesis figures)
 \definecolor{clrLGBM}{HTML}{1f77b4}
@@ -36,29 +37,29 @@
   A Systematic Comparison of Classical Machine Learning Models and Tabular Transformers}
 
 \author[1]{Olavo Caixeiro}[
-  orcid=0000-0000-0000-0000,
+  orcid=0009-0004-1532-4830,
 ]
 \cormark[1]
-\ead{olavo.caixeiro@ipcb.pt}
+\ead{200100274@esg.ipsantarem.pt}
 \credit{Conceptualization, Methodology, Software, Formal analysis, Writing -- original draft}
 
 \author[1]{Maryam Abbasi}[
-  orcid=0000-0000-0000-0000,
+  orcid=0000-0002-9011-0734,
 ]
-\ead{maryam.abbasi@ipcb.pt}
+\ead{maryam.abbasi@esg.ipsantarem.pt}
 \credit{Conceptualization, Supervision, Writing -- review \& editing}
 
 \author[1]{Pedro Martins}[
-  orcid=0000-0000-0000-0000,
+  orcid=0000-0001-9600-082X,
 ]
-\ead{pedro.martins@ipcb.pt}
+\ead{pedro.martins@esg.ipsantarem.pt}
 \credit{Supervision, Writing -- review \& editing}
 
 \affiliation[1]{
-  organization={Escola Superior de Tecnologia, Instituto Polit\'ecnico de Castelo Branco},
-  addressline={Av. do Emp\'resario},
-  city={Castelo Branco},
-  postcode={6000-767},
+  organization={Departamento de Inform\'atica e M\'etodos Quantitativos,
+    Escola Superior de Gest\~ao e Tecnologia,
+    Instituto Polit\'ecnico de Santar\'em},
+  city={Santar\'em},
   country={Portugal}
 }
 
@@ -284,9 +285,8 @@ selection treated as a primary experimental variable.
 
 Table~\ref{tab:data_chars} summarises the two datasets used in this study.
 
-\begin{table}[ht!]
-\centering
-\caption{Dataset characteristics.}
+\par\medskip\noindent\begin{minipage}{\linewidth}\centering
+\captionof{table}{Dataset characteristics.}
 \label{tab:data_chars}
 \begin{tabular}{l c c c c l}
 \toprule
@@ -296,7 +296,7 @@ ULB 2013 & 284,807 & 0.17 & 30 & PCA + Amount & \citet{dalpozzolo2017realistic} 
 BAF Base & 1,000,000 & 1.09 & 30 & Semantic & \citet{jesus2022turning} \\
 \bottomrule
 \end{tabular}
-\end{table}
+\end{minipage}\par\medskip
 
 \textbf{ULB Credit Card Fraud 2013.}
 European credit card transactions over two days in September 2013.
@@ -444,13 +444,12 @@ and ROC-AUC on the held-out test set.
 \subsection{Baseline Model Comparison}
 \label{subsec:baseline}
 
-Tables~\ref{tab:baseline_ulb}--\ref{tab:ops_baf} report performance under the baseline
-condition (strategy\,=\,None, threshold\,=\,max-$F_2$) on both datasets.
+Tables~\ref{tab:baseline_ulb} and~\ref{tab:baseline_baf} report performance under the
+baseline condition (strategy\,=\,None, threshold\,=\,max-$F_2$) on both datasets.
 Figure~\ref{fig:prauc_baseline} shows the corresponding PR-AUC bar charts.
 
-\begin{table}[ht!]
-\centering
-\caption{Baseline performance on ULB 2013 (strategy\,=\,None, threshold\,=\,max-$F_2$).}
+\par\medskip\noindent\begin{minipage}{\linewidth}\centering
+\captionof{table}{Baseline performance on ULB 2013 (strategy\,=\,None, threshold\,=\,max-$F_2$).}
 \label{tab:baseline_ulb}
 \begin{tabular}{l c c c c c c}
 \toprule
@@ -464,11 +463,10 @@ FT-Trans.  & 0.856 & 0.975 & 0.755 & 0.807 & 0.847 & 0.17\% \\
 OCSVM      & 0.335 & 0.953 & 0.415 & 0.527 & 0.643 & 0.36\% \\
 \bottomrule
 \end{tabular}
-\end{table}
+\end{minipage}\par\medskip
 
-\begin{table}[ht!]
-\centering
-\caption{Baseline performance on BAF Base (strategy\,=\,None, threshold\,=\,max-$F_2$).}
+\par\medskip\noindent\begin{minipage}{\linewidth}\centering
+\captionof{table}{Baseline performance on BAF Base (strategy\,=\,None, threshold\,=\,max-$F_2$).}
 \label{tab:baseline_baf}
 \begin{tabular}{l c c c c c c}
 \toprule
@@ -482,17 +480,16 @@ FT-Trans.  & 0.180 & 0.897 & 0.225 & 0.316 & 0.434 & 3.16\% \\
 OCSVM      & 0.019 & 0.628 & 0.045 & 0.081 & 0.171 & 7.32\% \\
 \bottomrule
 \end{tabular}
-\end{table}
+\end{minipage}\par\medskip
 
-\begin{figure}[ht!]
-  \centering
+\par\medskip\noindent\begin{minipage}{\linewidth}\centering
   \includegraphics[width=0.48\textwidth]{figs/ulb_prauc_bar_baseline.pdf}%
   \hfill
   \includegraphics[width=0.48\textwidth]{figs/baf_prauc_bar_baseline.pdf}
-  \caption{PR-AUC for all models on ULB~2013 (left) and BAF~Base (right),
+  \captionof{figure}{PR-AUC for all models on ULB~2013 (left) and BAF~Base (right),
     baseline condition (strategy\,=\,None, max-$F_2$ threshold).}
   \label{fig:prauc_baseline}
-\end{figure}
+\end{minipage}\par\medskip
 
 On ULB~2013, all supervised models achieve high PR-AUC ($>0.74$).
 CatBoost leads at~0.885, followed by LGBM~(0.874), RF~(0.867), and FT-Transformer~(0.856).
@@ -517,9 +514,8 @@ LGBM~(0.177) and RF~(0.159) complete the supervised tier; OCSVM collapses~(0.019
 Tables~\ref{tab:threshold_ulb_f2}--\ref{tab:threshold_baf_alert} report $F_2$ and
 Alert Rate under all four threshold strategies on both datasets.
 
-\begin{table}[ht!]
-\centering
-\caption{Threshold sensitivity on ULB~2013 --- $F_2$ by threshold strategy.}
+\par\medskip\noindent\begin{minipage}{\linewidth}\centering
+\captionof{table}{Threshold sensitivity on ULB~2013 --- $F_2$ by threshold strategy.}
 \label{tab:threshold_ulb_f2}
 \begin{tabular}{l c c c c}
 \toprule
@@ -533,11 +529,10 @@ FT-Trans.  & 0.825 & 0.825 & 0.820 & 0.778 \\
 OCSVM      & 0.420 & 0.498 & 0.527 & 0.455 \\
 \bottomrule
 \end{tabular}
-\end{table}
+\end{minipage}\par\medskip
 
-\begin{table}[ht!]
-\centering
-\caption{Threshold sensitivity on BAF~Base --- $F_2$ by threshold strategy.}
+\par\medskip\noindent\begin{minipage}{\linewidth}\centering
+\captionof{table}{Threshold sensitivity on BAF~Base --- $F_2$ by threshold strategy.}
 \label{tab:threshold_baf_f2}
 \begin{tabular}{l c c c c}
 \toprule
@@ -551,11 +546,10 @@ FT-Trans.  & 0.035 & 0.244 & 0.317 & 0.070 \\
 OCSVM      & 0.031 & 0.071 & 0.081 & 0.000 \\
 \bottomrule
 \end{tabular}
-\end{table}
+\end{minipage}\par\medskip
 
-\begin{table}[ht!]
-\centering
-\caption{Threshold sensitivity on BAF~Base --- Alert Rate (\%) by threshold strategy.}
+\par\medskip\noindent\begin{minipage}{\linewidth}\centering
+\captionof{table}{Threshold sensitivity on BAF~Base --- Alert Rate (\%) by threshold strategy.}
 \label{tab:threshold_baf_alert}
 \begin{tabular}{l c c c c}
 \toprule
@@ -569,7 +563,7 @@ FT-Trans.  & 0.05 & 1.14 & 3.66 & 0.12 \\
 OCSVM      & 1.03 & 4.06 & 7.32 & 0.00 \\
 \bottomrule
 \end{tabular}
-\end{table}
+\end{minipage}\par\medskip
 
 On ULB~2013, threshold choice has a moderate but meaningful impact.
 For CatBoost and LGBM, the fixed~$\tau=0.5$ already performs well~($F_2\!\approx\!0.81$)
@@ -595,7 +589,7 @@ reduces this to~$0.06$--$0.12\%$ at the cost of substantially lower recall.
 \textbf{The key finding is that threshold selection is not a minor post-hoc detail but a
 first-order design decision: on BAF, the choice of threshold strategy changes~$F_2$ by
 an order of magnitude and reverses the operational classification from ``detect nothing''
-to ``detect~$43$--$47\%$ of fraud''.}
+to ``detect~$41$--$47\%$ of fraud''.}
 
 \subsection{Full Factorial Analysis: Imbalance Strategy \texorpdfstring{$\times$}{x} Model}
 \label{subsec:factorial}
@@ -604,9 +598,8 @@ Tables~\ref{tab:factorial_ulb_prauc}--\ref{tab:factorial_baf_f2} present PR-AUC 
 under all strategy--model combinations.
 Figure~\ref{fig:heatmaps} shows the $\Delta$PR-AUC heatmaps (strategy minus None baseline).
 
-\begin{table}[ht!]
-\centering
-\caption{PR-AUC by model $\times$ strategy on ULB~2013. Bold: best result per row.}
+\par\medskip\noindent\begin{minipage}{\linewidth}\centering
+\captionof{table}{PR-AUC by model $\times$ strategy on ULB~2013. Bold: best result per row.}
 \label{tab:factorial_ulb_prauc}
 \begin{tabular}{l c c c c c c c}
 \toprule
@@ -619,11 +612,10 @@ CatBoost   & \textbf{0.885} & 0.617 & 0.879 & 0.857 & 0.857 & 0.846 & 0.875 \\
 FT-Trans.  & \textbf{0.856} & 0.650 & 0.836 & 0.845 & 0.845 & 0.772 & 0.783 \\
 \bottomrule
 \end{tabular}
-\end{table}
+\end{minipage}\par\medskip
 
-\begin{table}[ht!]
-\centering
-\caption{PR-AUC by model $\times$ strategy on BAF~Base. Bold: best result per row.}
+\par\medskip\noindent\begin{minipage}{\linewidth}\centering
+\captionof{table}{PR-AUC by model $\times$ strategy on BAF~Base. Bold: best result per row.}
 \label{tab:factorial_baf_prauc}
 \begin{tabular}{l c c c c c c c}
 \toprule
@@ -636,11 +628,10 @@ CatBoost   & 0.180 & 0.178 & \textbf{0.185} & 0.154 & 0.154 & 0.165 & 0.184 \\
 FT-Trans.  & \textbf{0.180} & 0.159 & 0.166 & 0.106 & 0.106 & 0.124 & 0.175 \\
 \bottomrule
 \end{tabular}
-\end{table}
+\end{minipage}\par\medskip
 
-\begin{table}[ht!]
-\centering
-\caption{$F_2$ by model $\times$ strategy on BAF~Base (max-$F_2$ threshold). Bold: best result per row.}
+\par\medskip\noindent\begin{minipage}{\linewidth}\centering
+\captionof{table}{$F_2$ by model $\times$ strategy on BAF~Base (max-$F_2$ threshold). Bold: best result per row.}
 \label{tab:factorial_baf_f2}
 \begin{tabular}{l c c c c c c c}
 \toprule
@@ -653,17 +644,16 @@ CatBoost   & 0.314 & \textbf{0.317} & 0.316 & 0.303 & 0.303 & 0.309 & 0.317 \\
 FT-Trans.  & \textbf{0.316} & 0.289 & 0.310 & 0.255 & 0.255 & 0.269 & 0.301 \\
 \bottomrule
 \end{tabular}
-\end{table}
+\end{minipage}\par\medskip
 
-\begin{figure}[ht!]
-  \centering
+\par\medskip\noindent\begin{minipage}{\linewidth}\centering
   \includegraphics[width=0.48\textwidth]{figs/ulb_heatmap_prauc.pdf}%
   \hfill
   \includegraphics[width=0.48\textwidth]{figs/baf_heatmap_prauc.pdf}
-  \caption{$\Delta$PR-AUC (strategy minus None baseline) heatmaps on ULB~2013 (left)
+  \captionof{figure}{$\Delta$PR-AUC (strategy minus None baseline) heatmaps on ULB~2013 (left)
     and BAF~Base (right). Green cells indicate improvement; red cells indicate degradation.}
   \label{fig:heatmaps}
-\end{figure}
+\end{minipage}\par\medskip
 
 On ULB~2013, the baseline (None) is optimal for LGBM, CatBoost, and FT-Transformer.
 Random Forest is the only model that benefits from oversampling: ROS raises PR-AUC
@@ -688,9 +678,8 @@ sensitivity discussed in Section~\ref{subsec:disc_architecture}.
 Tables~\ref{tab:ci_baf} and~\ref{tab:cost_baf} report bootstrap confidence intervals
 and training cost on BAF Base.
 
-\begin{table}[ht!]
-\centering
-\caption{95\% Bootstrap CI for PR-AUC and ROC-AUC on BAF Base (strategy\,=\,None, $B\!=\!1\,000$).}
+\par\medskip\noindent\begin{minipage}{\linewidth}\centering
+\captionof{table}{95\% Bootstrap CI for PR-AUC and ROC-AUC on BAF Base (strategy\,=\,None, $B\!=\!1\,000$).}
 \label{tab:ci_baf}
 \begin{tabular}{l c c c c}
 \toprule
@@ -704,11 +693,10 @@ FT-Trans.  & 0.180 & [0.164, 0.197] & 0.897 & [0.891, 0.904] \\
 OCSVM      & 0.019 & [0.018, 0.021] & 0.628 & [0.616, 0.639] \\
 \bottomrule
 \end{tabular}
-\end{table}
+\end{minipage}\par\medskip
 
-\begin{table}[ht!]
-\centering
-\caption{Computational cost on BAF Base (strategy\,=\,None). Tuning includes 50 Optuna trials.}
+\par\medskip\noindent\begin{minipage}{\linewidth}\centering
+\captionof{table}{Computational cost on BAF Base (strategy\,=\,None). Tuning includes 50 Optuna trials.}
 \label{tab:cost_baf}
 \begin{tabular}{l r r r}
 \toprule
@@ -722,7 +710,7 @@ FT-Trans.  & 46,550 & 346.9 & 2.419 \\
 OCSVM      & --- & 919.6 & 71.579 \\
 \bottomrule
 \end{tabular}
-\end{table}
+\end{minipage}\par\medskip
 
 The bootstrap CIs (Table~\ref{tab:ci_baf}) confirm that the FT-Transformer and
 CatBoost confidence intervals overlap completely (CatBoost: [0.164, 0.197];
@@ -840,9 +828,8 @@ decision framework for fraud detection practitioners.
 Each row maps a deployment scenario to the recommended model, imbalance strategy, and
 threshold strategy, derived from the experimental results in Section~\ref{sec:results}.
 
-\begin{table}[ht!]
-\centering
-\caption{Decision framework: recommended configuration by deployment scenario.
+\par\medskip\noindent\begin{minipage}{\linewidth}\centering
+\captionof{table}{Decision framework: recommended configuration by deployment scenario.
   Recommendations are derived from the results in Section~\ref{sec:results}.}
 \label{tab:decision_framework}
 \begin{tabular}{p{3.8cm} l l l}
@@ -858,7 +845,7 @@ Interpretability required    & LGBM      & None           & max-$F_2$      \\
 Tabular transformer (DL)     & FT-Trans. & Class Weights  & max-$F_2$      \\
 \bottomrule
 \end{tabular}
-\end{table}
+\end{minipage}\par\medskip
 
 Several patterns emerge from the framework.
 CatBoost is the default choice for in-domain deployment due to its consistently top-tier
