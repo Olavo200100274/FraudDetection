@@ -483,11 +483,17 @@ OCSVM      & 0.019 & 0.628 & 0.045 & 0.081 & 0.171 & 7.32\% \\
 \end{minipage}\par\medskip
 
 \par\medskip\noindent\begin{minipage}{\linewidth}\centering
-  \includegraphics[width=0.48\textwidth]{figs/ulb_prauc_bar_baseline.pdf}%
+  \includegraphics[width=0.48\textwidth]{figs/ulb_pr_curves_threshold.pdf}%
   \hfill
-  \includegraphics[width=0.48\textwidth]{figs/baf_prauc_bar_baseline.pdf}
-  \captionof{figure}{PR-AUC for all models on ULB~2013 (left) and BAF~Base (right),
-    baseline condition (strategy\,=\,None, max-$F_2$ threshold).}
+  \includegraphics[width=0.48\textwidth]{figs/baf_pr_curves_threshold.pdf}
+  \captionof{figure}{Precision--Recall curves for all models on ULB~2013 (left) and
+    BAF~Base (right) under the baseline condition (strategy\,=\,None). Each curve
+    represents the full operating space available to the model; the markers indicate
+    where the four threshold rules studied in this paper land on that curve
+    (\textbullet\ fixed~$\tau{=}0.5$; $\blacktriangle$~max-$F_1$;
+    $\blacksquare$~max-$F_2$; $\blacklozenge$~Precision~$\geq$~0.5).
+    OCSVM is shown as a dashed reference; threshold markers are omitted for OCSVM
+    because its decision-function output is not on the probability scale.}
   \label{fig:prauc_baseline}
 \end{minipage}\par\medskip
 
