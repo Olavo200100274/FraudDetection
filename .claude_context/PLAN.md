@@ -1,6 +1,6 @@
 # PLAN.md — Sequential plan to thesis + article
-**Last updated**: 2026-05-11  
-**Current position**: ✅ Steps 1–13.5 COMPLETE → THESIS DONE (with LaTeX layout polish) → Paper 1 draft + polish complete → ready for Step 14 (Maryam review)
+**Last updated**: 2026-05-13  
+**Current position**: ✅ Steps 1–13.5 COMPLETE → THESIS DONE (with LaTeX layout polish) → Paper 1 draft + polish complete → ready for Step 14 (Maryam review) → ✅ Steps 15–19 COMPLETE → Paper 2 full first draft written → ready for Step 20 (Maryam review)
 
 ---
 
@@ -148,23 +148,34 @@ Polish work driven by Overleaf review of the compiled draft and by feedback on v
 3. LGBM SHAP feature ranking is perfectly stable across all 6 BAF variants (Jaccard=1.00), explaining why interpretability holds under shift
 4. Top attention tokens align with top SHAP features across architecturally different models — **convergent validity**
 
-### Step 15 — Choose venue + freeze title
-- Candidates: **IEEE TNNLS** (IEEEtran template), Neural Networks (Elsevier), Applied Soft Computing (Elsevier)
-- Title direction: *"Why LightGBM Generalises Better Than Tabular Transformers Under Distribution Shift: Cross-Domain Evidence and Attention Diagnostics in Fraud Detection"*
-- Swap template if TNNLS chosen; otherwise CAS template stands
-- Length target: 9,000–11,000 words, figure-heavy
+### ✅ Step 15 — Choose venue + freeze title (COMPLETE 2026-05-13)
+- **Venue**: Neural Networks (Elsevier, Scopus Q1) — ideal for mechanistic attention + GBDT analysis; CAS template retained, no swap needed
+- **Title** (frozen): *"Mechanistic Understanding of Tabular Transformer Limitations in Financial Fraud Detection: Cross-Domain Robustness, Foggy Vision Attention, and SHAP Feature Stability"*
+- **Short title**: *"Tabular Transformer Limitations in Financial Fraud Detection"*
+- **Template**: `Article 2/main.tex` (Elsevier CAS single-column; renamed from `cas-sc-template.tex`) ✅
+- **Bibliography**: `Article 2/cas-refs.bib` (copied from Article 1's bib, +2 entries: `grinsztajn2022tree`, `caixeiro2025threshold` placeholder) ✅
 
-### Step 16 — Draft Method (compact, references Paper 1 for shared protocol)
-Cross-domain transfer protocol, SHAP setup (LinearExplainer / TreeExplainer / GradientExplainer), attention diagnostic framework (4 patterns + entropy). Reference Paper 1 for the leakage-free protocol details to avoid duplication.
+### ✅ Step 16 — Draft Method (COMPLETE 2026-05-13)
+Wrote §3 Experimental Setup: datasets (BAF suite description, ULB role), models, cross-domain transfer protocol (zero-shot Base→Variants I-V), SHAP analysis setup (3 explainers, Jaccard analysis), attention diagnostic framework (4 patterns + entropy). References companion Paper 1 for the shared leakage-free protocol.
 
-### Step 17 — Draft Results (figure-heavy)
-Transformer-vs-tree under strategies (Tables), cross-domain Base→Variants (Tables + figures), SHAP cross-model + cross-variant Jaccard (Tables), attention aggregate distribution + heatmaps (centrepiece figures).
+### ✅ Step 17 — Draft Results (COMPLETE 2026-05-13)
+§4 Results with 4 subsections:
+- §4.1 Imbalance sensitivity (Tables 1-2: FT-T vs CatBoost on ULB + BAF)
+- §4.2 Cross-domain robustness (Tables 3-5 + **new Figure 1: cross-domain PR-AUC line chart** showing RF improving on 4/5 variants)
+- §4.3 SHAP attribution (Figure 2: shap_global, Figure 3: shap_beeswarm, Tables 6-7: Jaccard cross-model + cross-variant, Figure 4: shap_waterfall)
+- §4.4 Attention diagnostics (Figure 5: attention_aggregate, Figure 6: attention_heatmap_fp, Foggy Vision diagnosis)
 
-### Step 18 — Draft Discussion + Convergent Validity
-The 4 mechanistic arguments + convergent-validity claim (attention top tokens ≈ SHAP top features) + Foggy Vision interpretation as dataset ceiling rather than model failure.
+Figures: 6 total. New figure generated: `Article 2/figs/crossdomain_prauc.pdf` (via `src/generate_crossdomain_chart.py`).
 
-### Step 19 — Draft Introduction + Related Work + Conclusion + Abstract
-Related Work focuses on tabular DL debate, attention interpretability, distribution shift in fraud (~15–20 refs).
+### ✅ Step 18 — Draft Discussion + Convergent Validity (COMPLETE 2026-05-13)
+§5 Discussion with 4 subsections:
+- §5.1 SMOTE-FT-T interaction: synthetic interpolates distort joint feature distribution seen by attention; tree splits less sensitive
+- §5.2 RF cross-domain regularization: random feature subsampling prevents domain-specific co-occurrence overfitting
+- §5.3 SHAP stability as diagnostic: Jaccard=1.00 → degradation is in decision surface, not in which features are informative
+- §5.4 Convergent validity + Foggy Vision: H=0.976 confirms BAF signal ceiling; attention agrees with SHAP on top-3 features
+
+### ✅ Step 19 — Draft Introduction + Related Work + Conclusion + Abstract (COMPLETE 2026-05-13)
+§1 Introduction (4 contributions C1-C4), §2 Related Work (3 subsections: tabular DL debate, distribution shift, SHAP + attention), §6 Conclusion (4 paragraphs), Abstract (~270 words), 5 highlights, 8 keywords.
 
 ### Step 20 — Maryam review → iterate → submit
 
