@@ -95,13 +95,13 @@ pattern (normalised entropy $H_{\text{norm}}\,=\,0.976$) and a convergent-validi
 result: independent SHAP attribution and attention weights identify the same
 top features, providing cross-method evidence that the $0.18$ PR-AUC ceiling
 is a signal-space ceiling and not an architectural failure.
-Together with the $\sim 40\times$ training-time advantage of LGBM over the
-FT-Transformer documented in a companion paper, the five converging lines of
-evidence show that simple tree-based models are sufficient for BAF-scale
-fraud detection: there is no resampling penalty to absorb, no cross-domain
-advantage to forgo, no explanation infrastructure to retrain under shift,
-and no headroom above the data-imposed ceiling that a more powerful
-architecture could exploit.
+Together with the $\sim 20\times$ training and $\sim 37\times$ tuning-time
+advantages of LGBM over the FT-Transformer documented in a companion paper,
+the five converging lines of evidence show that simple tree-based models are
+sufficient for BAF-scale fraud detection: there is no resampling penalty to
+absorb, no cross-domain advantage to forgo, no explanation infrastructure
+to retrain under shift, and no headroom above the data-imposed ceiling that
+a more powerful architecture could exploit.
 \end{abstract}
 
 \begin{highlights}
@@ -192,9 +192,9 @@ variants, supporting an integrated answer to the title question:
     features. The $0.18$ PR-AUC ceiling is a property of the feature space,
     not of any model.
 \end{enumerate}
-Combined with the well-documented $\sim 40\times$ training-time advantage of
-LGBM over the FT-Transformer~\citep{caixeiro2025threshold}, the four
-mechanistic findings converge on a single conclusion: for BAF-scale
+Combined with the well-documented $\sim 20\times$ training and $\sim 37\times$
+tuning-time advantages of LGBM over the FT-Transformer~\citep{caixeiro2025threshold},
+the four mechanistic findings converge on a single conclusion: for BAF-scale
 financial fraud detection, simple tree-based models are sufficient.
 
 The rest of the paper is structured as follows.
@@ -410,13 +410,17 @@ datasets with a shared core feature space of $30$--$32$ columns.
 BAF~Base is the primary training and in-domain evaluation dataset
 (approximately $1\,000\,000$ samples, $\approx 1.1\%$ fraud rate, $32$ features).
 Variants~I--V share the core $30$ features but differ in their distributional
-properties: Variant~I applies bias injection to fraud-related variables,
-Variant~II introduces label shift (altered fraud patterns), Variant~III adds
-covariate shift plus two auxiliary columns (\texttt{x1}, \texttt{x2}),
-Variant~IV modifies feature quality under adversarial conditions, and
-Variant~V combines covariate and label shifts.
-For the cross-domain experiments, the two auxiliary columns in Variants~III and~V
-are excluded so that all models receive a uniform $30$-feature input.
+properties along calibrated dimensions of group-size disparity, prevalence
+disparity, separability disparity, and temporal/training bias, as defined by
+the original authors~\citep{jesus2022turning}.
+Two of the variants (III and V) include the two auxiliary columns
+\texttt{x1} and \texttt{x2}; these columns are excluded from the cross-domain
+experiments of Section~\ref{sec:cross_domain} so that all models, trained on
+Base, receive a uniform $30$-feature input across every variant.
+We refer the reader to~\citet{jesus2022turning} for the exact specification of
+each variant; the present paper treats the variants as five black-box
+distributional shifts of varying severity, since our claims concern only how
+the model families' performance responds to those shifts in aggregate.
 The ULB 2013 dataset~\citep{dalpozzolo2015calibrating} is used only in the
 imbalance sensitivity analysis (Section~\ref{sec:imbalance_sensitivity}),
 providing a second dataset with a different prevalence ($0.17\%$) and a
@@ -632,12 +636,13 @@ OCSVM       & 0.628 & 0.599 & 0.664 & 0.616 & 0.646 & 0.594 \\
 
 Three distinct response profiles emerge.
 The first, shared by LGBM, CatBoost, and FT-Transformer, is one of
-proportional degradation: Variant~II (label shift only) is recovered almost
-perfectly, while Variants~III and~V (which combine covariate shift with
-feature alignment changes) cause PR-AUC drops in the $24$--$34\%$ range.
+proportional degradation: Variant~II is recovered almost perfectly (PR-AUC
+within $0.01$--$0.02$ of the Base score for each of the three), while
+Variants~III and~V impose the largest drops, in the $24$--$34\%$ range
+relative to Base.
 Critically, FT-Transformer and CatBoost --- which tied at PR-AUC~$=\,0.180$
-in-domain --- follow nearly identical degradation curves, ruling out any
-cross-domain advantage for the attention-based architecture.
+in-domain --- follow nearly identical degradation curves on all five variants,
+ruling out any cross-domain advantage for the attention-based architecture.
 
 The second profile is Random Forest's, and it constitutes the most striking
 finding of the cross-domain analysis.
@@ -647,7 +652,9 @@ on four of the five variants.
 On Variant~II it reaches PR-AUC~$=\,0.225$, exceeding the in-domain scores
 of the gradient-boosted models.
 In $F_2$ terms, RF improves from $0.294$ on Base to $0.319$ on Variant~II
-and remains above its Base score on Variants~I, III, and~IV.
+and remains above its Base score on Variants~I ($0.307$) and~IV ($0.314$),
+tying it on Variant~III ($0.289$, within sampling noise of Base), and only
+dropping clearly on the hardest Variant~V ($0.278$).
 The third profile is OCSVM's: uniformly low across all variants (PR-AUC
 below $0.023$), confirming the irrelevance of the one-class anomaly framing
 on this benchmark.
@@ -791,9 +798,10 @@ uniform baseline of $1/31 \approx 3.2\%$, ruling out Self-Obsession.
 (ratio $1.28\times$), a small categorical elevation far below what constitutes
 a Categorical Trap.
 (iv)~The top three tokens by attention are \texttt{device\_os} ($6.2\%$),
-\texttt{housing\_status} ($5.0\%$), and \texttt{employment\_status} ($3.8\%$),
-precisely the three features that dominate the SHAP rankings of the tree-based
-models (Section~\ref{sec:shap}).
+\texttt{housing\_status} ($5.0\%$), and \texttt{employment\_status} ($3.8\%$);
+the first two are also the top two SHAP features of the tree-based models
+(Section~\ref{sec:shap}), and the third (\texttt{employment\_status}) sits
+inside the LGBM SHAP top-15.
 The diagnostic verdict is \textbf{Foggy Vision}: none of Tunnel Vision,
 Self-Obsession, or Categorical Trap is present.
 
@@ -942,9 +950,10 @@ boosted trees are allowed to use any feature combination at any split.
 On BAF~Base, these models learn to exploit the joint configuration of
 \texttt{device\_os}, \texttt{housing\_status}, and \texttt{phone\_home\_valid}
 in a domain-specific way.
-When the covariate distribution shifts (Variants~III, V) or the fraud
-label assignment changes (Variants~I, II), those specific joint configurations
-become less discriminative.
+When the input distribution shifts under any of the BAF Variants ---
+whether through changes in group prevalence, conditional separability, or
+training bias --- those Base-specific joint configurations become less
+discriminative.
 Random Forest's ``forced ignorance'' of features during each tree growth
 is actually advantageous here: the resulting ensemble is less dependent on
 any particular feature combination and therefore more resilient when those
@@ -1001,11 +1010,12 @@ informative of the stability findings.
 It does not mean that fraud is equally detectable on all variants --- it means
 that \emph{the same features carry the fraud signal regardless of which variant
 is evaluated}.
-The performance degradation on Variants~III and~V ($0.177 \to 0.134$ PR-AUC for LGBM)
-therefore does not arise from the model suddenly relying on different features;
-instead, it arises from a change in the \emph{conditional relationship} between
-those stable features and the fraud label --- which is precisely what covariate
-and label shift alter by design in the BAF suite.
+The performance degradation on Variants~III and~V ($0.177 \to 0.134$ and
+$0.177 \to 0.122$ PR-AUC respectively for LGBM) therefore does not arise from
+the model suddenly relying on different features; instead, it arises from a
+change in the \emph{conditional relationship} between those stable features
+and the fraud label --- which is exactly what the distributional shifts of the
+BAF suite are designed to introduce.
 
 This diagnostic capability has an immediate practical consequence: explanations
 generated on the training distribution remain valid on shifted variants.
@@ -1045,17 +1055,22 @@ better under shift, but their explanations also retain their validity.
 \subsection{Convergent Validity and the Dataset Ceiling Interpretation}
 \label{sec:disc_ceiling}
 
-The convergent validity finding --- that attention top tokens and SHAP top features
-agree on the same three primary signals (\texttt{device\_os}, \texttt{housing\_status},
-\texttt{phone\_home\_valid}) --- is a stronger guarantee than either method alone
-could provide.
+The convergent validity finding --- that LGBM SHAP attribution and FT-Transformer
+attention agree on the top two features (\texttt{device\_os},
+\texttt{housing\_status}) and overlap on five of ten in their respective top-$10$
+rankings (Figure~\ref{fig:convergent_validity}) --- is a stronger guarantee than
+either method alone could provide.
+The agreement is doubly cross-method: the two attributions come from
+architecturally different models (a gradient-boosted forest vs.\ a stack of
+self-attention blocks) and from methodologically different attribution
+estimators (Shapley value coalitional attribution vs.\ learned attention weights).
 Attention weights can be confounded by architectural biases (e.g.\ higher attention
 to tokens with larger embedding norms); SHAP values can be confounded by feature
-correlations (e.g.\ TreeExplainer vs.\ GradientExplainer making different independence
-assumptions).
-When two structurally different methods produce the same feature ranking on the
-same data, the conclusion that these features carry genuine, robust fraud signal
-is substantially more credible than if it rested on either method in isolation.
+correlations (e.g.\ TreeExplainer's path-dependent estimation makes different
+independence assumptions than GradientExplainer's sampling-based estimation).
+When two structurally different methods produce the same ranking on the same data,
+the conclusion that the identified features carry genuine, robust fraud signal is
+substantially more credible than if it rested on either method in isolation.
 
 The Foggy Vision pattern ($H_{\text{norm}} = 0.976$) provides the final interpretive
 piece.
@@ -1156,13 +1171,14 @@ signal that neither tree-based attribution nor self-attention identifies
 as present --- a possibility this paper cannot rule out, but for which there
 is no current evidence.
 
-\textbf{Pillar~5 --- Compute is $\sim 40\times$ cheaper.}
+\textbf{Pillar~5 --- Compute is tens of times cheaper.}
 The cost tables of the companion study~\citep{caixeiro2025threshold} document
-that LGBM trains in $16$~seconds on BAF and tunes in $\approx 21$~minutes,
+that LGBM trains in $\approx 16$~seconds on BAF and tunes in $\approx 21$~minutes,
 while the FT-Transformer requires $\approx 347$~seconds of training and
 $\approx 13$~hours of GPU-bound tuning for an indistinguishable PR-AUC.
-On equal predictive quality, the simpler model dominates the cost dimension
-by a factor of $40$ in training and $50$ in tuning.
+On equal predictive quality, the simpler model is roughly $\sim 22\times$
+cheaper in training time and $\sim 37\times$ cheaper in tuning time, with no
+GPU requirement.
 
 The five pillars are not redundant.
 They cover distinct dimensions: an in-domain robustness dimension (Pillar~1),
@@ -1200,18 +1216,25 @@ without recomputation under distribution shift; (iv)~the FT-Transformer's
 near-uniform attention (entropy $0.976$, Foggy Vision) and its convergent
 agreement with SHAP on the same top features identify the $0.18$ PR-AUC ceiling
 as a property of the feature space, ruling out architectural-improvement
-gains; and (v)~LGBM requires $\sim 40\times$ less training time than the
-FT-Transformer for indistinguishable predictive quality.
+gains; and (v)~LGBM requires roughly $20\times$ less training time and
+$37\times$ less hyperparameter-tuning time than the FT-Transformer for
+indistinguishable predictive quality, with no GPU dependency.
 
 The methodological contribution of the paper is the application of
 convergent validity --- a research design principle from psychometric
 measurement theory --- to the comparison of SHAP attribution and self-attention
-weights on the same fraud detection model.
+weights as fraud-feature signals on the same data.
+Because the two attributions come from architecturally different models
+(LGBM and FT-Transformer) and from methodologically different estimators
+(Shapley values and learned attention weights), their convergence is
+unusually robust evidence that the identified features carry genuine fraud
+signal rather than method-specific artefacts.
 The convergent finding (five overlapping features in the top-$10$, two
-identical at the top) substantially strengthens the case that the identified
-features carry genuine fraud signal rather than method-specific artefacts.
-We are not aware of prior fraud literature that combines these two attribution
-methods on the same data under a convergent-validity framing.
+identical at the top --- \texttt{device\_os} and \texttt{housing\_status}) ties
+the in-domain SHAP results to the attention diagnostics and bounds the
+architectural-improvement headroom above the observed performance ceiling.
+We are not aware of prior fraud literature that combines these two
+attribution methods on the same data under a convergent-validity framing.
 
 For practitioners, the principal recommendations are direct: prefer CatBoost or
 LGBM for in-domain deployment on BAF-scale data; choose Random Forest when
