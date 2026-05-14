@@ -1,6 +1,6 @@
 # PLAN.md — Sequential plan to thesis + article
-**Last updated**: 2026-05-13  
-**Current position**: ✅ Steps 1–13.5 COMPLETE → THESIS DONE (with LaTeX layout polish) → Paper 1 draft + polish complete → ready for Step 14 (Maryam review) → ✅ Steps 15–19 COMPLETE → Paper 2 full first draft written → ready for Step 20 (Maryam review)
+**Last updated**: 2026-05-14  
+**Current position**: ✅ Steps 1–13.5 COMPLETE → THESIS DONE → Paper 1 draft submitted to Maryam → ✅ Steps 15–19 COMPLETE (first draft) → ✅ Step 19.5 COMPLETE (reframe to "Simple Trees Suffice" + venue switch to Applied Soft Computing + figure overhaul) → ready for Step 20 (Maryam review)
 
 ---
 
@@ -148,12 +148,13 @@ Polish work driven by Overleaf review of the compiled draft and by feedback on v
 3. LGBM SHAP feature ranking is perfectly stable across all 6 BAF variants (Jaccard=1.00), explaining why interpretability holds under shift
 4. Top attention tokens align with top SHAP features across architecturally different models — **convergent validity**
 
-### ✅ Step 15 — Choose venue + freeze title (COMPLETE 2026-05-13)
-- **Venue**: Neural Networks (Elsevier, Scopus Q1) — ideal for mechanistic attention + GBDT analysis; CAS template retained, no swap needed
-- **Title** (frozen): *"Mechanistic Understanding of Tabular Transformer Limitations in Financial Fraud Detection: Cross-Domain Robustness, Foggy Vision Attention, and SHAP Feature Stability"*
-- **Short title**: *"Tabular Transformer Limitations in Financial Fraud Detection"*
-- **Template**: `Article 2/main.tex` (Elsevier CAS single-column; renamed from `cas-sc-template.tex`) ✅
+### ✅ Step 15 — Choose venue + freeze title (REVISED 2026-05-14)
+- **Venue** (final): **Applied Soft Computing (Elsevier, Scopus Q1)** — better fit than Neural Networks for applied+mechanistic empirical work; CAS template retained, no swap
+- **Title** (frozen 2026-05-14): *"Why Simple Tree-Based Models Suffice for Financial Fraud Detection: Mechanistic Evidence from SHAP–Attention Convergence and Cross-Domain Transfer"*
+- **Short title**: *"Why Simple Trees Suffice for Financial Fraud Detection"*
+- **Template**: `Article 2/main.tex` (Elsevier CAS single-column) ✅
 - **Bibliography**: `Article 2/cas-refs.bib` (copied from Article 1's bib, +2 entries: `grinsztajn2022tree`, `caixeiro2025threshold` placeholder) ✅
+- **Earlier interim titles** (rejected during 2026-05-14 review): "Mechanistic Understanding of Tabular Transformer Limitations..." (too transformer-centric) and the original plan's "Why LightGBM Generalises Better Than Tabular Transformers..." (factually weak — LGBM does not literally beat FT-T cross-domain; RF is the real cross-domain winner)
 
 ### ✅ Step 16 — Draft Method (COMPLETE 2026-05-13)
 Wrote §3 Experimental Setup: datasets (BAF suite description, ULB role), models, cross-domain transfer protocol (zero-shot Base→Variants I-V), SHAP analysis setup (3 explainers, Jaccard analysis), attention diagnostic framework (4 patterns + entropy). References companion Paper 1 for the shared leakage-free protocol.
@@ -176,6 +177,18 @@ Figures: 6 total. New figure generated: `Article 2/figs/crossdomain_prauc.pdf` (
 
 ### ✅ Step 19 — Draft Introduction + Related Work + Conclusion + Abstract (COMPLETE 2026-05-13)
 §1 Introduction (4 contributions C1-C4), §2 Related Work (3 subsections: tabular DL debate, distribution shift, SHAP + attention), §6 Conclusion (4 paragraphs), Abstract (~270 words), 5 highlights, 8 keywords.
+
+### ✅ Step 19.5 — Reframe to "Simple Trees Suffice" + venue switch + figure overhaul (COMPLETE 2026-05-14)
+Critical-review pass driven by user concern that the original draft framing did not align with Maryam's directive *and* that the data did not literally support the planned LGBM-centric framing. Three structural changes:
+
+1. **Title and framing**: shifted from "Tabular Transformer Limitations" to **"Why Simple Tree-Based Models Suffice for Financial Fraud Detection: Mechanistic Evidence from SHAP–Attention Convergence and Cross-Domain Transfer"**. Reframed Abstract, §1 hook + 4 contributions (C1–C4 now framed as evidence FOR sufficiency), Highlights, Keywords (convergent validity now front-loaded), §6 Conclusion (opens with 5-pillar argument).
+2. **Content expansion** (~6.5K → ~8.8K words): expanded §2 Related Work (3 deeper subsections: tabular DL with grinsztajn structural analysis + fraud-specific factors; cross-domain bias–variance theory; convergent validity methodology), expanded §5.1–§5.4 (tokenisation analysis under SMOTE; bias–variance under shift; regulator/audit implications of SHAP stability; "when does attention help" + Foggy Vision as useful negative result), added **NEW §5.5 "Why Simple Trees Suffice: The Combined Argument"** with 5 explicit pillars (no resampling penalty, cross-domain parity/advantage, stable explanations, no headroom above ceiling, 40× cheaper compute).
+3. **Figure overhaul** (6 → 8 main figures): removed `shap_dependence.pdf` (no clear narrative); generated 2 new figures via Python scripts:
+   - `src/generate_smote_asymmetry_chart.py` → `Article 2/figs/smote_asymmetry.pdf` (FT-T vs CatBoost across 7 strategies × 2 datasets, visualises the 41/14 asymmetry)
+   - `src/generate_convergent_validity_chart.py` → `Article 2/figs/convergent_validity.pdf` (LGBM SHAP top-10 vs FT-T attention top-10, with 5 overlapping features highlighted in green; top-2 identical: `device_os`, `housing_status`)
+4. **Venue switch**: Neural Networks → **Applied Soft Computing** (better fit for applied+mechanistic empirical work; same CAS template).
+
+Files touched: `Article 2/main.tex`, `src/generate_smote_asymmetry_chart.py` (new), `src/generate_convergent_validity_chart.py` (new), `Article 2/figs/smote_asymmetry.pdf` (new), `Article 2/figs/convergent_validity.pdf` (new), `Article 2/figs/shap_dependence.pdf` (deleted), `.claude_context/PLAN.md`, `memory/project_overview.md`.
 
 ### Step 20 — Maryam review → iterate → submit
 
