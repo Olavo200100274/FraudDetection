@@ -1,6 +1,18 @@
 # REFERENCES_STATE.md
-**Last updated**: 2026-05-05  
-**Total .bib entries**: 43  
+**Last updated**: 2026-05-14
+
+## Bibliography per artefact
+
+| Artefact | File | Entries | Notes |
+|----------|------|---------|-------|
+| **Thesis** | `Overleaf/references.bib` | **43** | Frozen 2026-05-05; covers all 6 thesis contributions |
+| **Article 1** (ESWA, Threshold) | `Article 1/cas-refs.bib` | **47** | Thesis 43 + 4 entries added 2026-05-11 in Step 13.5: `tibshirani1996regression`, `breiman2001random`, `scholkopf2001estimating`, `fernandez2018smote` (LR/RF/OCSVM/SMOTE-review). |
+| **Article 2** (ASC, Simple Trees Suffice) | `Article 2/cas-refs.bib` | **49** | Article 1 bib 47 + `grinsztajn2022tree` (Why tree-based still outperform DL on tabular, NeurIPS 2022) + `caixeiro2025threshold` (companion Paper 1, placeholder citation). |
+
+Inventory below describes the thesis-level set of 43; Articles add the entries listed above on top of this set.
+
+---
+
 
 ---
 

@@ -1,6 +1,6 @@
 # PROJECT_STATE.md
-**Last updated**: 2026-05-05  
-**Status**: Experimental pipeline COMPLETE. Thesis writing in progress.
+**Last updated**: 2026-05-14
+**Status**: Experimental pipeline ✅ COMPLETE. Thesis ✅ COMPLETE. Article 1 ✅ first draft (awaiting Maryam review). Article 2 ✅ reframed + deep-reviewed draft (awaiting Maryam review).
 
 ---
 
@@ -87,10 +87,10 @@ OCSVM excluded from strategy factorial.
 - Gradient boosting already handles moderate imbalance (BAF) without resampling.
 
 ### Cross-domain (BAF Base → Variants I-V)
-- Variant II (label shift only): all models transfer well.
-- Variants III, V (covariate shift + extra features): CatBoost/LGBM lose 24-31% PR-AUC.
-- **Random Forest most robust**: improves on 3/5 Variants despite lower in-domain score.
-- SHAP feature ranking: Jaccard=1.00 LGBM across all 6 BAF datasets (perfect stability).
+- Variant II (label-shift dominant): all supervised models transfer well (within 0.01–0.02 of Base PR-AUC).
+- Variants III and V (the hardest variants): CatBoost/LGBM/FT-T lose 24–34% PR-AUC.
+- **Random Forest most robust**: improves on 4 of 5 BAF Variants (PR-AUC: I=0.206, II=0.225, III=0.170, IV=0.211, V=0.159) despite trailing the GBDTs in-domain (RF Base=0.159 vs LGBM/CatBoost 0.177/0.180). RF's F₂ remains above Base on Variants I (0.307) and IV (0.314), ties Base on III (0.289 vs 0.294, within noise), drops on V (0.278). RF is, jointly with CatBoost-under-SMOTE, one of two places where a tree-based model strictly beats FT-T.
+- SHAP feature ranking: Jaccard=1.00 LGBM across all 6 BAF datasets (perfect stability — explanations remain valid under shift without recomputation).
 
 ### SHAP interpretability
 - Top BAF features: device_os, housing_status, phone_home_valid (tree-based).
@@ -99,9 +99,17 @@ OCSVM excluded from strategy factorial.
 
 ### FT-Transformer attention diagnostics
 - Pattern: **Foggy Vision** (normalized entropy=0.976, nearly uniform attention over all 31 tokens).
-- NOT Categorical Trap, NOT Tunnel Vision, NOT Self-Obsession.
+- NOT Categorical Trap (cat/num ratio = 1.28×), NOT Tunnel Vision (top-3 share <16%), NOT Self-Obsession ([CLS] self-attn = 3.1% ≈ 1/31).
+- Top-3 attention tokens: `device_os` (6.2%), `housing_status` (5.0%), `employment_status` (3.8%).
 - Confirms 0.18 PR-AUC is dataset ceiling, not model pathology.
 - Script: `src/attention_analysis.py`, outputs in `results/baf_base/fttransformer/attention_analysis/`.
+
+### Convergent validity (Article 2 contribution)
+- LGBM SHAP top-10 vs FT-T attention top-10 on the same BAF Base test set.
+- **Top-2 identical in both rankings**: `device_os` (rank 1), `housing_status` (rank 2).
+- **5 of 10 features overlap** between the two rankings: device_os, housing_status, phone_home_valid, income, current_address_months_count.
+- Two architecturally different models (gradient-boosted forest vs self-attention stack) + two methodologically different attribution estimators (Shapley values vs learned attention weights) → unusually robust evidence.
+- Article 2 §5.5 Pillar 4: bounds the architectural-improvement headroom above the 0.18 PR-AUC ceiling.
 
 ---
 
@@ -109,22 +117,26 @@ OCSVM excluded from strategy factorial.
 
 ```
 src/
-├── main.py                 # Classical ML pipeline (Optuna + 5-fold CV + test eval)
-├── main_transformer.py     # FT-Transformer pipeline (Optuna + holdout val + GPU)
-├── run_all_transformer.py  # Sequential runner: threshold ULB+BAF + cross-domain for FT-T
-├── threshold_study.py      # 4 threshold strategies applied post-hoc
-├── cross_domain.py         # Transfer Base→Variants I-V
-├── shap_analysis.py        # SHAP global/local/cross-model/cross-variant
-├── attention_analysis.py   # FT-Transformer attention map extraction + visualization
-├── generate_results.py     # Generate all tables/figures for thesis (→ results_thesis/)
-├── baf_baseline_summary.py # Summary plots for BAF baseline
-├── data.py                 # Dataset registry + loaders
-├── preprocess.py           # ColumnTransformer (impute + scale numeric, one-hot categorical)
-├── pdf_extract.py          # PyMuPDF utility for PDF text extraction (used during ref curation)
-├── save_load.py            # Artefact persistence (model, metrics, curves)
-├── models/                 # logreg.py, rf.py, lgbm.py, catboost.py, ocsvm.py, fttransformer.py
-├── strategies/balancing.py # 7 imbalance strategies + sampler factory
-└── evaluation/metrics.py   # PR-AUC, ROC-AUC, F1, F2, Brier, bootstrap CI, threshold opts
+├── main.py                              # Classical ML pipeline (Optuna + 5-fold CV + test eval)
+├── main_transformer.py                  # FT-Transformer pipeline (Optuna + holdout val + GPU)
+├── run_all_transformer.py               # Sequential runner: threshold ULB+BAF + cross-domain for FT-T
+├── threshold_study.py                   # 4 threshold strategies applied post-hoc
+├── cross_domain.py                      # Transfer Base→Variants I-V
+├── shap_analysis.py                     # SHAP global/local/cross-model/cross-variant
+├── attention_analysis.py                # FT-Transformer attention map extraction + visualization
+├── generate_results.py                  # Generate all tables/figures for thesis (→ results_thesis/)
+├── baf_baseline_summary.py              # Summary plots for BAF baseline
+├── generate_pr_curves_threshold.py      # ARTICLE 1: PR curves with threshold-rule markers (ULB+BAF) — added 2026-05-11
+├── generate_crossdomain_chart.py        # ARTICLE 2: cross-domain PR-AUC line chart (RF advantage) — added 2026-05-13
+├── generate_smote_asymmetry_chart.py    # ARTICLE 2: FT-T vs CatBoost across 7 strategies × 2 datasets — added 2026-05-14
+├── generate_convergent_validity_chart.py # ARTICLE 2: SHAP top-10 vs Attention top-10 with overlap shading — added 2026-05-14
+├── data.py                              # Dataset registry + loaders
+├── preprocess.py                        # ColumnTransformer (impute + scale numeric, one-hot categorical)
+├── pdf_extract.py                       # PyMuPDF utility for PDF text extraction (used during ref curation)
+├── save_load.py                         # Artefact persistence (model, metrics, curves)
+├── models/                              # logreg.py, rf.py, lgbm.py, catboost.py, ocsvm.py, fttransformer.py
+├── strategies/balancing.py              # 7 imbalance strategies + sampler factory
+└── evaluation/metrics.py                # PR-AUC, ROC-AUC, F1, F2, Brier, bootstrap CI, threshold opts
 ```
 
 ## Notebooks

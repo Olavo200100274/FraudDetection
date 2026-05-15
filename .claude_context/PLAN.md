@@ -1,6 +1,6 @@
 # PLAN.md — Sequential plan to thesis + article
 **Last updated**: 2026-05-14  
-**Current position**: ✅ Steps 1–13.5 COMPLETE → THESIS DONE → Paper 1 draft submitted to Maryam → ✅ Steps 15–19 COMPLETE (first draft) → ✅ Step 19.5 COMPLETE (reframe to "Simple Trees Suffice" + venue switch to Applied Soft Computing + figure overhaul) → ready for Step 20 (Maryam review)
+**Current position**: ✅ Steps 1–13.5 COMPLETE → THESIS DONE → Paper 1 draft submitted to Maryam → ✅ Steps 15–19 COMPLETE (first draft) → ✅ Step 19.5 COMPLETE (reframe to "Simple Trees Suffice" + venue switch to Applied Soft Computing + figure overhaul) → ✅ Step 19.6 COMPLETE (deep-review pass — 7 factual fixes, commit `6c25574`) → ready for Step 20 (Maryam review of Article 2)
 
 ---
 
@@ -189,6 +189,19 @@ Critical-review pass driven by user concern that the original draft framing did 
 4. **Venue switch**: Neural Networks → **Applied Soft Computing** (better fit for applied+mechanistic empirical work; same CAS template).
 
 Files touched: `Article 2/main.tex`, `src/generate_smote_asymmetry_chart.py` (new), `src/generate_convergent_validity_chart.py` (new), `Article 2/figs/smote_asymmetry.pdf` (new), `Article 2/figs/convergent_validity.pdf` (new), `Article 2/figs/shap_dependence.pdf` (deleted), `.claude_context/PLAN.md`, `memory/project_overview.md`.
+
+### ✅ Step 19.6 — Article 2 deep-review pass (COMPLETE 2026-05-14, commit `6c25574`)
+Systematic verification of the Step 19.5 draft against actual experimental data caught **7 factual inconsistencies** that a reviewer would have spotted:
+
+1. **§4.4 line 793-798**: "Top-3 attention tokens *precisely* match the top-3 tree-based SHAP features" was FALSE. Only top-2 coincide (`device_os`, `housing_status`); the 3rd diverges (`employment_status` attention vs `phone_home_valid` SHAP). Reworded to *"the first two are also the top two SHAP features ... the third (`employment_status`) sits inside the LGBM SHAP top-15"*.
+2. **§5.4**: convergent validity "agree on the same three primary signals (`device_os`, `housing_status`, `phone_home_valid`)" was FALSE (`phone_home_valid` is rank 7 in attention, not 3). Reframed to *"agree on the top two ... and overlap on five of ten"*, with explicit cross-model + cross-method framing (stronger, not weaker, claim).
+3. **§6 Conclusion**: methodological contribution said convergent validity was applied "on the **same** fraud detection model" — FALSE: LGBM (SHAP) vs FT-Transformer (Attention) are different models. Reworded to make doubly cross-method framing explicit.
+4. **§3.1 BAF Variants**: per-variant descriptions ("Variant I: bias injection...", "Variant IV: feature quality under adversarial conditions") were invented and don't match the BAF paper. Replaced with the authors' own taxonomy (group-size, prevalence, separability, training bias) and a deferral to `jesus2022turning`.
+5. **§4.2 / §5.2 / §5.3**: prose tying specific variants to "covariate" vs "label" shift — generalised to "distributional shifts" of varying severity.
+6. **§4.2 F₂ claim**: "RF remains above its Base score on Variants I, III, and IV" was FALSE for Variant III (0.289 < 0.294). Corrected to "above on I (0.307) and IV (0.314), tying on III (within noise), dropping clearly on V (0.278)".
+7. **Compute claim**: "~40× training-time advantage" was inflated. Actual values: 346.9/16.1 = **21.5× training**, 46,550/1,243 = **37.4× tuning**. Corrected in Abstract, §1, §5.5 Pillar 5, and §6 (v) to "~20× training, ~37× tuning".
+
+Verified after fixes: 22/22 citations resolve in `cas-refs.bib`; 5 pillars consistent across Abstract / §5.5 / §6; word count 8783 → 8999 (within plan target).
 
 ### Step 20 — Maryam review → iterate → submit
 

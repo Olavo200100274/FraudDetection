@@ -1,5 +1,5 @@
 # THESIS_STATE.md
-**Last updated**: 2026-05-11 (Step 13.5 polish complete — minipage layout fix, hypcap warnings suppressed, Results chapter prose revised)
+**Last updated**: 2026-05-14 (after Article 2 deep-review pass — commit `6c25574`)
 
 ---
 
@@ -125,9 +125,53 @@ Originally a single TPAMI article. Maryam revised the plan: split into **two dis
 
 ---
 
+## Articles status
+
+### Article 1 — Practitioner / Threshold-centric (Paper 1)
+- **Folder**: `Article 1/`
+- **Title (frozen)**: *"Threshold Selection as a Critical Design Choice in Financial Fraud Detection: A Systematic Comparison of Classical Machine Learning Models and Tabular Transformers"*
+- **Short title**: *"Threshold Selection in Financial Fraud Detection"*
+- **Venue**: Expert Systems with Applications (Elsevier, Scopus Q1)
+- **Template**: Elsevier CAS single-column (`cas-sc.cls`)
+- **Main file**: `Article 1/main.tex`
+- **Bibliography**: `Article 1/cas-refs.bib` (47 entries — thesis 43 + 4 added in Step 13.5: tibshirani1996regression, breiman2001random, scholkopf2001estimating, fernandez2018smote)
+- **Figures**: `Article 1/figs/` — includes `ulb_pr_curves_threshold.pdf`, `baf_pr_curves_threshold.pdf`, factorial heatmaps, decision-framework graphic
+- **Owns thesis content**: Results §1 (baseline) + §2 (threshold sensitivity, **centrepiece**) + §3 (full factorial) + §8 (bootstrap CIs + cost tables + decision framework)
+- **Status**: ✅ first draft complete; sent to Maryam for review (Step 14 pending)
+
+### Article 2 — Mechanistic / "Simple Trees Suffice" (Paper 2)
+- **Folder**: `Article 2/`
+- **Title (frozen 2026-05-14 after Step 19.5 reframe)**: *"Why Simple Tree-Based Models Suffice for Financial Fraud Detection: Mechanistic Evidence from SHAP–Attention Convergence and Cross-Domain Transfer"*
+- **Short title**: *"Why Simple Trees Suffice for Financial Fraud Detection"*
+- **Venue**: Applied Soft Computing (Elsevier, Scopus Q1) — switched from Neural Networks during reframe
+- **Template**: Elsevier CAS single-column (`cas-sc.cls`)
+- **Main file**: `Article 2/main.tex` (~9K words, 8 main figures, 7 main tables)
+- **Bibliography**: `Article 2/cas-refs.bib` (49 entries — Article 1's 47 + grinsztajn2022tree + caixeiro2025threshold placeholder)
+- **Figures**: `Article 2/figs/`
+  - `crossdomain_prauc.pdf` — RF cross-domain advantage line chart
+  - `smote_asymmetry.pdf` — FT-T vs CatBoost across 7 strategies × 2 datasets
+  - `shap_global.pdf`, `shap_beeswarm.pdf`, `shap_waterfall.pdf` — SHAP attribution
+  - `convergent_validity.pdf` — LGBM SHAP top-10 vs FT-T attention top-10 with overlap shading
+  - `attention_aggregate.png`, `attention_heatmap_fp.png` — Foggy Vision diagnostic
+- **Owns thesis content**: Results §4 (transformer robustness) + §5 (cross-domain) + §6 (SHAP) + §7 (attention diagnostics)
+- **Central argument**: 5-pillar "Simple Trees Suffice" — (1) no resampling penalty, (2) cross-domain parity/advantage, (3) stable explanations, (4) no headroom above ceiling, (5) ~20× training / ~37× tuning cheaper
+- **Methodological novelty**: convergent validity (SHAP↔Attention) imported from psychometric measurement theory — 5/10 features overlap, top-2 identical (`device_os`, `housing_status`)
+- **Status**: ✅ first draft (Step 19) → reframe (Step 19.5) → deep-review pass (commit `6c25574`) complete; awaiting Maryam review (Step 20 pending)
+- **Rejected interim titles**:
+  - "Mechanistic Understanding of Tabular Transformer Limitations..." (too transformer-centric; rejected 2026-05-14 morning)
+  - "Why LightGBM Generalises Better Than Tabular Transformers..." (the plan's original direction; rejected for being factually weak — LGBM does not literally beat FT-T cross-domain; RF is the real winner; CatBoost is the SMOTE-robust hero)
+
+---
+
 ## Git repository
 
 - Remote: `https://github.com/Olavo200100274/FraudDetection.git`
 - Branch: `main`
-- Last commit: `624ff0a` (Step 5: Write Conclusion chapter)
+- Last commit: `6c25574` (Article 2 deep-review pass: fix 7 factual inconsistencies)
+- Recent history (newest → oldest):
+  - `6c25574` Article 2 deep-review pass: fix 7 factual inconsistencies
+  - `1782c46` Step 19.5: Reframe Article 2 to "Simple Trees Suffice" + venue switch
+  - `9b2d912` Steps 15–19: Article 2 full first draft (mechanistic paper)
+  - `c5646e8` Article 1: pre-submission tweaks (decision framework framing + Future Work)
+  - `bd02145` Article 1: align section 4 prose with new PR-curves figure
 - Git LFS active for: `*.joblib`, `*.pt`, `*.npy`, `datasets/*.csv`
