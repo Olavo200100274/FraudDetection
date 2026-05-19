@@ -1,6 +1,6 @@
 # PLAN.md — Sequential plan to thesis + article
 **Last updated**: 2026-05-19  
-**Current position**: ✅ Steps 1–8 COMPLETE (thesis first pass) → ✅ Step 8.1 COMPLETE (Maryam thesis-side feedback round 1: new "Theoretical Background" chapter; files renumbered 4–7) → ✅ Step 8.2 COMPLETE (Maryam thesis-side feedback round 2, item 1/3: short-form captions added to all 18 figures and 6 Appendix-B subfigures via `[short]{long}` so the List of Figures becomes concise; long captions preserved bit-for-bit; items 2/3 = List of Tables and 3/3 = page references still pending) → ✅ Steps 9–13.5 COMPLETE → ✅ Step 13.6 COMPLETE (Article 1 Maryam round-1 writing-only revision; Article 1 back in review queue) → ✅ Steps 15–19.6 COMPLETE on Article 2 → Article 1 awaiting round-2 Maryam review (Step 14); Article 2 awaiting round-1 Maryam review (Step 20)
+**Current position**: ✅ Steps 1–8 COMPLETE (thesis first pass) → ✅ Step 8.1 COMPLETE (Maryam thesis-side round 1: new "Theoretical Background" chapter; files renumbered 4–7) → ✅ Step 8.2 COMPLETE (Maryam thesis-side round 2, item 1/3: short-form captions on all 18 figures + 6 Appendix-B subfigures) → ✅ Step 8.3 COMPLETE (Maryam thesis-side round 2, item 2/3: short-form captions on all 32 tables via `[short]{long}` so the List of Tables becomes concise; long captions preserved bit-for-bit except a small MINOR_EDIT to Table 26 dropping a `\ref{}`-only meta-sentence; item 3/3 = page references still pending) → ✅ Steps 9–13.5 COMPLETE → ✅ Step 13.6 COMPLETE (Article 1 Maryam round-1 writing-only revision; Article 1 back in review queue) → ✅ Steps 15–19.6 COMPLETE on Article 2 → Article 1 awaiting round-2 Maryam review (Step 14); Article 2 awaiting round-1 Maryam review (Step 20)
 
 ---
 
@@ -158,12 +158,43 @@ The plan record is preserved verbatim at
 `.claude_context/FiguresShortCaptionsPlan.md` for future reference.
 
 Items still pending in this round:
-- Item 2/3 — List of Tables (apply same `[short]{long}` treatment to the
-  thesis's 30 tables, with the same audit-then-add pattern).
-- Item 3/3 — page references where appropriate (still to be scoped: where
-  in the thesis does explicit `Section X (p. NN)`-style cross-referencing
-  add real value, and what is the LaTeX mechanism — `\pageref{}` or the
-  `hyperref`/`varioref` family).
+- Item 2/3 — List of Tables → addressed by Step 8.3 (below).
+- Item 3/3 — page references where appropriate (still pending — to be
+  scoped: where in the thesis does explicit `Section X (p. NN)`-style
+  cross-referencing add real value, and what is the LaTeX mechanism —
+  `\pageref{}` or the `hyperref`/`varioref` family).
+
+### ✅ Step 8.3 — Short caption forms for the List of Tables (Maryam thesis-side round 2, item 2/3, COMPLETE 2026-05-19)
+
+Direct counterpart of Step 8.2 applied to the thesis's tables. The List
+of Tables was previously cluttered because every entry showed the full
+long caption.
+
+A Phase 1 audit covered every table in `Overleaf/Chapters/*.tex` (no
+tables in Introduction, SoA, Theoretical Background, Methodology, or
+Conclusion). All 32 long captions were assessed; 31 are KEEP_AS_IS and
+preserved bit-for-bit. The single MINOR_EDIT is on Table 26
+(`tab:decision_framework`): the trailing meta-sentence with a `\ref{}`
+backreference was dropped (it described where the recommendations were
+derived from, not what the table shows; the same information appears in
+the prose immediately above the table) and the descriptive part gained
+the parenthetical `(model, imbalance strategy, threshold rule)` to
+mirror the three result columns.
+
+Thirty-two `[short]` arguments were added (30 in Results + 2 in Appendix
+A). Style: 4–10 words per short form; series parallelism applied across
+seven series (baseline ×4, ULB threshold sensitivity ×4, BAF threshold
+sensitivity ×4, ULB factorial ×3, BAF factorial ×3, cross-domain ×3,
+bootstrap CIs ×2, computational cost ×2, hyperparameter appendix ×2).
+The factorial series uses the template `<Metric> factorial on
+<Dataset>`; the threshold-sensitivity series uses `<Metric> by threshold
+rule on <Dataset>`.
+
+The plan record is preserved verbatim at
+`.claude_context/TablesShortCaptionsPlan.md` for future reference.
+
+Item still pending in Maryam round 2: item 3/3 — page references where
+appropriate.
 
 ---
 

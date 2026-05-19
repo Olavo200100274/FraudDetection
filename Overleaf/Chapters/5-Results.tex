@@ -41,7 +41,7 @@ The baseline establishes the performance ceiling each model can reach when only 
 Tables~\ref{tab:baseline_ulb} and~\ref{tab:ops_ulb} report the predictive and operational metrics on ULB, and Figure~\ref{fig:prauc_ulb} visualises the PR-AUC ranking.
 
 \noindent\begin{minipage}{\linewidth}\centering
-\captionof{table}{Baseline comparison on ULB 2013 (strategy\,=\,None, threshold\,=\,max-$F_2$).}
+\captionof{table}[Baseline metrics on ULB 2013]{Baseline comparison on ULB 2013 (strategy\,=\,None, threshold\,=\,max-$F_2$).}
 \label{tab:baseline_ulb}
 \begin{tabular}{l c c c c c c c c}
 \toprule
@@ -58,7 +58,7 @@ OCSVM      & 0.3354 & 0.9534 & 0.4145 & 0.5268 & 0.3058 & 0.6429 & 2.4887 & 0.00
 \end{minipage}
 
 \noindent\begin{minipage}{\linewidth}\centering
-\captionof{table}{Operational metrics on ULB 2013 (strategy\,=\,None, threshold\,=\,max-$F_2$).}
+\captionof{table}[Baseline operational metrics on ULB 2013]{Operational metrics on ULB 2013 (strategy\,=\,None, threshold\,=\,max-$F_2$).}
 \label{tab:ops_ulb}
 \begin{tabular}{l c c c c c}
 \toprule
@@ -89,7 +89,7 @@ CatBoost reaches the highest PR-AUC on ULB at 0.885, narrowly ahead of LGBM (0.8
 The picture changes considerably on BAF Base, where the absolute scores compress by roughly a factor of five (Tables~\ref{tab:baseline_baf} and~\ref{tab:ops_baf}; Figure~\ref{fig:prauc_baf}).
 
 \noindent\begin{minipage}{\linewidth}\centering
-\captionof{table}{Baseline comparison on BAF Base (strategy\,=\,None, threshold\,=\,max-$F_2$).}
+\captionof{table}[Baseline metrics on BAF Base]{Baseline comparison on BAF Base (strategy\,=\,None, threshold\,=\,max-$F_2$).}
 \label{tab:baseline_baf}
 \begin{tabular}{l c c c c c c c c}
 \toprule
@@ -106,7 +106,7 @@ OCSVM      & 0.0190 & 0.6279 & 0.0449 & 0.0805 & 0.0258 & 0.1714 & -40.26 & 0.02
 \end{minipage}
 
 \noindent\begin{minipage}{\linewidth}\centering
-\captionof{table}{Operational metrics on BAF Base (strategy\,=\,None, threshold\,=\,max-$F_2$).}
+\captionof{table}[Baseline operational metrics on BAF Base]{Operational metrics on BAF Base (strategy\,=\,None, threshold\,=\,max-$F_2$).}
 \label{tab:ops_baf}
 \begin{tabular}{l c c c c c}
 \toprule
@@ -148,7 +148,7 @@ The four threshold strategies introduced in Section~\ref{sec:threshold_study} of
 Tables~\ref{tab:threshold_ulb_f2}--\ref{tab:threshold_ulb_alert} report $F_2$, $F_1$, Recall, and Alert Rate as the threshold strategy changes, holding everything else constant.
 
 \noindent\begin{minipage}{\linewidth}\centering
-\captionof{table}{Threshold sensitivity on ULB 2013~--- $F_2$ by threshold strategy (strategy\,=\,None).}
+\captionof{table}[$F_2$ by threshold rule on ULB 2013]{Threshold sensitivity on ULB 2013~--- $F_2$ by threshold strategy (strategy\,=\,None).}
 \label{tab:threshold_ulb_f2}
 \begin{tabular}{l c c c c}
 \toprule
@@ -165,7 +165,7 @@ OCSVM      & 0.420 & 0.498 & 0.527 & 0.455 \\
 \end{minipage}
 
 \noindent\begin{minipage}{\linewidth}\centering
-\captionof{table}{Threshold sensitivity on ULB 2013~--- $F_1$ by threshold strategy (strategy\,=\,None).}
+\captionof{table}[$F_1$ by threshold rule on ULB 2013]{Threshold sensitivity on ULB 2013~--- $F_1$ by threshold strategy (strategy\,=\,None).}
 \label{tab:threshold_ulb_f1}
 \begin{tabular}{l c c c c}
 \toprule
@@ -182,7 +182,7 @@ OCSVM      & 0.241 & 0.418 & 0.414 & 0.422 \\
 \end{minipage}
 
 \noindent\begin{minipage}{\linewidth}\centering
-\captionof{table}{Threshold sensitivity on ULB 2013~--- Recall by threshold strategy (strategy\,=\,None).}
+\captionof{table}[Recall by threshold rule on ULB 2013]{Threshold sensitivity on ULB 2013~--- Recall by threshold strategy (strategy\,=\,None).}
 \label{tab:threshold_ulb_recall}
 \begin{tabular}{l c c c c}
 \toprule
@@ -199,7 +199,7 @@ OCSVM      & 0.827 & 0.571 & 0.643 & 0.480 \\
 \end{minipage}
 
 \noindent\begin{minipage}{\linewidth}\centering
-\captionof{table}{Threshold sensitivity on ULB 2013~--- Alert Rate (\%) by threshold strategy (strategy\,=\,None).}
+\captionof{table}[Alert Rate by threshold rule on ULB 2013]{Threshold sensitivity on ULB 2013~--- Alert Rate (\%) by threshold strategy (strategy\,=\,None).}
 \label{tab:threshold_ulb_alert}
 \begin{tabular}{l c c c c}
 \toprule
@@ -224,7 +224,7 @@ On ULB, threshold choice has a moderate but meaningful effect. The tree-based mo
 The picture on BAF Base is qualitatively different. Tables~\ref{tab:threshold_baf_f2}--\ref{tab:threshold_baf_alert} report the same four metrics; the gap between the worst and best threshold strategy is now an order of magnitude larger than on ULB.
 
 \noindent\begin{minipage}{\linewidth}\centering
-\captionof{table}{Threshold sensitivity on BAF Base~--- $F_2$ by threshold strategy (strategy\,=\,None).}
+\captionof{table}[$F_2$ by threshold rule on BAF Base]{Threshold sensitivity on BAF Base~--- $F_2$ by threshold strategy (strategy\,=\,None).}
 \label{tab:threshold_baf_f2}
 \begin{tabular}{l c c c c}
 \toprule
@@ -241,7 +241,7 @@ OCSVM      & 0.031 & 0.071 & 0.081 & 0.000 \\
 \end{minipage}
 
 \noindent\begin{minipage}{\linewidth}\centering
-\captionof{table}{Threshold sensitivity on BAF Base~--- $F_1$ by threshold strategy (strategy\,=\,None).}
+\captionof{table}[$F_1$ by threshold rule on BAF Base]{Threshold sensitivity on BAF Base~--- $F_1$ by threshold strategy (strategy\,=\,None).}
 \label{tab:threshold_baf_f1}
 \begin{tabular}{l c c c c}
 \toprule
@@ -258,7 +258,7 @@ OCSVM      & 0.031 & 0.046 & 0.045 & 0.000 \\
 \end{minipage}
 
 \noindent\begin{minipage}{\linewidth}\centering
-\captionof{table}{Threshold sensitivity on BAF Base~--- Recall by threshold strategy (strategy\,=\,None).}
+\captionof{table}[Recall by threshold rule on BAF Base]{Threshold sensitivity on BAF Base~--- Recall by threshold strategy (strategy\,=\,None).}
 \label{tab:threshold_baf_recall}
 \begin{tabular}{l c c c c}
 \toprule
@@ -275,7 +275,7 @@ OCSVM      & 0.030 & 0.108 & 0.171 & 0.000 \\
 \end{minipage}
 
 \noindent\begin{minipage}{\linewidth}\centering
-\captionof{table}{Threshold sensitivity on BAF Base~--- Alert Rate (\%) by threshold strategy (strategy\,=\,None).}
+\captionof{table}[Alert Rate by threshold rule on BAF Base]{Threshold sensitivity on BAF Base~--- Alert Rate (\%) by threshold strategy (strategy\,=\,None).}
 \label{tab:threshold_baf_alert}
 \begin{tabular}{l c c c c}
 \toprule
@@ -311,7 +311,7 @@ This section traverses the full grid of seven imbalance handling strategies $\ti
 Tables~\ref{tab:factorial_ulb_prauc}--\ref{tab:factorial_ulb_f2} report PR-AUC, ROC-AUC, and $F_2$ for every (model, strategy) cell on ULB. The best value per row is highlighted in bold.
 
 \noindent\begin{minipage}{\linewidth}\centering
-\captionof{table}{PR-AUC by model $\times$ strategy on ULB 2013.}
+\captionof{table}[PR-AUC factorial on ULB 2013]{PR-AUC by model $\times$ strategy on ULB 2013.}
 \label{tab:factorial_ulb_prauc}
 \begin{tabular}{l c c c c c c c}
 \toprule
@@ -327,7 +327,7 @@ FT-Trans.  & \textbf{0.856} & 0.650 & 0.836 & 0.845 & 0.845 & 0.772 & 0.783 \\
 \end{minipage}
 
 \noindent\begin{minipage}{\linewidth}\centering
-\captionof{table}{ROC-AUC by model $\times$ strategy on ULB 2013.}
+\captionof{table}[ROC-AUC factorial on ULB 2013]{ROC-AUC by model $\times$ strategy on ULB 2013.}
 \label{tab:factorial_ulb_rocauc}
 \begin{tabular}{l c c c c c c c}
 \toprule
@@ -343,7 +343,7 @@ FT-Trans.  & 0.975 & 0.976 & 0.958 & 0.973 & 0.973 & 0.951 & \textbf{0.983} \\
 \end{minipage}
 
 \noindent\begin{minipage}{\linewidth}\centering
-\captionof{table}{$F_2$ by model $\times$ strategy on ULB 2013.}
+\captionof{table}[$F_2$ factorial on ULB 2013]{$F_2$ by model $\times$ strategy on ULB 2013.}
 \label{tab:factorial_ulb_f2}
 \begin{tabular}{l c c c c c c c}
 \toprule
@@ -367,7 +367,7 @@ The headline pattern on ULB is that the baseline (no resampling) already produce
 Tables~\ref{tab:factorial_baf_prauc}--\ref{tab:factorial_baf_f2} report the same three metrics on BAF Base.
 
 \noindent\begin{minipage}{\linewidth}\centering
-\captionof{table}{PR-AUC by model $\times$ strategy on BAF Base.}
+\captionof{table}[PR-AUC factorial on BAF Base]{PR-AUC by model $\times$ strategy on BAF Base.}
 \label{tab:factorial_baf_prauc}
 \begin{tabular}{l c c c c c c c}
 \toprule
@@ -383,7 +383,7 @@ FT-Trans.  & \textbf{0.180} & 0.159 & 0.166 & 0.106 & 0.106 & 0.124 & 0.175 \\
 \end{minipage}
 
 \noindent\begin{minipage}{\linewidth}\centering
-\captionof{table}{ROC-AUC by model $\times$ strategy on BAF Base.}
+\captionof{table}[ROC-AUC factorial on BAF Base]{ROC-AUC by model $\times$ strategy on BAF Base.}
 \label{tab:factorial_baf_rocauc}
 \begin{tabular}{l c c c c c c c}
 \toprule
@@ -399,7 +399,7 @@ FT-Trans.  & \textbf{0.897} & 0.892 & 0.892 & 0.862 & 0.862 & 0.867 & 0.896 \\
 \end{minipage}
 
 \noindent\begin{minipage}{\linewidth}\centering
-\captionof{table}{$F_2$ by model $\times$ strategy on BAF Base.}
+\captionof{table}[$F_2$ factorial on BAF Base]{$F_2$ by model $\times$ strategy on BAF Base.}
 \label{tab:factorial_baf_f2}
 \begin{tabular}{l c c c c c c c}
 \toprule
@@ -456,7 +456,7 @@ Three patterns become immediately legible. First, the RUS column is uniformly re
 The asymmetry observed in Section~\ref{sec:factorial_results} between FT-Transformer and CatBoost under SMOTE invites a more direct comparison. This section restricts the factorial to the two architectures and asks whether the attention-based model is inherently more or less stable under data-level imbalance interventions than the strongest tree-based competitor.
 
 \noindent\begin{minipage}{\linewidth}\centering
-\captionof{table}{FT-Transformer vs.\ best tree (CatBoost): robustness to imbalance strategies on ULB 2013.}
+\captionof{table}[FT-Transformer vs.\ CatBoost robustness on ULB 2013]{FT-Transformer vs.\ best tree (CatBoost): robustness to imbalance strategies on ULB 2013.}
 \label{tab:transformer_robustness_ulb}
 \begin{tabular}{l cc cc}
 \toprule
@@ -477,7 +477,7 @@ Weights   & 0.783 & 0.813 & 0.875 & 0.838 \\
 \end{minipage}
 
 \noindent\begin{minipage}{\linewidth}\centering
-\captionof{table}{FT-Transformer vs.\ best tree (CatBoost): robustness to imbalance strategies on BAF Base.}
+\captionof{table}[FT-Transformer vs.\ CatBoost robustness on BAF Base]{FT-Transformer vs.\ best tree (CatBoost): robustness to imbalance strategies on BAF Base.}
 \label{tab:transformer_robustness_baf}
 \begin{tabular}{l cc cc}
 \toprule
@@ -513,7 +513,7 @@ The cross-domain experiment trains each model on BAF Base and evaluates it on th
 \subsection{Cross-Domain Performance}
 
 \noindent\begin{minipage}{\linewidth}\centering
-\captionof{table}{Cross-domain PR-AUC: trained on BAF Base, evaluated on each Variant (no retraining).}
+\captionof{table}[Cross-domain PR-AUC on BAF Variants]{Cross-domain PR-AUC: trained on BAF Base, evaluated on each Variant (no retraining).}
 \label{tab:crossdomain_prauc}
 \begin{tabular}{l c c c c c c}
 \toprule
@@ -530,7 +530,7 @@ OCSVM      & 0.0190 & 0.0167 & \textbf{0.0221} & 0.0178 & 0.0205 & 0.0166 \\
 \end{minipage}
 
 \noindent\begin{minipage}{\linewidth}\centering
-\captionof{table}{Cross-domain $F_2$: trained on BAF Base, evaluated on each Variant (no retraining).}
+\captionof{table}[Cross-domain $F_2$ on BAF Variants]{Cross-domain $F_2$: trained on BAF Base, evaluated on each Variant (no retraining).}
 \label{tab:crossdomain_f2}
 \begin{tabular}{l c c c c c c}
 \toprule
@@ -547,7 +547,7 @@ OCSVM      & 0.0805 & 0.0684 & \textbf{0.0934} & 0.0756 & 0.0883 & 0.0699 \\
 \end{minipage}
 
 \noindent\begin{minipage}{\linewidth}\centering
-\captionof{table}{Cross-domain ROC-AUC: trained on BAF Base, evaluated on each Variant (no retraining).}
+\captionof{table}[Cross-domain ROC-AUC on BAF Variants]{Cross-domain ROC-AUC: trained on BAF Base, evaluated on each Variant (no retraining).}
 \label{tab:crossdomain_rocauc}
 \begin{tabular}{l c c c c c c}
 \toprule
@@ -601,7 +601,7 @@ Figure~\ref{fig:shap_global} shows that LR, LGBM, and CatBoost concentrate their
 The Jaccard similarity of the top-10 feature sets between every pair of models quantifies how much the rankings agree.
 
 \noindent\begin{minipage}{\linewidth}\centering
-\captionof{table}{Jaccard similarity of top-10 SHAP features across model pairs (BAF Base).}
+\captionof{table}[Cross-model SHAP top-10 Jaccard agreement]{Jaccard similarity of top-10 SHAP features across model pairs (BAF Base).}
 \label{tab:shap_consistency}
 \begin{tabular}{l c c c c}
 \toprule
@@ -622,7 +622,7 @@ LGBM and CatBoost agree perfectly on the top-10 feature set (Jaccard $= 1.00$), 
 The same Jaccard analysis, run across the six BAF datasets (Base + Variants~I--V), tests whether feature importance ordering survives distribution shift.
 
 \noindent\begin{minipage}{\linewidth}\centering
-\captionof{table}{Jaccard similarity of top-10 SHAP features for LGBM across BAF Variants.}
+\captionof{table}[Cross-variant SHAP top-10 stability for LGBM]{Jaccard similarity of top-10 SHAP features for LGBM across BAF Variants.}
 \label{tab:shap_stability}
 \begin{tabular}{l c c c c c c}
 \toprule
@@ -721,7 +721,7 @@ The PR curves visually confirm the tabulated baseline rankings of Section~\ref{s
 \subsection{Decision Framework}
 
 \noindent\begin{minipage}{\linewidth}\centering
-\captionof{table}{Decision framework: recommended configuration by deployment scenario. Recommendations are derived from the experimental results presented in Sections~\ref{sec:baseline_results}--\ref{sec:shap_results}.}
+\captionof{table}[Decision framework by deployment scenario]{Decision framework: recommended (model, imbalance strategy, threshold rule) configuration by deployment scenario.}
 \label{tab:decision_framework}
 \begin{tabular}{p{4.2cm} l l l}
 \toprule
@@ -745,7 +745,7 @@ Table~\ref{tab:decision_framework} translates the experimental evidence into sev
 The bootstrap CIs in Tables~\ref{tab:ci_ulb} and~\ref{tab:ci_baf} quantify the sampling uncertainty of the baseline PR-AUC and ROC-AUC estimates.
 
 \noindent\begin{minipage}{\linewidth}\centering
-\captionof{table}{$95\%$ Bootstrap CI for PR-AUC and ROC-AUC on ULB 2013 (strategy\,=\,None, $1\,000$ iterations).}
+\captionof{table}[Bootstrap PR-AUC and ROC-AUC CIs on ULB 2013]{$95\%$ Bootstrap CI for PR-AUC and ROC-AUC on ULB 2013 (strategy\,=\,None, $1\,000$ iterations).}
 \label{tab:ci_ulb}
 \begin{tabular}{l c c c c}
 \toprule
@@ -762,7 +762,7 @@ OCSVM      & 0.335 & [0.252, 0.449] & 0.953 & [0.922, 0.979] \\
 \end{minipage}
 
 \noindent\begin{minipage}{\linewidth}\centering
-\captionof{table}{$95\%$ Bootstrap CI for PR-AUC and ROC-AUC on BAF Base (strategy\,=\,None, $1\,000$ iterations).}
+\captionof{table}[Bootstrap PR-AUC and ROC-AUC CIs on BAF Base]{$95\%$ Bootstrap CI for PR-AUC and ROC-AUC on BAF Base (strategy\,=\,None, $1\,000$ iterations).}
 \label{tab:ci_baf}
 \begin{tabular}{l c c c c}
 \toprule
@@ -785,7 +785,7 @@ On ULB the intervals are wide enough that several of the top three models' PR-AU
 The cost tables capture the operational reality that decisions about model selection cannot be made on accuracy alone.
 
 \noindent\begin{minipage}{\linewidth}\centering
-\captionof{table}{Computational cost on ULB 2013 (strategy\,=\,None). Tuning includes Optuna TPE (50 trials, 5-fold CV).}
+\captionof{table}[Computational cost on ULB 2013]{Computational cost on ULB 2013 (strategy\,=\,None). Tuning includes Optuna TPE (50 trials, 5-fold CV).}
 \label{tab:cost_ulb}
 \begin{tabular}{l r r r}
 \toprule
@@ -802,7 +802,7 @@ OCSVM      & --- & 98.1 & 10.117 \\
 \end{minipage}
 
 \noindent\begin{minipage}{\linewidth}\centering
-\captionof{table}{Computational cost on BAF Base (strategy\,=\,None). Tuning includes Optuna TPE (50 trials, 5-fold CV).}
+\captionof{table}[Computational cost on BAF Base]{Computational cost on BAF Base (strategy\,=\,None). Tuning includes Optuna TPE (50 trials, 5-fold CV).}
 \label{tab:cost_baf}
 \begin{tabular}{l r r r}
 \toprule
