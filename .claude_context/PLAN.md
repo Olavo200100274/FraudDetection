@@ -1,6 +1,6 @@
 # PLAN.md — Sequential plan to thesis + article
-**Last updated**: 2026-05-14  
-**Current position**: ✅ Steps 1–13.5 COMPLETE → THESIS DONE → Paper 1 draft submitted to Maryam → ✅ Steps 15–19 COMPLETE (first draft) → ✅ Step 19.5 COMPLETE (reframe to "Simple Trees Suffice" + venue switch to Applied Soft Computing + figure overhaul) → ✅ Step 19.6 COMPLETE (deep-review pass — 7 factual fixes, commit `6c25574`) → ready for Step 20 (Maryam review of Article 2)
+**Last updated**: 2026-05-19  
+**Current position**: ✅ Steps 1–13.5 COMPLETE → THESIS DONE → ✅ Step 13.6 COMPLETE (Maryam round-1 feedback on Article 1 — "too much itemize"; writing-only revision pass applied via the Maryam-authored revision prompt now stored at `.claude_context/RevisingPaperContext.md`; original preserved as `Article 1/main_old.tex`, revised version is now `Article 1/main.tex`) → Article 1 back in Maryam review queue → ✅ Steps 15–19 COMPLETE (first draft) → ✅ Step 19.5 COMPLETE (reframe to "Simple Trees Suffice" + venue switch to Applied Soft Computing + figure overhaul) → ✅ Step 19.6 COMPLETE (deep-review pass — 7 factual fixes, commit `6c25574`) → Article 2 awaiting Maryam round-1 review (Step 20)
 
 ---
 
@@ -126,6 +126,42 @@ Polish work driven by Overleaf review of the compiled draft and by feedback on v
 - **Float placement fix (thesis class)** — same minipage approach applied to `Overleaf/Chapters/3-Methodology.tex` (3 TikZ figures), `Overleaf/Chapters/4-Results.tex` (30 tables + 13 figures), and `Overleaf/Chapters/6-appendices.tex` (2 tables). Appendix B's 2 figures with `subfigure` content reverted to `figure[H]` because `subcaption` errors out outside a real float; `[H]` (from `float`, already in preamble) gives exact placement.
 - **Caption warning suppression** — added `\captionsetup{hypcap=false}` to `Overleaf/include/preamble.tex`; eliminates the "hypcap=true will be ignored" warning that `\captionof` triggers inside minipages (~12 warnings → 0).
 - **Results chapter prose revision (4-Results.tex)** — full pass: (1) removed every `\paragraph{Discussion.}` block (8 in total) and integrated their content into the surrounding narrative as flowing prose; (2) added a chapter-level overview paragraph that explains how the section order builds; (3) added lead-in sentences before each table/figure ("Tables X--Y report..." / "Figure X visualises...") and interpretive sentences after; (4) condensed §9 from "Discussion" (6 subsections, heavy duplication of per-section discussions) into "Synthesis and Threats to Validity" (one synthesis paragraph + 5-item validity list). File length: 1045 → 841 lines, with all 30 tables, 13 figures, 43 labels and 42 internal `\ref{}` preserved bit-for-bit.
+
+### ✅ Step 13.6 — Maryam round-1 writing-only revision pass (COMPLETE 2026-05-19)
+Maryam reviewed the first Article 1 draft and returned a single high-level note:
+*"it has too much itemize, it is strange!"*. She also authored a detailed revision
+prompt (preserved verbatim in `.claude_context/RevisingPaperContext.md`) covering:
+reducing thesis-like writing, removing excessive enumeration/itemize, deduplicating the
+four most-repeated ideas (fixed $\tau{=}0.5$ fails, threshold dominates,
+SMOTE = SMOTE+Tomek, threshold is first-order), replacing dramatic wording
+("catastrophic"/"destroying recall"/"detect nothing") with journal-grade equivalents,
+strengthening mechanistic interpretation in the Discussion, reframing the paper
+around score-space behaviour / probability compression / operating-point instability
+rather than the bare slogan "threshold tuning matters", tightening Introduction and
+Conclusion, and smoothing inter-subsection transitions.
+
+Applied the prompt as a pure writing revision (no experiments, numbers, tables,
+citations, figures, or labels touched). Concrete edits in the new
+`Article 1/main.tex`:
+- Models / Class Imbalance Strategies / Threshold Strategies sections converted from
+  `\begin{itemize}`/`\begin{enumerate}` lists to integrated prose paragraphs.
+- Introduction contributions block (C1–C4) converted from `enumerate` to a single
+  flowing paragraph.
+- Discussion §5.1 retitled "Score Geometry under Extreme Imbalance" (was "Threshold
+  Selection Dominates Model Selection") and rewritten around the
+  probability-compression mechanism rather than as a restatement of the threshold
+  tables.
+- Conclusion rewritten to open with the score-geometry message and discuss broader
+  implications, instead of repeating the BAF/ULB numerical findings already given in
+  Results and Discussion.
+- Dramatic wording replaced throughout ("catastrophic" → "operationally unsuitable";
+  "destroying recall" → "near-collapse of recall"; "detect nothing" → "flags almost
+  nothing"). The four over-repeated ideas now each appear with venue-grade rephrasing
+  rather than near-identical restatement across Intro/Results/Discussion/Conclusion.
+
+File policy: original draft preserved as `Article 1/main_old.tex`; revised draft is
+now `Article 1/main.tex` so Overleaf compiles the new version by default. The lone
+remaining itemize is the Highlights block, which is required by the ESWA template.
 
 ### Step 14 — Maryam review → iterate → submit
 

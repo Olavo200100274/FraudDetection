@@ -1,5 +1,5 @@
 # THESIS_STATE.md
-**Last updated**: 2026-05-14 (after Article 2 deep-review pass — commit `6c25574`)
+**Last updated**: 2026-05-19 (after Article 1 Maryam round-1 writing-only revision pass)
 
 ---
 
@@ -133,11 +133,12 @@ Originally a single TPAMI article. Maryam revised the plan: split into **two dis
 - **Short title**: *"Threshold Selection in Financial Fraud Detection"*
 - **Venue**: Expert Systems with Applications (Elsevier, Scopus Q1)
 - **Template**: Elsevier CAS single-column (`cas-sc.cls`)
-- **Main file**: `Article 1/main.tex`
+- **Main file**: `Article 1/main.tex` (writing-only revised draft as of Step 13.6, 2026-05-19; pre-revision version preserved as `Article 1/main_old.tex`)
 - **Bibliography**: `Article 1/cas-refs.bib` (47 entries — thesis 43 + 4 added in Step 13.5: tibshirani1996regression, breiman2001random, scholkopf2001estimating, fernandez2018smote)
 - **Figures**: `Article 1/figs/` — includes `ulb_pr_curves_threshold.pdf`, `baf_pr_curves_threshold.pdf`, factorial heatmaps, decision-framework graphic
 - **Owns thesis content**: Results §1 (baseline) + §2 (threshold sensitivity, **centrepiece**) + §3 (full factorial) + §8 (bootstrap CIs + cost tables + decision framework)
-- **Status**: ✅ first draft complete; sent to Maryam for review (Step 14 pending)
+- **Status**: ✅ first draft → ✅ Maryam round-1 feedback ("too much itemize") absorbed via writing-only revision pass (Step 13.6); back in Maryam review queue (Step 14 still pending — second review of revised draft)
+- **Reusable revision prompt**: stored verbatim in `.claude_context/RevisingPaperContext.md` (Maryam-authored). Applies to Article 2 with two section-specific adaptations (see header of that file).
 
 ### Article 2 — Mechanistic / "Simple Trees Suffice" (Paper 2)
 - **Folder**: `Article 2/`
