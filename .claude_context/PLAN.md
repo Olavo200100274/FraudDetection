@@ -1,6 +1,6 @@
 # PLAN.md — Sequential plan to thesis + article
 **Last updated**: 2026-05-19  
-**Current position**: ✅ Steps 1–13.5 COMPLETE → THESIS DONE → ✅ Step 13.6 COMPLETE (Maryam round-1 feedback on Article 1 — "too much itemize"; writing-only revision pass applied via the Maryam-authored revision prompt now stored at `.claude_context/RevisingPaperContext.md`; original preserved as `Article 1/main_old.tex`, revised version is now `Article 1/main.tex`) → Article 1 back in Maryam review queue → ✅ Steps 15–19 COMPLETE (first draft) → ✅ Step 19.5 COMPLETE (reframe to "Simple Trees Suffice" + venue switch to Applied Soft Computing + figure overhaul) → ✅ Step 19.6 COMPLETE (deep-review pass — 7 factual fixes, commit `6c25574`) → Article 2 awaiting Maryam round-1 review (Step 20)
+**Current position**: ✅ Steps 1–8 COMPLETE (thesis first pass) → ✅ Step 8.1 COMPLETE (Maryam round-1 thesis-side feedback: new "Theoretical Background" chapter inserted between SoA and Methodology; Methodology trimmed to project-specific protocol with cross-refs to the new chapter; chapter files renumbered to 4-Methodology, 5-Results, 6-conclusion, 7-appendices) → ✅ Steps 9–13.5 COMPLETE → ✅ Step 13.6 COMPLETE (Article 1 Maryam round-1 writing-only revision; Article 1 back in review queue) → ✅ Steps 15–19.6 COMPLETE on Article 2 → Article 1 awaiting round-2 Maryam review (Step 14); Article 2 awaiting round-1 Maryam review (Step 20)
 
 ---
 
@@ -72,6 +72,68 @@ Concrete fixes applied:
 - **Conclusion + Results** — softened "Class Weights is consistently safe across all model families / never degrades substantially" — LGBM on ULB drops 17% under Class Weights, contradicting the absolute claim. Now framed as "safest default, with caveat for LGBM on ULB"
 
 Threshold sensitivity tables (8 total) and SHAP Jaccard table audited and kept — each conveys complementary information not derivable from prose alone.
+
+### ✅ Step 8.1 — Add Theoretical Background chapter (Maryam thesis-side round-1, COMPLETE 2026-05-19)
+
+Maryam reviewed the thesis and observed that the Methodology chapter was mixing
+two distinct kinds of content: textbook-style theory (what each tool *is* and
+how it works in general) and project-specific application (how *this* study
+configured those tools). She asked for a structural split: a new chapter
+between State of the Art and Methodology to hold the toolkit definitions, so
+that the Methodology can focus exclusively on the project's protocol and
+cross-reference the new chapter when background is needed.
+
+User decisions in this round:
+- **Chapter name**: *Theoretical Background*.
+- **File numbering**: renumber all subsequent chapter files so filename index
+  matches chapter order.
+
+Concrete changes:
+1. **Renumbered chapter files (git-mv, history preserved)** in commit `c82384e`:
+   `3-Methodology.tex → 4-Methodology.tex`,
+   `4-Results.tex → 5-Results.tex`,
+   `5-conclusion.tex → 6-conclusion.tex`,
+   `6-appendices.tex → 7-appendices.tex`.
+   `Overleaf/main.tex` `\input{}` block updated to include the new slot.
+2. **Created** `Overleaf/Chapters/3-Theoretical Background.tex` (label
+   `sec:chapterTheoreticalBackground`) with seven sections that mirror, in
+   order, the tool families invoked by Methodology:
+   `sec:tb:models` (LR, RF, LightGBM, CatBoost, OCSVM, FT-Transformer);
+   `sec:tb:imbalance` (RUS, ROS, SMOTE family, Class Weights);
+   `sec:tb:metrics` (Precision, Recall, $F_\beta$, PR-AUC vs.\ ROC-AUC, calibration);
+   `sec:tb:thresholds` (fixed default, validation-optimal $F_\beta$, precision-constrained, alert-budget);
+   `sec:tb:hpo` (SMBO, TPE algorithm, pruning);
+   `sec:tb:shap` (Shapley values, axioms, TreeSHAP, LinearExplainer, GradientExplainer, Jaccard agreement).
+   No new citations introduced beyond those already in `references.bib`.
+   Attention-diagnostics theory was *not* migrated because it currently lives
+   in Results §7 (Article 2's owned content), not in Methodology — so the
+   originally-planned 8th section was dropped.
+3. **Trimmed** `Overleaf/Chapters/4-Methodology.tex`: stripped theoretical
+   passages from six sections (Models, Imbalance Strategies, Threshold Study,
+   Hyperparameter Tuning, Evaluation Metrics, Interpretability) and replaced
+   each with a one-paragraph project-specific statement plus a pointer to the
+   corresponding `\ref{sec:tb:*}` label. Existing Methodology labels
+   unchanged; existing TikZ figures and the leakage-free protocol untouched.
+   The three remaining `enumerate` blocks (contributions C1–C4, leakage-free
+   CV steps, cross-domain protocol steps) are project-specific procedural
+   lists and were kept as-is.
+4. **Updated** `Overleaf/Chapters/5-Results.tex` line 26 chapter-intro
+   cross-reference: formal metric definitions now point to
+   `\ref{sec:tb:metrics}` in the new chapter; the applied metric reporting
+   choices still point to `\ref{sec:metrics}` in Methodology.
+5. **Updated** `Overleaf/Chapters/1-Introduction.tex` Document Structure
+   section: added a paragraph describing the new Theoretical Background
+   chapter; rephrased the Methodology paragraph to reflect that the chapter
+   now describes "how the toolkit was applied" rather than restating each
+   tool.
+6. **No changes** to State of the Art, references.bib, glossary
+   (acronyms already cover all introduced terms), Conclusion, Appendices, or
+   either Article.
+
+Cross-reference health checked: every `\ref{sec:tb:*}` in Methodology and
+Results resolves to a label defined in `3-Theoretical Background.tex`; the
+single SoA cross-reference added in Methodology
+(`\ref{subsec:sota-dl-gbdt-debate}`) matches the existing SoA label.
 
 ---
 

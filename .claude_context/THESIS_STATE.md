@@ -1,5 +1,5 @@
 # THESIS_STATE.md
-**Last updated**: 2026-05-19 (after Article 1 Maryam round-1 writing-only revision pass)
+**Last updated**: 2026-05-19 (after Step 8.1 — new Theoretical Background chapter inserted between SoA and Methodology, files renumbered 4-Methodology / 5-Results / 6-conclusion / 7-appendices)
 
 ---
 
@@ -17,14 +17,15 @@ Overleaf/
 │   ├── epigraph.tex              # ✅ Donald Knuth quote (kept as-is)
 │   └── copyright.tex             # ✅ standard PT+EN text (no changes needed)
 ├── Chapters/
-│   ├── abstract/abstract-EN.tex  # ❌ PLACEHOLDER (needs writing + fix wrong keywords)
-│   ├── abstract/abstract-PT.tex  # ❌ PLACEHOLDER (Lorem Ipsum)
-│   ├── 1-Introduction.tex        # ✅ COMPLETE
-│   ├── 2-State of the Art.tex    # ✅ COMPLETE
-│   ├── 3-Methodology.tex         # ✅ COMPLETE
-│   ├── 4-Results.tex             # ✅ COMPLETE
-│   ├── 5-conclusion.tex          # ✅ COMPLETE
-│   └── 6-appendices.tex          # ❌ PLACEHOLDER (Lorem Ipsum — decide or remove)
+│   ├── abstract/abstract-EN.tex      # ❌ PLACEHOLDER (needs writing + fix wrong keywords)
+│   ├── abstract/abstract-PT.tex      # ❌ PLACEHOLDER (Lorem Ipsum)
+│   ├── 1-Introduction.tex            # ✅ COMPLETE
+│   ├── 2-State of the Art.tex        # ✅ COMPLETE
+│   ├── 3-Theoretical Background.tex  # ✅ COMPLETE (added Step 8.1, 2026-05-19)
+│   ├── 4-Methodology.tex             # ✅ COMPLETE (trimmed in Step 8.1; theory migrated to ch.3)
+│   ├── 5-Results.tex                 # ✅ COMPLETE
+│   ├── 6-conclusion.tex              # ✅ COMPLETE
+│   └── 7-appendices.tex              # ❌ PLACEHOLDER (Lorem Ipsum — decide or remove)
 ├── figures/baf/                  # 9 PDF figures + 3 PNG attention figures
 ├── figures/ulb/                  # 5 PDF figures
 ├── references/                   # curated PDF library (see REFERENCES_STATE.md)
@@ -39,12 +40,13 @@ Overleaf/
 |---------|--------|-------|
 | Abstract EN | ✅ | Complete — 4 paragraphs, ~280 words, 9 keywords |
 | Abstract PT | ✅ | Complete — faithful translation of EN |
-| 1-Introduction | ✅ | 5 sections: Context, Motivation, Objectives+RQs (×5), Research Approach, Document Structure. 8 citations. |
+| 1-Introduction | ✅ | 5 sections: Context, Motivation, Objectives+RQs (×5), Research Approach, Document Structure (updated Step 8.1 to describe the new ch.3). 8 citations. |
 | 2-State of the Art | ✅ | 7 sections, 43 BibTeX entries. Sec 5.3 carries Maryam's GBDT-vs-Transformer framing. Sec 7 maps 6 gaps to 6 contributions. |
-| 3-Methodology | ✅ | 11 sections, 3 TikZ figures (pipeline, leakage-free CV, cross-domain). Model and strategy selection now justified. |
-| 4-Results | ✅ | 9 sections: baseline, threshold, factorial, transformer robustness, cross-domain, SHAP, attention diagnostics, consolidated, **synthesis + threats to validity (renamed from "discussion" in Step 13.5)**. Prose revised so discussion is integrated inline rather than collected into per-section `\paragraph{Discussion.}` blocks. 30 tables, 13 figures, 43 labels. |
-| 5-Conclusion | ✅ | 4 sections: contributions summary, RQ answers (×5 with numbers), limitations (×5), future work (×5 concrete directions). |
-| 6-Appendices | ✅ | Complete — Appendix A: hyperparameter tables (ULB+BAF, all models); Appendix B: 6 attention bar charts (FP/FN cases) |
+| 3-Theoretical Background | ✅ | NEW (Step 8.1, 2026-05-19). 7 sections: Supervised Models, Class-Imbalance Strategies, Evaluation Metrics, Decision-Threshold Selection, Hyperparameter Optimisation, SHAP & Feature Attribution. Labels `sec:tb:{models,imbalance,metrics,thresholds,hpo,shap}`. Reuses existing citations only — no new BibTeX entries. |
+| 4-Methodology | ✅ | 11 sections, 3 TikZ figures (pipeline, leakage-free CV, cross-domain). In Step 8.1 the theoretical passages in Models / Imbalance / Threshold Study / HPO / Metrics / Interpretability were replaced with project-specific statements + cross-refs to `sec:tb:*` in ch.3. Project-specific protocol untouched. |
+| 5-Results | ✅ | 9 sections: baseline, threshold, factorial, transformer robustness, cross-domain, SHAP, attention diagnostics, consolidated, **synthesis + threats to validity (renamed from "discussion" in Step 13.5)**. Prose revised so discussion is integrated inline rather than collected into per-section `\paragraph{Discussion.}` blocks. 30 tables, 13 figures, 43 labels. Chapter-intro cross-ref updated in Step 8.1 to point at `sec:tb:metrics` for formal metric definitions. |
+| 6-Conclusion | ✅ | 4 sections: contributions summary, RQ answers (×5 with numbers), limitations (×5), future work (×5 concrete directions). |
+| 7-Appendices | ✅ | Complete — Appendix A: hyperparameter tables (ULB+BAF, all models); Appendix B: 6 attention bar charts (FP/FN cases) |
 
 ---
 
