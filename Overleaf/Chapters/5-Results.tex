@@ -76,7 +76,7 @@ OCSVM      & 0.00362 & 2.2698 & 0.2430 & 0.7041 & 284 \\
 
 \noindent\begin{minipage}{\linewidth}\centering
 \includegraphics[width=0.78\textwidth]{figures/ulb/prauc_bar_baseline.pdf}
-\captionof{figure}{PR-AUC for all models on ULB 2013 (baseline, Optuna, $F_2$ threshold).}
+\captionof{figure}[Baseline PR-AUC by model on ULB 2013]{PR-AUC for all models on ULB 2013 (baseline, Optuna, $F_2$ threshold).}
 \label{fig:prauc_ulb}
 \end{minipage}
 
@@ -124,7 +124,7 @@ OCSVM      & 0.07321 & 37.7328 & 0.0300 & 0.0136 & 1000 \\
 
 \noindent\begin{minipage}{\linewidth}\centering
 \includegraphics[width=0.78\textwidth]{figures/baf/prauc_bar_baseline.pdf}
-\captionof{figure}{PR-AUC for all models on BAF Base (baseline, Optuna, $F_2$ threshold).}
+\captionof{figure}[Baseline PR-AUC by model on BAF Base]{PR-AUC for all models on BAF Base (baseline, Optuna, $F_2$ threshold).}
 \label{fig:prauc_baf}
 \end{minipage}
 
@@ -422,25 +422,25 @@ The four heatmaps in Figures~\ref{fig:heatmap_ulb_prauc}--\ref{fig:heatmap_baf_f
 
 \noindent\begin{minipage}{\linewidth}\centering
 \includegraphics[width=0.85\textwidth]{figures/ulb/heatmap_prauc.pdf}
-\captionof{figure}{$\Delta$PR-AUC (strategy $-$ None) per model on ULB 2013.}
+\captionof{figure}[$\Delta$PR-AUC heatmap on ULB 2013]{$\Delta$PR-AUC (strategy $-$ None) per model on ULB 2013.}
 \label{fig:heatmap_ulb_prauc}
 \end{minipage}
 
 \noindent\begin{minipage}{\linewidth}\centering
 \includegraphics[width=0.85\textwidth]{figures/ulb/heatmap_f2.pdf}
-\captionof{figure}{$\Delta F_2$ (strategy $-$ None) per model on ULB 2013.}
+\captionof{figure}[$\Delta F_2$ heatmap on ULB 2013]{$\Delta F_2$ (strategy $-$ None) per model on ULB 2013.}
 \label{fig:heatmap_ulb_f2}
 \end{minipage}
 
 \noindent\begin{minipage}{\linewidth}\centering
 \includegraphics[width=0.85\textwidth]{figures/baf/heatmap_prauc.pdf}
-\captionof{figure}{$\Delta$PR-AUC (strategy $-$ None) per model on BAF Base.}
+\captionof{figure}[$\Delta$PR-AUC heatmap on BAF Base]{$\Delta$PR-AUC (strategy $-$ None) per model on BAF Base.}
 \label{fig:heatmap_baf_prauc}
 \end{minipage}
 
 \noindent\begin{minipage}{\linewidth}\centering
 \includegraphics[width=0.85\textwidth]{figures/baf/heatmap_f2.pdf}
-\captionof{figure}{$\Delta F_2$ (strategy $-$ None) per model on BAF Base.}
+\captionof{figure}[$\Delta F_2$ heatmap on BAF Base]{$\Delta F_2$ (strategy $-$ None) per model on BAF Base.}
 \label{fig:heatmap_baf_f2}
 \end{minipage}
 
@@ -584,13 +584,13 @@ The global view orders features by mean $|\text{SHAP}|$ across the test set.
 
 \noindent\begin{minipage}{\linewidth}\centering
 \includegraphics[width=0.88\textwidth]{figures/baf/shap_global.pdf}
-\captionof{figure}{Top-15 features by mean $|\text{SHAP}|$ on BAF Base for LR, LGBM, CatBoost, and FT-Transformer.}
+\captionof{figure}[Top-15 SHAP features by model on BAF Base]{Top-15 features by mean $|\text{SHAP}|$ on BAF Base for LR, LGBM, CatBoost, and FT-Transformer.}
 \label{fig:shap_global}
 \end{minipage}
 
 \noindent\begin{minipage}{\linewidth}\centering
 \includegraphics[width=0.88\textwidth]{figures/baf/shap_beeswarm.pdf}
-\captionof{figure}{SHAP beeswarm plot for LGBM on BAF Base. Each dot represents a test sample; colour indicates feature value (red\,=\,high, blue\,=\,low). Features are sorted by mean $|\text{SHAP}|$.}
+\captionof{figure}[SHAP beeswarm plot for LGBM on BAF Base]{SHAP beeswarm plot for LGBM on BAF Base. Each dot represents a test sample; colour indicates feature value (red\,=\,high, blue\,=\,low). Features are sorted by mean $|\text{SHAP}|$.}
 \label{fig:shap_beeswarm}
 \end{minipage}
 
@@ -644,13 +644,13 @@ The result is unequivocal: LGBM's top-10 feature ranking is identical on every B
 
 \noindent\begin{minipage}{\linewidth}\centering
 \includegraphics[width=0.95\textwidth]{figures/baf/shap_waterfall_tp_fp_fn.pdf}
-\captionof{figure}{SHAP contribution plots for representative True Positive, False Positive, and False Negative cases (LGBM on BAF Base). Red bars push toward fraud; blue bars push toward legitimate.}
+\captionof{figure}[Local SHAP explanations for TP, FP, and FN cases (LGBM)]{SHAP contribution plots for representative True Positive, False Positive, and False Negative cases (LGBM on BAF Base). Red bars push toward fraud; blue bars push toward legitimate.}
 \label{fig:shap_local}
 \end{minipage}
 
 \noindent\begin{minipage}{\linewidth}\centering
 \includegraphics[width=0.95\textwidth]{figures/baf/shap_dependence.pdf}
-\captionof{figure}{SHAP dependence plots for the top-3 features (LGBM on BAF Base). Each point is a test sample; colour intensity reflects SHAP value magnitude.}
+\captionof{figure}[SHAP dependence plots for the top-3 LGBM features]{SHAP dependence plots for the top-3 features (LGBM on BAF Base). Each point is a test sample; colour intensity reflects SHAP value magnitude.}
 \label{fig:shap_dependence}
 \end{minipage}
 
@@ -678,7 +678,7 @@ Diagnostics are computed on $200\,000$ test samples from BAF Base using the best
 
 \noindent\begin{minipage}{\linewidth}\centering
 \includegraphics[width=0.95\textwidth]{figures/baf/attention_aggregate.png}
-\captionof{figure}{Mean attention weight per feature token aggregated over all $200\,000$ BAF Base test samples. Categorical features are shown in orange; numerical features in blue. Error bars represent standard deviation across samples. A perfectly uniform distribution would assign $1/31 \approx 3.2\%$ to each token.}
+\captionof{figure}[Mean per-token attention on BAF Base (FT-Transformer)]{Mean attention weight per feature token aggregated over all $200\,000$ BAF Base test samples. Categorical features are shown in orange; numerical features in blue. Error bars represent standard deviation across samples. A perfectly uniform distribution would assign $1/31 \approx 3.2\%$ to each token.}
 \label{fig:attention_aggregate}
 \end{minipage}
 
@@ -688,7 +688,7 @@ Four statistics summarise the aggregate distribution shown in Figure~\ref{fig:at
 
 \noindent\begin{minipage}{\linewidth}\centering
 \includegraphics[width=0.80\textwidth]{figures/baf/attention_heatmap_fp.png}
-\captionof{figure}{Full $31{\times}31$ attention matrix for a representative False Positive case (score\,$\approx\tau = 0.0584$). Each cell $(i,j)$ shows the attention weight from query token $i$ to key token $j$. The near-uniform light-blue colouration across the entire matrix confirms the Foggy Vision pattern at the individual case level.}
+\captionof{figure}[Attention matrix for a borderline False Positive case]{Full $31{\times}31$ attention matrix for a representative False Positive case (score\,$\approx\tau = 0.0584$). Each cell $(i,j)$ shows the attention weight from query token $i$ to key token $j$. The near-uniform light-blue colouration across the entire matrix confirms the Foggy Vision pattern at the individual case level.}
 \label{fig:attention_heatmap_fp}
 \end{minipage}
 
@@ -712,7 +712,7 @@ This section consolidates the experimental evidence into three artefacts intende
 \includegraphics[width=0.48\textwidth]{figures/ulb/pr_curves_baseline.pdf}%
 \hfill
 \includegraphics[width=0.48\textwidth]{figures/baf/pr_curves_baseline.pdf}
-\captionof{figure}{Precision--Recall curves for all models on ULB~2013 (left) and BAF~Base (right) under the baseline setting (strategy\,=\,None). OCSVM is included for reference.}
+\captionof{figure}[Precision--Recall curves for all models on ULB and BAF]{Precision--Recall curves for all models on ULB~2013 (left) and BAF~Base (right) under the baseline setting (strategy\,=\,None). OCSVM is included for reference.}
 \label{fig:pr_curves_consolidated}
 \end{minipage}
 

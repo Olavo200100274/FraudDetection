@@ -130,24 +130,24 @@ Even at this individual, maximally uncertain level, no feature receives substant
 \centering
 \begin{subfigure}[b]{0.82\textwidth}
   \includegraphics[width=\textwidth]{figures/baf/attention_bar_FP_1.png}
-  \caption{FP Case 1 (score\,$=\,0.05844$, true label: Legitimate)}
+  \caption[FP Case 1]{FP Case 1 (score\,$=\,0.05844$, true label: Legitimate)}
 \end{subfigure}
 
 \vspace{0.5em}
 
 \begin{subfigure}[b]{0.82\textwidth}
   \includegraphics[width=\textwidth]{figures/baf/attention_bar_FP_2.png}
-  \caption{FP Case 2 (score\,$=\,0.05844$, true label: Legitimate)}
+  \caption[FP Case 2]{FP Case 2 (score\,$=\,0.05844$, true label: Legitimate)}
 \end{subfigure}
 
 \vspace{0.5em}
 
 \begin{subfigure}[b]{0.82\textwidth}
   \includegraphics[width=\textwidth]{figures/baf/attention_bar_FP_3.png}
-  \caption{FP Case 3 (score\,$=\,0.05844$, true label: Legitimate)}
+  \caption[FP Case 3]{FP Case 3 (score\,$=\,0.05844$, true label: Legitimate)}
 \end{subfigure}
 
-\caption{Per-feature attention weights for three False Positive cases (BAF Base). Orange bars\,=\,categorical features; blue bars\,=\,numerical features. Dashed line\,=\,uniform attention baseline ($1/31 \approx 3.2\%$). All cases have score just above $\tau = 0.058$.}
+\caption[Per-feature attention for three False Positive cases]{Per-feature attention weights for three False Positive cases (BAF Base). Orange bars\,=\,categorical features; blue bars\,=\,numerical features. Dashed line\,=\,uniform attention baseline ($1/31 \approx 3.2\%$). All cases have score just above $\tau = 0.058$.}
 \label{fig:attention_bar_fp}
 \end{figure}
 
@@ -157,23 +157,23 @@ Even at this individual, maximally uncertain level, no feature receives substant
 \centering
 \begin{subfigure}[b]{0.82\textwidth}
   \includegraphics[width=\textwidth]{figures/baf/attention_bar_FN_1.png}
-  \caption{FN Case 1 (score\,$=\,0.05842$, true label: Fraud)}
+  \caption[FN Case 1]{FN Case 1 (score\,$=\,0.05842$, true label: Fraud)}
 \end{subfigure}
 
 \vspace{0.5em}
 
 \begin{subfigure}[b]{0.82\textwidth}
   \includegraphics[width=\textwidth]{figures/baf/attention_bar_FN_2.png}
-  \caption{FN Case 2 (score\,$=\,0.05829$, true label: Fraud)}
+  \caption[FN Case 2]{FN Case 2 (score\,$=\,0.05829$, true label: Fraud)}
 \end{subfigure}
 
 \vspace{0.5em}
 
 \begin{subfigure}[b]{0.82\textwidth}
   \includegraphics[width=\textwidth]{figures/baf/attention_bar_FN_3.png}
-  \caption{FN Case 3 (score\,$=\,0.05828$, true label: Fraud)}
+  \caption[FN Case 3]{FN Case 3 (score\,$=\,0.05828$, true label: Fraud)}
 \end{subfigure}
 
-\caption{Per-feature attention weights for three False Negative cases (BAF Base). Orange bars\,=\,categorical features; blue bars\,=\,numerical features. Dashed line\,=\,uniform attention baseline ($1/31 \approx 3.2\%$). All cases have score just below $\tau = 0.058$. The Foggy Vision pattern is consistent across FP and FN cases, confirming that the model distributes attention broadly regardless of prediction outcome.}
+\caption[Per-feature attention for three False Negative cases]{Per-feature attention weights for three False Negative cases (BAF Base). Orange bars\,=\,categorical features; blue bars\,=\,numerical features. Dashed line\,=\,uniform attention baseline ($1/31 \approx 3.2\%$). All cases have score just below $\tau = 0.058$. The Foggy Vision pattern is consistent across FP and FN cases, confirming that the model distributes attention broadly regardless of prediction outcome.}
 \label{fig:attention_bar_fn}
 \end{figure}

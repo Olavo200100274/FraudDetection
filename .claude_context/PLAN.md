@@ -1,6 +1,6 @@
 # PLAN.md — Sequential plan to thesis + article
 **Last updated**: 2026-05-19  
-**Current position**: ✅ Steps 1–8 COMPLETE (thesis first pass) → ✅ Step 8.1 COMPLETE (Maryam round-1 thesis-side feedback: new "Theoretical Background" chapter inserted between SoA and Methodology; Methodology trimmed to project-specific protocol with cross-refs to the new chapter; chapter files renumbered to 4-Methodology, 5-Results, 6-conclusion, 7-appendices) → ✅ Steps 9–13.5 COMPLETE → ✅ Step 13.6 COMPLETE (Article 1 Maryam round-1 writing-only revision; Article 1 back in review queue) → ✅ Steps 15–19.6 COMPLETE on Article 2 → Article 1 awaiting round-2 Maryam review (Step 14); Article 2 awaiting round-1 Maryam review (Step 20)
+**Current position**: ✅ Steps 1–8 COMPLETE (thesis first pass) → ✅ Step 8.1 COMPLETE (Maryam thesis-side feedback round 1: new "Theoretical Background" chapter; files renumbered 4–7) → ✅ Step 8.2 COMPLETE (Maryam thesis-side feedback round 2, item 1/3: short-form captions added to all 18 figures and 6 Appendix-B subfigures via `[short]{long}` so the List of Figures becomes concise; long captions preserved bit-for-bit; items 2/3 = List of Tables and 3/3 = page references still pending) → ✅ Steps 9–13.5 COMPLETE → ✅ Step 13.6 COMPLETE (Article 1 Maryam round-1 writing-only revision; Article 1 back in review queue) → ✅ Steps 15–19.6 COMPLETE on Article 2 → Article 1 awaiting round-2 Maryam review (Step 14); Article 2 awaiting round-1 Maryam review (Step 20)
 
 ---
 
@@ -134,6 +134,36 @@ Cross-reference health checked: every `\ref{sec:tb:*}` in Methodology and
 Results resolves to a label defined in `3-Theoretical Background.tex`; the
 single SoA cross-reference added in Methodology
 (`\ref{subsec:sota-dl-gbdt-debate}`) matches the existing SoA label.
+
+### ✅ Step 8.2 — Short caption forms for the List of Figures (Maryam thesis-side round 2, item 1/3, COMPLETE 2026-05-19)
+
+Maryam pointed out that the List of Figures was cluttered because every
+entry was the full long caption. She asked for two things per figure:
+(a) confirmation that the long caption text is still appropriate; and
+(b) addition of a `[short]{long}` LaTeX optional argument so the LoF entry
+becomes concise while the in-page caption stays detailed.
+
+User decisions in this round:
+- Subfigures in Appendix B also receive short forms.
+
+A Phase 1 audit covered every figure in `Overleaf/Chapters/*.tex` (no
+figures in Introduction, SoA, Theoretical Background, or Conclusion). All
+18 long captions were assessed as KEEP_AS_IS and preserved bit-for-bit.
+Twenty-four `[short]` arguments were added (3 in Methodology + 13 in
+Results + 2 outer + 6 subcaptions in Appendix B). Style: 6–10 words per
+short form; series parallelism for the four ΔPR-AUC/ΔF2 heatmaps
+(§5.3–§5.6) and for the FP/FN subfigure pairs in Appendix B.
+
+The plan record is preserved verbatim at
+`.claude_context/FiguresShortCaptionsPlan.md` for future reference.
+
+Items still pending in this round:
+- Item 2/3 — List of Tables (apply same `[short]{long}` treatment to the
+  thesis's 30 tables, with the same audit-then-add pattern).
+- Item 3/3 — page references where appropriate (still to be scoped: where
+  in the thesis does explicit `Section X (p. NN)`-style cross-referencing
+  add real value, and what is the LaTeX mechanism — `\pageref{}` or the
+  `hyperref`/`varioref` family).
 
 ---
 
