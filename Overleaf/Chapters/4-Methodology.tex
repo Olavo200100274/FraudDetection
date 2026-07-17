@@ -1,28 +1,50 @@
 ﻿\chapter{Methodology}
 \label{sec:chapterMethodology}
 
-This chapter describes the experimental methodology adopted in this thesis. The theoretical background for the learning algorithms, imbalance interventions, evaluation metrics, threshold rules, hyperparameter optimisation procedure, and feature-attribution estimators referenced throughout is collected in the preceding Chapter~\ref{sec:chapterTheoreticalBackground}; the present chapter focuses on how these tools were configured and applied in the specific context of this study, and cross-references the relevant section of the theoretical background whenever a definition is invoked.
+This chapter describes the experimental methodology adopted in the thesis. Chapter~\ref{sec:chapterTheoreticalBackground} (p.~\pageref{sec:chapterTheoreticalBackground}) defines the learning algorithms, imbalance interventions, evaluation metrics, threshold rules, hyperparameter optimisation procedure, and feature-attribution estimators. The present chapter explains how those elements were configured and applied in this study.
 
-Section~\ref{sec:objective} states the research objectives and the overall experimental design. Sections~\ref{sec:datasets}--\ref{sec:models} introduce the datasets and the models under study. Sections~\ref{sec:imbalance_strategies}--\ref{sec:protocol} detail the imbalance handling strategies and the leakage-free evaluation protocol. Sections~\ref{sec:threshold_study}--\ref{sec:tuning} address the threshold selection study and the hyperparameter tuning strategy. Section~\ref{sec:cross_domain} describes the cross-domain generalisation experiments. Finally, Sections~\ref{sec:metrics}--\ref{sec:interpretability} present the evaluation metrics actually reported, the reproducibility provisions, and the interpretability analysis.
+Section~\ref{sec:objective} links the research questions to the overall experimental design. Sections~\ref{sec:datasets}--\ref{sec:models} introduce the datasets and models, while Sections~\ref{sec:imbalance_strategies}--\ref{sec:protocol} describe the imbalance interventions and leakage-free evaluation protocol. Sections~\ref{sec:threshold_study}--\ref{sec:tuning} specify threshold selection and hyperparameter optimisation. Section~\ref{sec:cross_domain} defines the BAF transfer experiment, and Sections~\ref{sec:metrics}--\ref{sec:interpretability} document the reported metrics, reproducibility provisions, and interpretability analyses.
 
 % ──────────────────────────────────────────────────────────────────────────
 \section{Research Objective and Experimental Design}
 \label{sec:objective}
 % ──────────────────────────────────────────────────────────────────────────
 
-This thesis investigates fraud detection in financial transactions under extreme class imbalance. The work is structured around four complementary research contributions:
+This thesis investigates fraud detection in financial transactions under extreme class imbalance. The work is structured around six complementary research contributions:
 
 \begin{enumerate}
-  \item \textbf{Unified model comparison.} Compare classical Machine Learning (ML) models and a Transformer-based tabular model across distinct fraud domains using a single, leakage-free evaluation protocol.
+  \item \textbf{Unified model comparison.} Compare classical machine learning models and a transformer-based tabular model across distinct fraud datasets using a shared leakage-free outer holdout, common metrics, and model-appropriate validation procedures.
 
-  \item \textbf{Threshold selection as a first-class experimental variable.} Systematically study how the choice of decision threshold strategy affects model rankings and operational metrics, addressing a gap in the fraud detection literature where threshold selection is often implicit or applied on the test set (introducing leakage).
+  \item \textbf{Threshold selection as a first-class experimental variable.} Examine how the decision-threshold rule affects model rankings and operational metrics using validation-only selection.
 
-  \item \textbf{Full factorial analysis of imbalance handling.} Evaluate $s$ balancing strategies $\times$ $m$ model families $\times$ $d$ datasets in a structured factorial design, producing a practitioner-oriented recommendation framework for when and for which model each strategy helps.
+  \item \textbf{Full factorial analysis of imbalance handling.} Evaluate seven imbalance strategies $\times$ five supervised model families $\times$ two datasets in a structured design, documenting how each intervention changes the observed metrics.
 
-  \item \textbf{Cross-domain generalization under distribution shift.} Assess model robustness by training on one dataset and evaluating on related datasets with different distributional characteristics, simulating a realistic deployment scenario where a fraud model trained in one context is applied in another.
+  \item \textbf{Cross-domain generalisation under controlled BAF conditions.} Assess robustness by training on BAF Base and evaluating, without retraining, on the five BAF Variants that alter group-size, prevalence, separability, or temporal conditions.
+
+  \item \textbf{SHAP feature-set consistency.} Compare top-feature sets from architecture-compatible SHAP explainers for Logistic Regression, LightGBM, and CatBoost, and assess the stability of the Base-trained LGBM top-feature set across BAF Variant test distributions.
+
+  \item \textbf{FT-Transformer attention diagnostics.} Characterise the concentration of last-layer, head-averaged \texttt{[CLS]} attention across BAF feature tokens as a descriptive diagnostic that is separate from SHAP feature attribution.
 \end{enumerate}
 
-In addition, the study analyses performance--interpretability trade-offs through SHAP-based explanations.
+Contributions~5 and~6 form the two complementary components of RQ5. Table~\ref{tab:rq_design_map} shows how all five research questions are operationalised and where their evidence is reported.
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{Alignment between research questions, experimental operations, and Results sections.}
+\label{tab:rq_design_map}
+\begin{tabular}{p{0.08\linewidth} p{0.52\linewidth} p{0.27\linewidth}}
+\toprule
+\textbf{RQ} & \textbf{Experimental operationalisation} & \textbf{Primary evidence} \\
+\midrule
+RQ1 & Baseline comparison of the six model families under the shared outer holdout and model-specific inner validation. & Section~\ref{sec:baseline_results} \\
+RQ2 & Comparison of fixed, max-$F_1$, max-$F_2$, and precision-constrained threshold rules selected within DEV. & Section~\ref{sec:threshold_sensitivity} \\
+RQ3 & Factorial comparison of seven imbalance strategies across five supervised models and two datasets, followed by a focused FT-Transformer--CatBoost comparison. & Sections~\ref{sec:factorial_results} and~\ref{sec:transformer_imbalance} \\
+RQ4 & Evaluation of fixed BAF Base-trained models and thresholds on Variant test distributions without retraining. & Section~\ref{sec:cross_domain_results} \\
+RQ5 & SHAP top-feature-set comparisons for compatible explainers and a separate descriptive FT-Transformer attention diagnostic. & Sections~\ref{sec:shap_results} and~\ref{sec:attention_diagnostics} \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 Figure~\ref{fig:pipeline} provides a high-level overview of the end-to-end experimental pipeline described in the remainder of this chapter.
 
@@ -77,15 +99,15 @@ Figure~\ref{fig:pipeline} provides a high-level overview of the end-to-end exper
 % ── DEV zone ──
 \node[box, fill=clrPrep, below=0.85cm of split] (prep)
     {3.\ Preprocessing\\[-2pt]
-     \fontsize{7}{8}\selectfont Imputation $\to$ Scaling $\to$ One-Hot encoding (categorical)};
+     \fontsize{7}{8}\selectfont Classical/OCSVM: impute, scale, one-hot \;\;$\cdot$\;\; FT: scale numerical, ordinal categories};
 
 \node[box, fill=clrTune, below=of prep] (tune)
-    {4.\ Hyperparameter Tuning (Optuna)\\[-2pt]
+    {4.\ Supervised-model Hyperparameter Tuning (Optuna)\\[-2pt]
      \fontsize{7}{8}\selectfont TPE sampler \;\;$\cdot$\;\; 50 trials \;\;$\cdot$\;\; PR-AUC objective};
 
 \node[box, fill=clrThresh, text=black, below=of tune] (thresh)
-    {5.\ Threshold Selection (5-Fold CV)\\[-2pt]
-     \fontsize{7}{8}\selectfont max-$F_2$ per fold $\to$ median $\tau$ across folds};
+    {5.\ Validation and Threshold Selection\\[-2pt]
+     \fontsize{7}{8}\selectfont Classical/OCSVM: 5-fold median $\tau$ \;\;$\cdot$\;\; FT: single DEV holdout $\tau$};
 
 % ── Factorial annotation ──
 \node[smallbox, fill=clrFact!80, text=clrFactBorder, draw=clrFactBorder,
@@ -101,11 +123,11 @@ Figure~\ref{fig:pipeline} provides a high-level overview of the end-to-end exper
 % ── TEST zone ──
 \node[box, fill=clrFinal, below=1.0cm of fact] (final)
     {6.\ Final Training\\[-2pt]
-     \fontsize{7}{8}\selectfont Full training partition \;\;$\cdot$\;\; best hyperparameters};
+     \fontsize{7}{8}\selectfont Full training partition \;\;$\cdot$\;\; selected configuration};
 
 \node[box, fill=clrEval, below=of final] (eval)
     {7.\ Held-Out Test Evaluation\\[-2pt]
-     \fontsize{7}{8}\selectfont Apply median $\tau$ \;\;$\cdot$\;\; Bootstrap 95\% CI ($B{=}1000$)};
+     \fontsize{7}{8}\selectfont Apply validation-derived $\tau$ \;\;$\cdot$\;\; Bootstrap 95\% CI ($B{=}1000$)};
 
 % TEST zone background
 \begin{scope}[on background layer]
@@ -115,8 +137,8 @@ Figure~\ref{fig:pipeline} provides a high-level overview of the end-to-end exper
 
 % ── SHAP ──
 \node[box, fill=clrShap, below=1.0cm of eval] (shap)
-    {8.\ Explainability (SHAP)\\[-2pt]
-     \fontsize{7}{8}\selectfont Global feature importance \;\;$\cdot$\;\; Local explanations (TP, FP, FN)};
+    {8.\ Interpretability Analyses\\[-2pt]
+     \fontsize{7}{8}\selectfont SHAP feature sets and local cases \;\;$\cdot$\;\; FT attention diagnostic};
 
 % ── Arrows ──
 \draw[arrow] (data) -- (split);
@@ -129,7 +151,7 @@ Figure~\ref{fig:pipeline} provides a high-level overview of the end-to-end exper
 \draw[arrow] (eval) -- (shap);
 
 \end{tikzpicture}
-\captionof{figure}[End-to-end experimental pipeline for fraud detection]{End-to-end experimental pipeline for fraud detection under extreme class imbalance. Stages~3--5 operate exclusively on the DEV partition (80\%) via inner cross-validation; stages~6--7 provide a single unbiased evaluation on the held-out TEST set (20\%); stage~8 adds post-hoc explainability via SHAP.}
+\captionof{figure}[End-to-end experimental pipeline for fraud detection]{End-to-end experimental pipeline for fraud detection under extreme class imbalance. Stages~3--5 operate exclusively on the DEV partition (80\%): classical models and OCSVM use five-fold validation, whereas FT-Transformer uses a single internal holdout. Stages~6--7 provide one evaluation on the untouched TEST partition (20\%). Stage~8 comprises SHAP for the linear and tree-based models and a separate attention diagnostic for FT-Transformer.}
 \label{fig:pipeline}
 \end{minipage}\par\medskip
 \clearpage
@@ -143,28 +165,34 @@ Figure~\ref{fig:pipeline} provides a high-level overview of the end-to-end exper
 The ULB dataset contains European credit card transactions with anonymised features (PCA components V1--V28, plus \texttt{Time} and \texttt{Amount}) and a binary target indicating fraud. The dataset exhibits extreme class imbalance ($\approx$0.17\% fraud).
 
 \paragraph{Bank Account Fraud (BAF) Suite (NeurIPS 2022).}
-The BAF suite contains a Base dataset and five variants (Variant~I--V) designed to stress-test model robustness under distribution shifts and bias-related conditions. Each dataset comprises $\approx$1\,000\,000 instances with mixed numerical and categorical variables (5 categorical features: \texttt{payment\_type}, \texttt{employment\_status}, \texttt{housing\_status}, \texttt{source}, \texttt{device\_os}) and a binary label \texttt{fraud\_bool} ($\approx$1.1\% fraud). The six datasets share a common core of 32 features; Variants~III and~V include two additional synthetic columns (\texttt{x1}, \texttt{x2}), which are dropped in cross-domain experiments to maintain a consistent feature space across all six datasets.
+The BAF suite contains a Base dataset and five variants (Variant~I--V) designed to stress-test models under controlled bias and distributional conditions. Each dataset comprises $\approx$1\,000\,000 instances with mixed numerical and categorical variables (5 categorical features: \texttt{payment\_type}, \texttt{employment\_status}, \texttt{housing\_status}, \texttt{source}, \texttt{device\_os}) and a binary label \texttt{fraud\_bool} ($\approx$1.1\% fraud in Base). The raw Base file contains 32 columns, including the target and the \texttt{month} field. The pipeline excludes both fields from the predictors, yielding 30 modelling features. Variants~III and~V additionally contain \texttt{x1} and \texttt{x2}; these synthetic columns are also excluded so that all Base-to-Variant evaluations use the same 30-feature input.
 
 \paragraph{Cross-dataset compatibility note.}
-The ULB and BAF datasets have incompatible feature spaces (PCA-anonymised vs.\ real-world features). Therefore, cross-dataset transfer between ULB and BAF is not feasible. Cross-domain generalization is studied \emph{within} the BAF suite, where the shared feature space isolates the effect of distribution shift from feature engineering differences.
+The ULB and BAF datasets have incompatible feature spaces (PCA-anonymised vs.\ semantic features). Therefore, cross-dataset transfer between ULB and BAF is not feasible. Cross-domain generalisation is studied \emph{within} the BAF suite, where a shared modelling feature space enables Base-trained models to be evaluated on each controlled variant.
 
 % ──────────────────────────────────────────────────────────────────────────
 \section{Models}
 \label{sec:models}
 % ──────────────────────────────────────────────────────────────────────────
 
-Six supervised model families are evaluated: Logistic Regression (LR), Random Forest (RF), LightGBM (LGBM)~\cite{ke2017lightgbm}, CatBoost (CB)~\cite{prokhorenkova2018catboost}, One-Class SVM (OCSVM), and the Feature Tokenizer Transformer (FT-Transformer)~\cite{gorishniy2021revisiting}. Definitions of each architecture are given in Section~\ref{sec:tb:models}.
+Six model families are evaluated: five supervised classifiers --- Logistic Regression (LR), Random Forest (RF), LightGBM (LGBM)~\cite{ke2017lightgbm}, CatBoost (CB)~\cite{prokhorenkova2018catboost}, and the Feature Tokenizer Transformer (FT-Transformer)~\cite{gorishniy2021revisiting} --- together with One-Class SVM (OCSVM) as an unsupervised anomaly-detection baseline. Definitions of each architecture are given in Section~\ref{sec:tb:models}.
 
-The selection is designed to cover four levels of model capacity --- linear (LR), bagged trees (RF), gradient-boosted trees (LGBM and CB), and an attention-based deep network (FT-Transformer) --- together with an unsupervised anomaly-detection baseline (OCSVM). The two gradient-boosted implementations are kept distinct rather than treated as interchangeable: LightGBM is the speed-leaning reference for tabular data and CatBoost is the categorical-friendly reference, and their occasional disagreement on the present datasets is itself an experimental signal. OCSVM is included specifically to quantify the value of supervised fraud labels relative to a purely unsupervised regime, and is therefore excluded from the imbalance-strategy and class-weighting comparisons. Including the FT-Transformer alongside the four classical families allows the thesis to test whether attention-based architectures are inherently more or less robust to extreme class imbalance than tree-based ensembles on tabular fraud data --- a question that the State of the Art (Section~\ref{subsec:sota-dl-gbdt-debate}) identifies as open in the literature.
+The selection covers four supervised approaches --- linear classification (LR), bagged trees (RF), gradient-boosted trees (LGBM and CB), and an attention-based deep network (FT-Transformer) --- together with the OCSVM reference. The two gradient-boosted implementations are retained separately: LightGBM provides a computationally efficient tabular model, whereas CatBoost uses a distinct boosting procedure. OCSVM quantifies performance without supervised fraud labels and is therefore excluded from the imbalance-strategy and class-weighting comparisons. Including FT-Transformer alongside the four classical supervised families allows their observed responses to the implemented imbalance interventions to be compared without assuming that any difference is inherent to the architecture.
+
+\paragraph{Model-specific preprocessing.}
+The classical models and OCSVM use a shared \texttt{ColumnTransformer}: numerical variables are mean-imputed and standardised, while categorical variables are mode-imputed and one-hot encoded. Consequently, although CatBoost supports native categorical processing in general, that capability is not used in this experiment. FT-Transformer follows a separate input path in which numerical variables are mean-imputed and standardised and categorical variables are ordinally encoded as integer embedding indices. Each preprocessor is fitted only on the relevant training partition.
 
 % ──────────────────────────────────────────────────────────────────────────
 \section{Imbalance Handling Strategies}
 \label{sec:imbalance_strategies}
 % ──────────────────────────────────────────────────────────────────────────
 
-To address extreme class imbalance, seven strategies are evaluated for the five supervised model families (LR, RF, LGBM, CB, FT-Transformer): an unmodified baseline (\textbf{None}); Random Under-Sampling (\textbf{RUS}) and Random Over-Sampling (\textbf{ROS}); the synthetic-minority oversampler \textbf{SMOTE}~\cite{chawla2002smote} and its two cleaning-augmented variants \textbf{SMOTE+Tomek Links} and \textbf{SMOTEENN}~\cite{batista2004balancing}; and cost-sensitive \textbf{Class Weights}. The selection covers the three main paradigms identified in the literature~\cite{hegarcia2009learning, krawczyk2016learning} --- undersampling, oversampling (with the most widely cited synthetic variants), and cost-sensitive adjustment --- together with the unmodified baseline that isolates the effect of each intervention. The algorithms themselves are defined in Section~\ref{sec:tb:imbalance}.
+To address extreme class imbalance, seven strategies are evaluated for the five supervised model families (LR, RF, LGBM, CB, and FT-Transformer): an unmodified baseline (\textbf{None}); random undersampling (\textbf{RUS}) and random oversampling (\textbf{ROS}); \textbf{SMOTE}~\cite{chawla2002smote} and its two cleaning-augmented variants, \textbf{SMOTE+Tomek Links} and \textbf{SMOTEENN}~\cite{batista2004balancing}; and cost-sensitive \textbf{Class Weights}. The selection covers undersampling, oversampling, and cost-sensitive adjustment~\cite{hegarcia2009learning, krawczyk2016learning}, together with the unmodified reference needed to measure changes associated with each intervention. Section~\ref{sec:tb:imbalance} defines the algorithms.
 
 OCSVM is evaluated separately (no resampling or class weighting), given its one-class anomaly-detection paradigm. The full factorial design yields $7 \text{ strategies} \times 5 \text{ supervised models} = 35$ configurations per dataset (plus OCSVM), enabling a structured analysis of the \emph{strategy~$\times$~model~$\times$~dataset} interaction.
+
+\paragraph{Resampling representation.}
+The implemented samplers operate after model-specific preprocessing. For the classical models, SMOTE therefore interpolates the standardised numerical variables and the one-hot-encoded categorical columns. For FT-Transformer, the sampler receives concatenated standardised numerical values and ordinal category codes; synthetic categorical values are subsequently converted to integer embedding indices. Neither path uses a categorical-aware sampler such as SMOTENC. The resulting SMOTE comparisons describe the behaviour of this implemented pipeline and cannot isolate an architecture-only effect from the representation used during synthetic resampling.
 
 % ──────────────────────────────────────────────────────────────────────────
 \section{Leakage-Free Evaluation Protocol}
@@ -173,22 +201,24 @@ OCSVM is evaluated separately (no resampling or class weighting), given its one-
 
 A central methodological concern in fraud detection is preventing data leakage: information from the test set must never influence model selection, preprocessing, resampling, or threshold calibration. This section formalises the leakage-free protocol adopted throughout this thesis. Figure~\ref{fig:cv_protocol} illustrates the inner workings of a single cross-validation fold.
 
-\subsection{Outer Split (Holdout Test)}
-For each dataset, an outer stratified split creates a holdout test set (80\% train, 20\% test). The holdout test set is never used for preprocessing fitting, resampling, hyperparameter selection, threshold selection, or interpretability calibration.
+\subsection{Outer Split (Holdout Test Set)}
+For each dataset, an outer stratified split creates an 80\% development partition (DEV) and a 20\% holdout test partition (TEST). TEST is not used to fit preprocessing, resample data, select hyperparameters, or select decision thresholds. Post-hoc analyses that use TEST are conducted only after the predictive evaluation has been fixed.
 
-\subsection{Inner Cross-Validation (Model Selection and Thresholding)}
-All selection procedures occur exclusively within the training partition via stratified $k$-fold cross-validation ($k=5$). For each fold:
+\subsection{Inner Validation (Model Selection and Thresholding)}
+For the classical supervised models and OCSVM, selection occurs exclusively within the DEV partition via stratified $k$-fold cross-validation ($k=5$). For each fold:
 \begin{enumerate}
-  \item Fit preprocessing on the fold's training subset only.
+  \item Fit the preprocessor on the fold's training subset only.
   \item Apply the imbalance strategy only on the fold's training subset.
-  \item Train the model.
+  \item Fit the model.
   \item Evaluate on the fold's validation subset: compute PR-AUC and obtain predicted scores.
   \item Select a decision threshold $\tau$ by maximising the chosen criterion (see Section~\ref{sec:threshold_study}) on the validation subset.
   \item Using $\tau$, compute $F_1$, $F_2$, and confusion matrix counts $\{TN, FP, FN, TP\}$.
 \end{enumerate}
 
+For OCSVM, the model is fitted only on legitimate examples from each training fold, while the corresponding validation fold retains both classes for threshold selection and evaluation. FT-Transformer replaces five-fold cross-validation with one stratified 80/20 holdout inside DEV. Its preprocessing, early stopping, hyperparameter selection, and $F_2$ threshold selection use only this internal training/validation split. This model-specific difference reduces computational cost but means that fold dispersion and median thresholds are available only for the classical models and OCSVM.
+
 \subsection{Final Training and Test Evaluation}
-For each (model, strategy, dataset), the final configuration is trained on the full training partition. The decision threshold $\tau$ applied to the holdout test set is derived from inner validation (median threshold across folds) to avoid test-set leakage.
+For each model--strategy--dataset configuration, the final model is fitted on the full DEV partition. For the classical models and OCSVM, the decision threshold $\tau$ applied to TEST is the median of the five validation-fold thresholds. For FT-Transformer, it is the threshold selected on the single internal validation split. In both paths, TEST remains untouched until the final predictive evaluation.
 
 % ═══════════════════════════════════════════════════════════════════════════
 %  FIGURE 4.2 — Leakage-Free Inner Cross-Validation Protocol
@@ -219,7 +249,7 @@ For each (model, strategy, dataset), the final configuration is trained on the f
 ]
 
 % ── Title ──
-\node[font=\small\bfseries, text=black!80] (title) {One Inner CV Fold ($k$ of $K{=}5$)};
+\node[font=\small\bfseries, text=black!80] (title) {One Classical/OCSVM Inner CV Fold ($k$ of $K{=}5$)};
 
 % ── TRAIN FOLD (left side) ──
 \node[trainstep, below=0.9cm of title, xshift=-5.2cm] (fitpre)
@@ -261,7 +291,7 @@ For each (model, strategy, dataset), the final configuration is trained on the f
           label={[font=\footnotesize\bfseries, text=clrValStep]above:VALIDATION FOLD}] (valzone) {};
 \end{scope}
 
-% ── LEAKAGE BARRIER (centered between zones) ──
+% ── LEAKAGE BARRIER (centred between zones) ──
 \coordinate (barTop) at ($(trainzone.north east)!0.5!(valzone.north west)+(0,0.4)$);
 \coordinate (barBot) at ($(trainzone.south east)!0.5!(valzone.south west)+(0,-0.4)$);
 \draw[clrBarrier, line width=2.5pt, dashed] (barTop) -- (barBot);
@@ -304,7 +334,7 @@ For each (model, strategy, dataset), the final configuration is trained on the f
     {Repeat for $k = 1, \ldots, K$. \quad Final $\tau = \mathrm{median}(\tau_1, \ldots, \tau_K)$.};
 
 \end{tikzpicture}
-\captionof{figure}[Leakage-free inner cross-validation protocol]{Leakage-free inner cross-validation protocol. Within each fold, preprocessing is fitted and resampling is applied exclusively on the training subset (left); the validation subset (right) is only transformed and scored. The dashed red line represents the leakage barrier: no information may cross from right to left. The final decision threshold is the median across all $K{=}5$ folds.}
+\captionof{figure}[Leakage-free inner cross-validation protocol]{Leakage-free inner cross-validation protocol for the classical supervised models and OCSVM. Within each fold, preprocessing is fitted and any applicable resampling is performed exclusively on the training subset (left); the validation subset (right) is only transformed and scored. The dashed red line represents the leakage barrier, and the final decision threshold is the median across all $K{=}5$ folds. FT-Transformer instead uses the separate DEV holdout procedure described in the text.}
 \label{fig:cv_protocol}
 \end{minipage}\par\medskip
 
@@ -315,62 +345,62 @@ For each (model, strategy, dataset), the final configuration is trained on the f
 \label{sec:threshold_study}
 % ──────────────────────────────────────────────────────────────────────────
 
-Most fraud detection studies either use a fixed threshold of $\tau{=}0.5$ or optimise the threshold on the test set, which constitutes data leakage. This thesis treats threshold selection as a first-class experimental variable and systematically compares four threshold rules: the fixed default $\tau{=}0.5$; the validation-optimal $F_1$ threshold ($\tau^{*}=\arg\max_{\tau} F_1(\tau)$, balanced precision--recall); the validation-optimal $F_2$ threshold ($\tau^{*}=\arg\max_{\tau} F_2(\tau)$, recall-weighted, more appropriate when missing a fraud is costlier than investigating a false alert); and a precision-constrained rule that selects the smallest $\tau$ for which $\text{Precision}(\tau) \geq 0.5$ on the validation set, simulating a deployment with a hard upper bound on the tolerable false-alert rate. The corresponding theoretical definitions are given in Section~\ref{sec:tb:thresholds} and the $F_{\beta}$ formula in Section~\ref{sec:tb:metrics}.
+Threshold selection is often implicit in fraud detection studies, and selecting a threshold on the test set constitutes data leakage. This thesis instead compares four explicit rules: the fixed default $\tau{=}0.5$; the validation-optimal $F_1$ threshold ($\tau^{*}=\arg\max_{\tau} F_1(\tau)$), which gives precision and recall equal weight; the validation-optimal $F_2$ threshold ($\tau^{*}=\arg\max_{\tau} F_2(\tau)$), which assigns greater weight to recall; and a precision-constrained rule that selects the smallest $\tau$ for which $\text{Precision}(\tau) \geq 0.5$ on validation. The last rule represents a minimum validation-precision target, not a guarantee that test precision will remain above 0.5 under sampling variation or distribution shift. Section~\ref{sec:tb:thresholds} defines these rules, and Section~\ref{sec:tb:metrics} defines $F_{\beta}$.
 
-For each rule, $\tau$ is selected \emph{exclusively on the validation folds} (never on the test set), and the median across folds is applied to the holdout test set. The primary analysis uses the $F_2$-maximising rule, while the threshold study reports all four to quantify how model rankings, $F_1$, $F_2$, and operational metrics change with the rule.
+For OCSVM, these rules operate on the negated decision function rather than a calibrated probability. Its fixed value of 0.5 is retained as a numerical sensitivity reference but is not equivalent to a 50\% posterior-probability decision.
+
+For the classical models and OCSVM, each rule is evaluated on the five validation folds and the median threshold is applied to the saved TEST scores. For FT-Transformer, thresholds are obtained from a separately reconstructed internal DEV split by training a validation model for the baseline-selected number of epochs; the resulting thresholds are then applied to the saved baseline TEST scores. TEST labels are never used to select a threshold. Because the baseline FT-Transformer threshold came from its original early-stopping validation run, its baseline max-$F_2$ operating point and the max-$F_2$ point reconstructed for this threshold study need not be numerically identical. The threshold study reports all four study-specific operating points to quantify changes in $F_1$, $F_2$, and workload metrics.
 
 % ──────────────────────────────────────────────────────────────────────────
 \section{Hyperparameter Tuning Strategy}
 \label{sec:tuning}
 % ──────────────────────────────────────────────────────────────────────────
 
-Hyperparameter tuning is performed only for the baseline setting (\texttt{strategy=None}) to ensure feasibility and fairness across the imbalance strategy study. The best hyperparameters found under the baseline are reused for all resampling strategies within the same model and dataset, isolating the effect of the balancing technique from confounding model capacity changes.
+Hyperparameter tuning is performed only for the baseline setting (\texttt{strategy=None}) to keep the factorial study computationally feasible and internally consistent. The baseline-selected hyperparameters are reused for every imbalance strategy within the same model and dataset. Model capacity is therefore held fixed while the planned imbalance intervention changes, although the comparison remains conditional on the baseline search result.
 
-\subsection{Classical ML Models}
+\subsection{Classical Models}
 
-Tuning uses \textbf{Optuna}~\cite{akiba2019optuna} with the Tree-structured Parzen Estimator (TPE) sampler and a \texttt{MedianPruner} that terminates unpromising trials early on the basis of per-fold intermediate results; the TPE algorithm and the pruning strategy are described in Section~\ref{sec:tb:hpo}. Each study runs 50~trials, optimising PR-AUC via 5-fold stratified cross-validation. For gradient-boosted models (LightGBM and CatBoost), early stopping with a patience of $50$ rounds determines the optimal number of boosting iterations, avoiding both over-fitting and wasteful computation. The sampler is seeded for full reproducibility.
+Tuning uses \textbf{Optuna}~\cite{akiba2019optuna} with the Tree-structured Parzen Estimator (TPE) sampler and a \texttt{MedianPruner} that terminates unpromising trials on the basis of per-fold intermediate results; Section~\ref{sec:tb:hpo} describes both methods. Each study runs 50~trials and optimises PR-AUC through five-fold stratified cross-validation. For LightGBM and CatBoost, early stopping with a patience of $50$ rounds limits unnecessary boosting iterations and controls overfitting. The sampler seed fixes the search sequence. Appendix~\ref{appendixA} (p.~\pageref{appendixA}) reports the selected configurations and notes that the Logistic Regression search sampled an inactive \texttt{l1\_ratio} while using the default $\ell_2$ penalty.
 
 \subsection{FT-Transformer}
 
-For the FT-Transformer, 5-fold cross-validation is replaced by a \textbf{single holdout validation split} (80/20 within the DEV partition), because training a deep model for each fold would be prohibitively expensive (each trial requires full gradient-based optimisation over many epochs).
-This is standard practice in the tabular deep learning literature~\cite{gorishniy2021revisiting}.
+For FT-Transformer, five-fold cross-validation is replaced by a \textbf{single holdout validation split} (80/20 within DEV), because fitting a deep model for every fold would multiply the cost of each trial. This holdout-based choice is consistent with the evaluation design used in the FT-Transformer literature~\cite{gorishniy2021revisiting}, but it provides a different estimate of selection variability from the five-fold classical-model path.
 
-Tuning also uses Optuna TPE with 50~trials, optimising PR-AUC on the validation split.
+Tuning also uses Optuna TPE with 50~trials and optimises PR-AUC on the validation split.
 Each trial trains the model with early stopping (patience~=~15 epochs, monitoring validation PR-AUC).
 The hyperparameter search space includes: number of Transformer blocks ($2$--$4$), token embedding dimension ($64$--$256$), number of attention heads ($4$--$8$), FFN dimension multiplier ($2/3$--$8/3$), attention and FFN dropout ($0.0$--$0.5$), learning rate ($10^{-5}$--$10^{-3}$), weight decay ($10^{-6}$--$10^{-3}$), and batch size ($256$--$1024$).
 The decision threshold~$\tau$ is selected by maximising $F_2$ on the validation split (rather than the median across folds).
 
 \subsection{General Notes}
 
-For the BAF suite, tuning is performed on the Base dataset and the best hyperparameters are reused across the variants, keeping model capacity constant while testing robustness under dataset shifts.
+For the BAF transfer study, tuning and fitting are performed on Base only. The saved Base-trained model, selected hyperparameters, and decision threshold are then applied unchanged to every Variant test distribution.
 
 % ──────────────────────────────────────────────────────────────────────────
-\section{Cross-Domain Generalization}
+\section{Cross-Domain Generalisation}
 \label{sec:cross_domain}
 % ──────────────────────────────────────────────────────────────────────────
 
-To assess how well fraud detection models generalize across domains, we study cross-domain transfer within the BAF suite, where all six datasets (Base + Variants~I--V) share a common core feature space (32~columns) but differ in distributional characteristics (covariate shift, label shift, or bias conditions). The extra columns present in Variants~III and~V (\texttt{x1}, \texttt{x2}) are excluded so that the model trained on Base can be applied directly to all Variants without feature mismatch.
+To assess robustness beyond the Base test distribution, the study performs transfer within the BAF suite. Variant~I changes group-size disparity, Variant~II changes group-wise prevalence disparity, Variant~III changes group-wise separability, Variant~IV changes prevalence disparity over time, and Variant~V changes separability over time. The target and \texttt{month} fields are excluded from modelling, as are the additional \texttt{x1} and \texttt{x2} columns in Variants~III and~V, so every model receives the same 30-feature input.
 
 The protocol is as follows:
 \begin{enumerate}
-  \item \textbf{In-domain baseline:} For each BAF dataset, train and evaluate on the same dataset (standard holdout protocol) to establish upper-bound performance.
-  \item \textbf{Cross-domain transfer:} Train on BAF~Base (using the full training partition with the best configuration from tuning), then evaluate on the holdout test set of each Variant~I--V \emph{without retraining or re-tuning}.
-  \item \textbf{Performance degradation:} Report the absolute and relative drop in PR-AUC, $F_1$, and $F_2$ between in-domain and cross-domain to quantify robustness to distribution shift.
-  \item \textbf{Threshold transfer:} The decision threshold $\tau$ obtained from Base validation is applied unchanged to the Variants, testing whether threshold calibration transfers across domains.
+  \item \textbf{Base reference:} Train and evaluate each model on BAF Base using the standard holdout protocol.
+  \item \textbf{Variant transfer:} Apply the saved Base-trained model to the holdout test set of each Variant~I--V \emph{without retraining or re-tuning}.
+  \item \textbf{Threshold transfer:} Apply the decision threshold $\tau$ selected on Base validation unchanged to all Variant test sets.
+  \item \textbf{Descriptive comparison:} Report PR-AUC, ROC-AUC, $F_1$, and $F_2$ on Base and each Variant. Differences are measured relative to the Base reference, not to separately trained in-domain Variant models.
 \end{enumerate}
 
-This simulates a realistic deployment scenario: a fraud model trained at one institution is deployed at another, or a model trained on historical data encounters distributional drift over time. Figure~\ref{fig:cross_domain} illustrates this protocol.
+This is a controlled stress test of a fixed Base-trained model under the BAF suite's predefined conditions. It does not reproduce the full complexity of transfer between institutions or production concept drift. Figure~\ref{fig:cross_domain} illustrates the protocol.
 
 \paragraph{Note on ULB \texorpdfstring{$\leftrightarrow$}{<->} BAF.}
-Cross-dataset transfer between ULB~2013 and the BAF suite is not feasible due to incompatible feature spaces (PCA-anonymised vs.\ real-world features). This limitation is acknowledged; the BAF internal transfer setting provides a controlled environment to study generalization under distribution shift with matched features.
+Cross-dataset transfer between ULB~2013 and the BAF suite is not feasible due to incompatible feature spaces (PCA-anonymised vs.\ semantic features). The BAF internal transfer setting instead provides controlled Variant test distributions with a matched 30-feature modelling space.
 
 % ═══════════════════════════════════════════════════════════════════════════
-%  FIGURE 4.3 — Cross-Domain Generalization Protocol (BAF Suite)
+%  FIGURE 4.3 — Cross-Domain Generalisation Protocol (BAF Suite)
 % ═══════════════════════════════════════════════════════════════════════════
 
 \definecolor{clrBase}{HTML}{4472C4}      % Blue (BAF Base)
 \definecolor{clrVariant}{HTML}{ED7D31}   % Orange (Variants)
-\definecolor{clrInDomain}{HTML}{548235}  % Green (in-domain)
 \definecolor{clrDrop}{HTML}{CC0000}      % Red (degradation)
 
 \par\medskip\noindent\begin{minipage}{\linewidth}\centering
@@ -384,12 +414,8 @@ Cross-dataset transfer between ULB~2013 and the BAF suite is not feasible due to
     },
     varbox/.style={
         rectangle, rounded corners=3pt, minimum width=2.4cm, minimum height=1.1cm,
+        text width=2.15cm,
         fill=clrVariant, text=white, font=\footnotesize\bfseries, align=center,
-        drop shadow={shadow xshift=0.8pt, shadow yshift=-0.8pt}
-    },
-    indombox/.style={
-        rectangle, rounded corners=3pt, minimum width=2.4cm, minimum height=0.8cm,
-        fill=clrInDomain, text=white, font=\footnotesize\bfseries, align=center,
         drop shadow={shadow xshift=0.8pt, shadow yshift=-0.8pt}
     },
     compbox/.style={
@@ -404,19 +430,19 @@ Cross-dataset transfer between ULB~2013 and the BAF suite is not feasible due to
 % ── BAF Base (source) ──
 \node[basebox] (base)
     {BAF Base (Train)\\[-2pt]
-     \fontsize{7}{8}\selectfont $N{=}800\text{K}$ train \;\;$\cdot$\;\; 32 features \;\;$\cdot$\;\; best hyperparameters + $\tau$};
+     \fontsize{7}{8}\selectfont $N{=}800\text{K}$ DEV \;\;$\cdot$\;\; 30 features \;\;$\cdot$\;\; selected hyperparameters + $\tau$};
 
 % ── Variants (targets) — single-line descriptions ──
 \node[varbox, below=2.0cm of base, xshift=-5.2cm] (v1)
-    {Variant I\\[-2pt] \fontsize{6.5}{7.5}\selectfont Covariate shift};
+    {Variant I\\[-2pt] \fontsize{6.2}{7.2}\selectfont Group-size disparity};
 \node[varbox, right=0.3cm of v1] (v2)
-    {Variant II\\[-2pt] \fontsize{6.5}{7.5}\selectfont Label shift};
+    {Variant II\\[-2pt] \fontsize{6.2}{7.2}\selectfont Prevalence disparity};
 \node[varbox, right=0.3cm of v2] (v3)
-    {Variant III\\[-2pt] \fontsize{6.5}{7.5}\selectfont Cov.\ shift + feat.};
+    {Variant III\\[-2pt] \fontsize{6.2}{7.2}\selectfont Separability disparity};
 \node[varbox, right=0.3cm of v3] (v4)
-    {Variant IV\\[-2pt] \fontsize{6.5}{7.5}\selectfont Bias conditions};
+    {Variant IV\\[-2pt] \fontsize{6.2}{7.2}\selectfont Temporal prevalence};
 \node[varbox, right=0.3cm of v4] (v5)
-    {Variant V\\[-2pt] \fontsize{6.5}{7.5}\selectfont Bias + feat.};
+    {Variant V\\[-2pt] \fontsize{6.2}{7.2}\selectfont Temporal separability};
 
 % ── Cross-domain label ──
 \node[font=\scriptsize\bfseries, text=clrBase]
@@ -429,32 +455,13 @@ Cross-dataset transfer between ULB~2013 and the BAF suite is not feasible due to
 \draw[arrow, clrBase] (base.south) -- ++(0,-0.5) -| (v4.north);
 \draw[arrow, clrBase] (base.south) -- ++(0,-0.5) -| (v5.north);
 
-% ── In-domain baselines ──
-\node[indombox, below=0.8cm of v1] (id1) {In-domain I};
-\node[indombox, below=0.8cm of v2] (id2) {In-domain II};
-\node[indombox, below=0.8cm of v3] (id3) {In-domain III};
-\node[indombox, below=0.8cm of v4] (id4) {In-domain IV};
-\node[indombox, below=0.8cm of v5] (id5) {In-domain V};
-
 % ── Comparison ──
-\node[compbox, below=1.0cm of id3] (comp)
-    {$\Delta$PR-AUC \qquad $\Delta F_1$ \qquad $\Delta F_2$ \qquad (cross-domain $-$ in-domain)};
-\node[annot, below=0.2cm of comp] {Quantifies robustness to distribution shift};
-
-% ── Comparison arrows ──
-\draw[arrow, clrVariant!70, densely dashed]
-    (v3.south) -- ++(0,-0.15) -| ([xshift=-0.8cm]comp.north);
-\draw[arrow, clrInDomain!70, densely dashed]
-    (id3.south) -- ++(0,-0.15) -| ([xshift=0.8cm]comp.north);
-
-% ── Note about x1, x2 ──
-\node[rectangle, rounded corners=2pt, fill=black!5, draw=black!20,
-      font=\scriptsize, align=left, text=black!70,
-      right=0.4cm of v5.east, anchor=west] (note)
-    {\texttt{x1}, \texttt{x2} dropped\\in III \& V\\(32-col alignment)};
+\node[compbox, below=1.0cm of v3] (comp)
+    {Compare transferred metrics with the BAF Base reference};
+\node[annot, below=0.2cm of comp] {PR-AUC \qquad ROC-AUC \qquad $F_1$ \qquad $F_2$};
 
 \end{tikzpicture}
-\captionof{figure}[Cross-domain generalisation protocol within the BAF suite]{Cross-domain generalization protocol within the BAF suite. A model trained on BAF~Base is applied directly to Variants~I--V without retraining (top arrows). Each variant is also trained and evaluated in-domain (green boxes) to establish upper-bound performance. The difference between cross-domain and in-domain metrics quantifies robustness to distribution shift.}
+\captionof{figure}[Cross-domain generalisation protocol within the BAF suite]{Cross-domain generalisation protocol within the BAF suite. A model trained on BAF~Base is applied directly to Variants~I--V without retraining or threshold recalibration. The transferred metrics are compared descriptively with the Base reference; no separate in-domain Variant models are trained.}
 \label{fig:cross_domain}
 \end{minipage}\par\medskip
 
@@ -468,16 +475,16 @@ Cross-dataset transfer between ULB~2013 and the BAF suite is not feasible due to
 The formal definitions of the metrics summarised below are given in Section~\ref{sec:tb:metrics}; this section states which metrics are reported and the specific operational choices made for their computation.
 
 \paragraph{Primary and secondary summary metrics.}
-The primary threshold-independent summary metric is PR-AUC, computed via \texttt{average\_precision\_score}. ROC-AUC is reported as a secondary threshold-independent metric: although less informative than PR-AUC under severe imbalance, it enables direct comparison with prior work that does not report PR-AUC. Brier score is reported for models that produce probability outputs as a summary of calibration quality.
+The primary threshold-independent summary metric is average precision, computed with \texttt{average\_precision\_score} and reported as PR-AUC. ROC-AUC is a secondary ranking metric that supports comparison with prior work. The Brier score is reported for models that produce probability outputs as a summary of probabilistic accuracy. OCSVM produces an uncalibrated decision function rather than probabilities, so its clipped implementation value is neither reported nor interpreted as a Brier score.
 
 \paragraph{Operating-point metrics.}
-The primary operating-point metric is $F_2$, which weights recall four times more heavily than precision in its gradient and is the criterion used for threshold selection (Section~\ref{sec:threshold_study}). $F_1$ is reported alongside $F_2$ for the balanced-criterion view. Precision, recall, and the four confusion-matrix counts $\{TN, FP, FN, TP\}$ are reported in full to expose the underlying trade-offs.
+The primary operating-point metric is $F_2$, which assigns recall four times the weight of precision through the $\beta^2$ term and is the criterion used for threshold selection (Section~\ref{sec:threshold_study}). $F_1$ is reported alongside $F_2$ for the balanced-criterion view. Precision, recall, and the four confusion-matrix counts $\{TN, FP, FN, TP\}$ are reported in full to expose the underlying trade-offs.
 
 \paragraph{Operational workload proxies.}
 Two proxies for human review workload are reported: the alert rate $\frac{TP+FP}{N}$ (fraction of transactions flagged for review) and the ratio $\frac{FP}{TP}$ (false alerts per true fraud caught). These quantify how the chosen threshold rule translates into investigator effort. Precision@$k$ and Recall@$k$ for $k=0.5\%$ of scored transactions complement these by simulating an investigator who reviews only the highest-risk alerts under a fixed capacity budget.
 
 \paragraph{Confidence intervals.}
-Bootstrap $95\%$ confidence intervals ($B{=}1\,000$ iterations) are computed on the held-out test set for PR-AUC, ROC-AUC, and $F_2$, so that comparisons between models can be interpreted with their statistical uncertainty.
+Bootstrap $95\%$ confidence intervals ($B{=}1\,000$ iterations) are computed on the held-out test set for PR-AUC, ROC-AUC, and $F_2$. These intervals describe test-sample uncertainty conditional on each fitted model and split; they do not capture training-seed, split, or hyperparameter-search variability, and overlap between separate marginal intervals is not a formal paired significance test.
 
 % ──────────────────────────────────────────────────────────────────────────
 \section{Computational Cost and Reproducibility}
@@ -486,22 +493,25 @@ Bootstrap $95\%$ confidence intervals ($B{=}1\,000$ iterations) are computed on 
 
 All experiments are conducted on a single machine with an Intel Core i5-13600KF (14 cores), 16\,GB RAM, and an NVIDIA RTX~3070 (8\,GB VRAM). Classical ML models run on CPU via scikit-learn, LightGBM, and CatBoost; the FT-Transformer runs on GPU via PyTorch.
 
-Each run logs the full configuration (dataset identifier and SHA-256 hash, split seed, model parameters, preprocessing specification, imbalance strategy, threshold rule), training and inference time, and hardware/software context (Python version, platform). Trained model artefacts and evaluation artefacts (metrics JSON files, PR-curve data, confusion matrix plots) are stored to enable full reproducibility. All random seeds are fixed (seed\,=\,42) across data splitting, Optuna sampling, and PyTorch initialisation.
+Each run logs its configuration (dataset identifier and SHA-256 hash, split seed, model parameters, preprocessing specification, imbalance strategy, and threshold rule), training and inference time, and hardware/software context (Python version and platform). Trained models and evaluation artefacts, including metric JSON files, PR-curve data, and confusion-matrix plots, are stored to support auditability and reproducibility. A common seed (42) is used for data splitting, Optuna sampling, and PyTorch initialisation; this controls the recorded runs but does not substitute for repeated-seed evaluation.
 
 % ──────────────────────────────────────────────────────────────────────────
 \section{Interpretability}
 \label{sec:interpretability}
 % ──────────────────────────────────────────────────────────────────────────
 
-Interpretability is analysed through SHAP attributions~\cite{lundberg2017unified} on the BAF~Base dataset, where features have semantic meaning. ULB~2013 features (PCA components V1--V28) are not interpretable, so the SHAP analysis is restricted to the BAF suite. The SHAP framework, the LinearExplainer / TreeExplainer / GradientExplainer family, and the Jaccard-based attribution-agreement summary used below are defined in Section~\ref{sec:tb:shap}.
+Interpretability is analysed through SHAP attributions~\cite{lundberg2017unified} on BAF~Base, whose features have semantic names. ULB~2013 features (PCA components V1--V28) are not interpreted in domain terms, so the substantive SHAP analysis is restricted to BAF. Section~\ref{sec:tb:shap} defines SHAP, LinearExplainer, TreeExplainer, and the Jaccard set-agreement measure.
 
-Four models are analysed: LR, LGBM, CatBoost, and FT-Transformer. Each model is paired with the SHAP explainer most appropriate to its architecture --- LinearExplainer for LR, TreeExplainer~\cite{lundberg2020local} for LGBM and CatBoost, and GradientExplainer for the FT-Transformer (with a background sample of $500$ instances drawn from the training set). For categorical features that are one-hot encoded during preprocessing, SHAP values are aggregated back to the original feature level by summing absolute SHAP values across one-hot columns, so that attributions remain comparable across models that differ in their categorical handling.
+The primary SHAP comparison covers LR, LGBM, and CatBoost. LinearExplainer is used for LR and TreeExplainer~\cite{lundberg2020local} for LGBM and CatBoost. For categorical features that are one-hot encoded during preprocessing, absolute SHAP values are aggregated back to the original feature level across one-hot columns. A GradientExplainer output was also generated for FT-Transformer using a 500-instance background and a 2,000-instance test sample. However, the explainer wrapper converts categorical inputs from floating-point tensors to integer embedding indices during its forward pass. This non-differentiable conversion prevents reliable gradient attribution to those categorical inputs. The FT-Transformer SHAP output is therefore retained only as an exploratory artefact and is excluded from the cross-model feature-consistency conclusions.
 
-The analysis comprises four components. Global feature importance is summarised as the mean $|\text{SHAP}|$ across all test samples, identifying the top-$k$ ($k=15$) most influential features per model. Local explanations are produced as SHAP waterfall plots for representative True Positive, False Positive, and False Negative cases, illustrating per-feature contributions for individual predictions. Cross-model consistency is quantified by the pairwise Jaccard similarity of the top-10 feature sets across all four models, indicating whether architecturally different classifiers rely on the same fraud signal. Cross-variant stability is quantified by the pairwise Jaccard similarity of LGBM's top-10 features across all six BAF datasets (Base + Variants~I--V), testing whether the discovered signal is stable under distribution shift.
+The analysis comprises four components. For LR, LGBM, and CatBoost, global feature importance is summarised as mean $|\text{SHAP}|$ across the full BAF Base test set, identifying the top-$k$ ($k=15$) features per model. Local explanations are produced for selected LGBM true-positive, false-positive, and false-negative cases. Cross-model consistency is quantified by pairwise Jaccard similarity between the top-10 feature \emph{sets} of LR, LGBM, and CatBoost; this statistic measures membership overlap, not rank order or attribution magnitude. Cross-variant stability applies the Base-trained LGBM model and TreeExplainer to each BAF test distribution and compares the resulting top-10 sets. It therefore characterises global set membership for one fixed model, not the validity of every local explanation under shift.
+
+\paragraph{FT-Transformer attention diagnostic.}
+Attention is analysed separately for the baseline BAF Base FT-Transformer. The diagnostic extracts the \texttt{[CLS]} query row from the final transformer layer, with PyTorch averaging attention weights across heads, and aggregates those weights over the 200,000 TEST observations. Normalised entropy, \texttt{[CLS]} self-attention, and mean categorical-versus-numerical attention describe how concentrated this specific last-layer average is. Head averaging may conceal head-specific structure, earlier layers are not included, and attention weights are not treated as faithful output attributions.
 
 % ──────────────────────────────────────────────────────────────────────────
 \section{Summary}
 \label{sec:methodology_summary}
 % ──────────────────────────────────────────────────────────────────────────
 
-Together, the experimental provisions described in this chapter --- from the leakage-free outer holdout and inner stratified cross-validation, through the unified Optuna tuning budget, the seven imbalance strategies and four threshold rules applied without retraining, the cross-domain transfer protocol on BAF Variants, and the architecture-matched SHAP analysis with feature-level aggregation --- ensure that all results reported in Chapter~\ref{sec:chapterResults} are reproducible and that all comparisons across model families and datasets are conducted on strictly equal footing. The definitions of the algorithms, metrics, threshold rules, and attribution estimators invoked above are collected in Chapter~\ref{sec:chapterTheoreticalBackground} and cross-referenced from each section above. Each design choice is motivated by a specific methodological concern identified in the State of the Art (Sections~\ref{subsec:fraud_detection_class_imbalance} and~\ref{subsec:limitations_research}), and no result presented in the next chapter depends on a step taken outside the protocol described here.
+The methodology establishes a shared outer holdout, common reporting metrics, controlled imbalance comparisons, validation-only threshold selection, a fixed Base-to-Variant transfer protocol, and architecture-compatible SHAP conclusions. The classical models and FT-Transformer use different inner-validation and preprocessing paths, and these differences remain explicit. Guided by the mapping in Table~\ref{tab:rq_design_map}, Chapter~\ref{sec:chapterResults} (p.~\pageref{sec:chapterResults}) now presents the evidence in research-question order and interprets it within the documented boundaries.

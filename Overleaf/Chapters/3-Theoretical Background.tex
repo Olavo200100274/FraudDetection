@@ -14,25 +14,23 @@ estimator --- is defined here once, in general terms, so that the Methodology
 chapter can focus exclusively on project-specific design choices and refer
 back to this chapter whenever a definition or mechanism needs to be recalled.
 
-The exposition deliberately stops short of comparative analysis: which
-combinations of these tools perform best on the present datasets is an
-empirical question, and is answered in the Results chapter
-(Chapter~\ref{sec:chapterResults}); whether one architectural family
-\emph{should} be preferred over another in tabular fraud detection is a
-position-taking question that belongs to the State of the Art's research-gap
-discussion. Here the goal is narrower: to provide a self-contained reference
-for the toolkit terminology used in the remainder of the thesis.
+The exposition deliberately stops short of comparative analysis. Which
+combinations perform best on the present datasets is an empirical question
+answered in the Results and Discussion chapter
+(Chapter~\ref{sec:chapterResults}). The narrower purpose here is to provide a
+self-contained reference for the terminology and mechanisms used in the
+remainder of the thesis.
 
 % ──────────────────────────────────────────────────────────────────────────
-\section{Supervised Models}
+\section{Model Families}
 \label{sec:tb:models}
 % ──────────────────────────────────────────────────────────────────────────
 
-The supervised classifiers used in this thesis cover four levels of model
-capacity (linear, bagged trees, gradient-boosted trees, attention-based
-deep network) plus a one-class anomaly-detection counterpart. This section
-recalls their defining mechanisms; the rationale for selecting these specific
-families is given in the Methodology chapter.
+The study covers four supervised approaches --- a linear classifier, bagged
+trees, gradient-boosted trees, and an attention-based deep network --- together
+with a one-class anomaly-detection baseline. This section recalls their defining
+mechanisms; the rationale for selecting these families is given in the
+Methodology chapter.
 
 \paragraph{Logistic Regression.}
 Logistic Regression is the canonical linear probabilistic classifier. It
@@ -43,18 +41,18 @@ Parameters are typically learned by minimising the regularised
 cross-entropy loss; the elastic-net penalty
 $\lambda(\alpha\|\mathbf{w}\|_1 + (1-\alpha)\|\mathbf{w}\|_2^2/2)$ combines
 $\ell_1$ and $\ell_2$ regularisation and acts as a unified sparsity/shrinkage
-control. Logistic Regression is interpretable through its coefficients, tends
-to be well-calibrated when the linearity assumption holds, and serves as a
-lower-bound reference against which more flexible models are compared.
+control. Logistic Regression is interpretable through its coefficients, can be
+well-calibrated when the modelling assumptions are adequate, and serves as a
+simple parametric reference against which more flexible models are compared.
 
 \paragraph{Random Forest.}
-A Random Forest is a bagged ensemble of decision trees. Each tree is fit on a
+A Random Forest is a bagged ensemble of decision trees. Each tree is fitted on a
 bootstrap sample of the training data and, at every split, considers only a
 random subset of features; the ensemble prediction is the average of the
 per-tree class probabilities. The combination of bootstrap aggregation and
-feature subsampling reduces variance without materially increasing bias, which
-in practice makes the ensemble robust to mild distributional perturbations and
-relatively insensitive to feature scaling.
+feature subsampling is designed to reduce correlation among trees and lower
+ensemble variance relative to a single tree. Tree splits are also relatively
+insensitive to monotonic feature scaling.
 
 \paragraph{Gradient-boosted decision trees.}
 Gradient boosting builds an additive ensemble
@@ -68,19 +66,19 @@ the tree level by level, and bins continuous features into discrete histograms
 so that split evaluation becomes a constant-time operation per bin.
 \textbf{CatBoost}~\cite{prokhorenkova2018catboost} introduces \emph{ordered
 boosting}, which computes the residual for each training example using a model
-trained without that example, eliminating the prediction-shift bias that
-ordinary gradient boosting acquires when the same data are used to compute
-gradients and to fit the next learner. CatBoost also handles categorical
+constructed without that example, thereby reducing the prediction-shift bias
+that can arise when the same data are used to compute gradients and fit the
+next learner. CatBoost also handles categorical
 features natively via permutation-aware target statistics, removing the need
 for one-hot encoding of high-cardinality categorical inputs.
 
 \paragraph{One-Class SVM.}
 The One-Class Support Vector Machine is an unsupervised anomaly-detection
 model. Given training examples drawn predominantly from a single class, it
-fits a smooth boundary in a reproducing-kernel Hilbert space that encloses
-the bulk of the training distribution; test points falling outside the
-boundary receive a negative decision-function value and are flagged as
-anomalies. The model does not consume fraud labels at training time, which
+maps the observations into a kernel feature space and learns a maximum-margin
+hyperplane that separates most training observations from the origin. Test
+points on the anomalous side of the boundary receive a negative
+decision-function value. The model does not consume fraud labels at training time, which
 makes it a natural reference point for quantifying the value added by
 supervised labels under extreme imbalance.
 
@@ -107,9 +105,9 @@ arbitrary feature interactions to be captured.
 \label{sec:tb:imbalance}
 % ──────────────────────────────────────────────────────────────────────────
 
-Under extreme class imbalance the empirical training distribution under-represents
-the minority class to such a degree that loss minimisation on the unmodified
-data tends to drive the decision boundary towards the majority. The
+Under extreme class imbalance, the minority class contributes relatively few
+examples to the empirical training distribution, and minimising an unmodified
+loss can favour the majority class. The
 literature on imbalance handling~\cite{hegarcia2009learning, krawczyk2016learning}
 groups remedies into three families: \emph{data-level} interventions that
 modify the empirical training distribution, \emph{algorithm-level}
@@ -136,17 +134,16 @@ $\lambda \sim \mathcal{U}(0,1)$. Two cleaning-augmented variants
 near the decision boundary: \emph{SMOTE+Tomek Links} removes any pair of
 nearest neighbours from opposite classes (a Tomek link), and \emph{SMOTEENN}
 applies the Edited Nearest Neighbour rule, removing examples whose class
-disagrees with the majority of their $k$ nearest neighbours. Under extreme
-imbalance the cleaning step typically removes very few examples, because the
-minority is too sparse for borderline Tomek-linked pairs to exist; the
-cleaning variants then reduce in practice to plain SMOTE.
+disagrees with the majority of their $k$ nearest neighbours. How many examples
+the cleaning step removes depends on the geometry of the resampled training
+data. Equal downstream metrics for a cleaning variant and plain SMOTE do not,
+by themselves, reveal whether the resampled training sets were identical.
 
 \paragraph{Cost-sensitive learning.}
 The cost-sensitive (or \emph{class weighting}) family modifies the training
-objective rather than the training data. Each training example is assigned a
-weight inversely proportional to the prevalence of its class, so that the
-loss contribution of a minority example is amplified by the factor
-$n_{\text{maj}}/n_{\text{min}}$ relative to a majority example. The
+objective rather than the training data. A common balanced weighting rule
+assigns weights inversely proportional to class frequency, increasing the
+relative contribution of minority-class errors. The
 empirical training distribution is left unchanged, which avoids the
 distributional distortions introduced by oversampling, but the model is
 encouraged to allocate capacity to the minority class through the reweighted
@@ -164,17 +161,16 @@ used throughout this thesis.
 
 \paragraph{Confusion-matrix primitives.}
 For a binary classifier and a fixed decision rule, the confusion matrix has
-four counts: True Positives (TP), False Positives (FP), True Negatives (TN),
-and False Negatives (FN). Precision and recall are defined as
+four counts: true positives (TP), false positives (FP), true negatives (TN),
+and false negatives (FN). Precision and recall are defined as
 \[
 \mathrm{Precision} = \frac{TP}{TP + FP}, \qquad
 \mathrm{Recall} = \frac{TP}{TP + FN}.
 \]
-Both are insensitive to the size of the True Negative cell, which is what
-makes them appropriate under extreme imbalance: a classifier that flags only
-the obviously fraudulent transactions and never errs on a legitimate one will
-report a high precision regardless of how many legitimate transactions exist
-in the dataset.
+Neither expression contains the true-negative count. Precision quantifies the
+fraction of alerts that are fraudulent, whereas recall quantifies the fraction
+of fraudulent cases detected. They therefore expose positive-class behaviour
+that overall accuracy can obscure under extreme imbalance.
 
 \paragraph{The $F_{\beta}$-score.}
 The $F_{\beta}$-score is the weighted harmonic mean of precision and recall,
@@ -183,34 +179,35 @@ F_{\beta} = (1+\beta^{2})\,\frac{\mathrm{Precision}\cdot\mathrm{Recall}}
                                  {\beta^{2}\,\mathrm{Precision} + \mathrm{Recall}},
 \]
 with $\beta$ controlling the relative weight assigned to recall: $\beta{=}1$
-recovers the symmetric $F_1$, while $\beta{=}2$ ($F_2$) weights recall
-four times more heavily than precision in the gradient direction. In fraud
-detection $F_2$ is the more operationally meaningful choice because the cost
-of a missed fraud typically exceeds the cost of investigating a false alert.
+recovers the symmetric $F_1$, while $\beta{=}2$ ($F_2$) assigns recall four
+times the weight of precision through the $\beta^2$ term. In fraud
+detection $F_2$ provides a recall-sensitive summary when missed fraud is given
+greater importance than a false alert. The value $\beta{=}2$ is a reporting
+choice rather than a direct monetary cost model.
 
 \paragraph{PR-AUC and ROC-AUC.}
-The Precision--Recall (PR) curve traces the trade-off between precision and
-recall as the decision threshold sweeps the full range of model scores; the
-area under this curve (PR-AUC, also called Average Precision) summarises the
-trade-off as a single threshold-independent scalar. The Receiver Operating
-Characteristic (ROC) curve traces True Positive Rate against False Positive
-Rate over the same threshold sweep, and the area under it is ROC-AUC. Under
-extreme imbalance the two summaries behave very differently: ROC-AUC is
-insensitive to the class prior and remains high even when the absolute number
-of fraud detections is small, because the False Positive Rate is normalised
-by the very large negative count. PR-AUC, by contrast, has random-baseline
-value equal to the positive prevalence~$\pi$, and is therefore directly
-sensitive to changes in fraud detection rate; it is the preferred summary
-metric in fraud-detection benchmarking.
+The precision--recall (PR) curve traces the trade-off between precision and
+recall as the decision threshold sweeps the full range of model scores.
+This thesis reports average precision under the conventional label PR-AUC as a
+threshold-independent summary. The receiver operating characteristic (ROC)
+curve traces the true-positive rate against the false-positive rate over the
+same threshold sweep, and the area under it is ROC-AUC. ROC-AUC is invariant to
+prevalence when the class-conditional score distributions are fixed. Under
+extreme imbalance, however, a small false-positive rate can still correspond
+to many false alerts, and the ROC curve does not expose precision directly.
+PR-AUC, by contrast, has a random-ranking baseline equal to the positive
+prevalence~$\pi$ and summarises precision--recall performance for the positive
+class; it is therefore the primary ranking metric used in this thesis.
 
 \paragraph{Calibration.}
-A probabilistic classifier is well-calibrated if its output scores match
+A probabilistic classifier is well calibrated if its output scores match
 empirical conditional positive frequencies: among examples assigned a score
-of, say, $0.05$, the fraction that are actually fraud should be $\approx 0.05$.
+of, say, $0.05$, the fraction that are fraudulent should be approximately $0.05$.
 The Brier score $\frac{1}{N}\sum_i(\hat{p}_i - y_i)^2$ is the mean squared
 error of the predicted probability against the binary label and is a standard
-proper-scoring-rule summary of calibration quality; lower is better.
-Reliability curves provide a graphical companion by plotting empirical
+proper scoring rule for probabilistic accuracy; lower is better. Because it
+reflects both calibration and resolution, it is not a pure calibration measure.
+Reliability curves assess calibration more directly by plotting empirical
 positive frequency against predicted score within score bins.
 
 % ──────────────────────────────────────────────────────────────────────────
@@ -218,51 +215,52 @@ positive frequency against predicted score within score bins.
 \label{sec:tb:thresholds}
 % ──────────────────────────────────────────────────────────────────────────
 
-A probabilistic classifier produces a score $s(\mathbf{x}) \in [0,1]$ for each
-input; converting that score into a binary decision requires a
+A classifier produces a score $s(\mathbf{x})$ for each input; for probabilistic
+models this score is commonly in $[0,1]$, whereas an anomaly detector may produce
+an uncalibrated decision value. Converting a score into a binary decision requires a
 \emph{threshold rule} that maps scores to predictions, the canonical form
 being $\hat{y} = \mathbb{1}\{s(\mathbf{x}) \geq \tau\}$. The choice of $\tau$
 determines where on the precision--recall curve the system operates, and
-under extreme imbalance the gap between defensible threshold rules can be of
-the same order of magnitude as the gap between model families. Several
-classes of threshold rule appear in the literature.
+under extreme imbalance different defensible threshold rules can materially
+alter threshold-dependent metrics. Several classes of threshold rule appear
+in the literature.
 
 \paragraph{Fixed default ($\tau{=}0.5$).}
-The most common choice in software defaults is $\tau{=}0.5$, which
-corresponds to a maximum-a-posteriori decision under the implicit assumption
-that the two classes are equiprobable. Under extreme imbalance this
-assumption is violated by orders of magnitude; the predicted scores of even
-genuine positives are typically compressed well below~$0.5$ and the fixed
-default places the operating point in a region of the score distribution
-where almost no probability mass exists.
+The most common choice in software defaults is $\tau{=}0.5$. For a calibrated
+posterior probability, this threshold corresponds to a decision rule with
+equal false-positive and false-negative costs; it does not imply equal class
+prevalence. Under asymmetric operational costs or model-dependent score
+calibration, $0.5$ need not be an appropriate operating point. Validation data
+should therefore be used to determine whether the default achieves the
+required precision--recall trade-off.
 
 \paragraph{Validation-optimal $F_{\beta}$ thresholds.}
 A second family selects $\tau$ by maximising a chosen $F_{\beta}$ score on
 held-out validation data, $\tau^{*} = \arg\max_{\tau} F_{\beta}(\tau)$.
-Setting $\beta{=}1$ produces the threshold that balances precision and
-recall; $\beta{=}2$ shifts the operating point towards higher recall and is
-the more natural criterion when missed positives are the dominant cost.
+Setting $\beta{=}1$ gives precision and recall equal weight; $\beta{=}2$
+assigns greater weight to recall and is suitable when missed positives receive
+greater emphasis. The selected value does not, by itself, encode a monetary
+cost ratio.
 
 \paragraph{Precision-constrained thresholds.}
-A third family selects $\tau$ to enforce a lower bound on precision,
+A third family selects $\tau$ to enforce a lower bound on validation precision,
 $\tau^{*} = \min\{\tau : \mathrm{Precision}(\tau) \geq P_{\min}\}$. The
-resulting operating point bounds the false-alert workload that human
-investigators must absorb, at the cost of accepting a recall that the data
-itself dictates.
+resulting operating point targets a minimum positive predictive value and
+therefore influences the fraction of false alerts. It does not directly fix the
+number of alerts, and the realised precision may differ on future data.
 
 \paragraph{Alert-budget thresholds.}
 A fourth family selects $\tau$ as the empirical quantile of the validation
 score distribution that flags exactly the top-$k$ scoring instances, which
 amounts to fixing the operational alert volume independently of any
-performance criterion. This rule is closest to how production fraud teams
-allocate review capacity, since investigation throughput is typically
-constrained by staffing rather than by a target precision.
+performance criterion. This rule represents settings in which investigation
+throughput is constrained by a fixed review capacity rather than by a target
+precision.
 
 To remain leakage-free, any of these rules must be computed exclusively on
-data that the test set does not see. The mechanics of how the present study
-calibrates $\tau$ within inner-validation folds and applies the median across
-folds to the held-out test set are described in
-Section~\ref{sec:threshold_study} of the Methodology chapter.
+data selected without access to the test set. The model-specific validation procedures
+used to select $\tau$ and apply it to the held-out test set are described in
+Section~\ref{sec:threshold_study} (p.~\pageref{sec:threshold_study}) of the Methodology chapter.
 
 % ──────────────────────────────────────────────────────────────────────────
 \section{Hyperparameter Optimisation}
@@ -272,9 +270,9 @@ Section~\ref{sec:threshold_study} of the Methodology chapter.
 Hyperparameter optimisation (HPO) selects values for the parameters that
 control a learning algorithm but are not learned from data --- regularisation
 strength, tree depth, number of attention heads, learning rate, and so on.
-Brute-force grid search is exhaustive but prohibitively expensive in
-high-dimensional configuration spaces; random search is cheaper but
-information-blind across trials. Modern HPO frameworks instead adopt
+Brute-force grid search becomes expensive in high-dimensional configuration
+spaces, while random search does not use information from earlier trials.
+Modern HPO frameworks can instead adopt
 \emph{sequential model-based optimisation} (SMBO), in which a probabilistic
 surrogate model of the objective is updated after every completed trial and
 the next configuration is selected to maximise an acquisition criterion such
@@ -287,11 +285,9 @@ modelling the objective $p(y\,|\,\mathbf{x})$ directly, TPE models the two
 conditional distributions $p(\mathbf{x}\,|\,y < y^{*})$ and
 $p(\mathbf{x}\,|\,y \geq y^{*})$ of "good" and "bad" configurations (split at
 a quantile $y^{*}$ of the observed objective values) and proposes the
-configuration that maximises the ratio of these two densities. This
-heuristic concentrates exploration in regions of the configuration space
-where the surrogate believes good outcomes are more likely than bad ones,
-and tends to converge much faster than random search on smooth, well-behaved
-objectives.
+configuration that maximises the ratio of these two densities. This heuristic
+concentrates exploration in regions of the configuration space where the
+surrogate estimates that good outcomes are more likely than bad ones.
 
 \paragraph{Pruning of unpromising trials.}
 Many HPO objectives produce intermediate values during a single trial --- a
@@ -299,10 +295,9 @@ cross-validation fold's metric, an epoch's validation loss --- which a
 \emph{pruner} can compare against the trajectory of completed trials. A
 median pruner, for example, terminates a trial whose intermediate metric
 falls below the median of the completed trials' values at the same step,
-allowing the optimiser to spend its remaining budget on more promising
-regions. Pruning amplifies the effective trial count for a fixed wall-clock
-budget but introduces a slight bias against configurations that are slow to
-warm up.
+allowing the optimiser to spend less computation on unpromising regions.
+Pruning reduces the cost of the search but can disadvantage configurations
+whose intermediate performance improves slowly.
 
 % ──────────────────────────────────────────────────────────────────────────
 \section{Feature Attribution with SHAP}
@@ -321,29 +316,25 @@ revealed to the model,
 \phi_{j} = \sum_{S \subseteq F\setminus\{j\}} \frac{|S|!\,(|F|-|S|-1)!}{|F|!}
            \Bigl[ f_{S\cup\{j\}}(\mathbf{x}_{S\cup\{j\}}) - f_{S}(\mathbf{x}_{S}) \Bigr].
 \]
-This formulation is the unique attribution that satisfies three desirable
-axioms: \emph{local accuracy} (the attributions sum to the prediction minus
-a baseline), \emph{missingness} (features with no input variation receive
-zero attribution), and \emph{consistency} (a feature whose contribution
-weakly increases in every coalition cannot be assigned a smaller attribution).
-Together, these axioms make Shapley values the only feature-attribution
-scheme of their kind, and provide the theoretical justification for
-comparing SHAP attributions across architecturally different models.
+Within the additive explanation framework, the formulation is characterised by
+three properties: \emph{local accuracy} (the attributions sum to the prediction
+relative to a baseline), \emph{missingness} (a missing feature receives zero
+attribution), and \emph{consistency} (an attribution cannot decrease when that
+feature's marginal contribution increases across coalitions). These properties
+provide a common vocabulary for model explanation, but comparisons across
+models still depend on compatible output scales, background data, feature
+grouping, and explainer assumptions.
 
 \paragraph{Architecture-specific explainers.}
 Computing the Shapley value exactly requires evaluating the model over all
 $2^{|F|}$ feature subsets, which is intractable for non-trivial feature counts.
 Architecture-specific explainers exploit model structure to make the
-computation efficient. The \emph{LinearExplainer} returns SHAP values in
-closed form for linear models, since the marginal contribution of each
-feature is constant across coalitions. \emph{TreeSHAP}~\cite{lundberg2020local}
-computes exact Shapley values for tree-based models in polynomial time, by
-descending each tree once per instance and accounting for which subset of
-features actively participated in each split. The \emph{GradientExplainer}
-approximates Shapley values for differentiable models by averaging the
-integrated gradient of the model output between a background sample and the
-target instance; the approximation quality improves with the size of the
-background sample at the cost of compute.
+computation efficient. \emph{LinearExplainer} uses the linear model form and a
+specified background distribution. \emph{TreeSHAP}~\cite{lundberg2020local}
+computes exact values for its tree-specific SHAP formulation in polynomial
+time. \emph{GradientExplainer} approximates expected gradients for
+differentiable models using a background sample; its output depends on both
+the approximation and the selected background data.
 
 \paragraph{Comparing attributions across models.}
 Once per-feature SHAP values are available, a model's global feature
@@ -351,7 +342,18 @@ importance is summarised as the mean absolute SHAP value across a held-out
 sample. Two models can then be compared on the agreement between their
 top-$k$ feature sets through the \emph{Jaccard similarity}
 $|A \cap B|/|A \cup B|$, which equals one when the two sets coincide and
-zero when they are disjoint. Jaccard agreement on a fixed evaluation set is
-the device this thesis uses to assess whether two architectures have
-discovered the same fraud signal, and to test whether SHAP rankings are
-stable across distribution shifts.
+zero when they are disjoint. In this thesis, Jaccard agreement is used only to
+compare membership of the top-$k$ global feature sets. It does not compare rank
+order, attribution magnitude, local explanations, or whether different models
+have learned the same decision process.
+
+% ──────────────────────────────────────────────────────────────────────────
+\section{Chapter Summary}
+\label{sec:tb:summary}
+% ──────────────────────────────────────────────────────────────────────────
+
+This chapter has defined the model families, imbalance interventions,
+evaluation measures, threshold rules, optimisation procedure, and SHAP
+quantities used in the empirical study. Chapter~\ref{sec:chapterMethodology}
+now translates these general concepts into the project-specific datasets,
+preprocessing paths, validation procedures, and analysis plan.

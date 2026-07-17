@@ -23,7 +23,9 @@
 \definecolor{clrLR}{HTML}{9467bd}
 \definecolor{clrOCSVM}{HTML}{7f7f7f}
 
-This chapter presents the empirical findings of the thesis. Each section addresses a specific experimental question and is built around the artefacts (tables, figures, metric files) produced by the corresponding pipeline run. The order of sections mirrors the way the experiments build on one another: the baseline comparison (Section~\ref{sec:baseline_results}) establishes a reference point for every supervised model and OCSVM; the threshold sensitivity study (Section~\ref{sec:threshold_sensitivity}) and the full factorial analysis (Section~\ref{sec:factorial_results}) then probe, in turn, the two design choices with the largest effect on operational behaviour; transformer-specific robustness (Section~\ref{sec:transformer_imbalance}) and cross-domain transfer (Section~\ref{sec:cross_domain_results}) test the limits of the best classifiers under perturbations of the input distribution; SHAP interpretability (Section~\ref{sec:shap_results}) and attention diagnostics (Section~\ref{sec:attention_diagnostics}) explain the mechanisms behind the numbers; and the consolidated summary (Section~\ref{sec:consolidated}) packages the evidence into a practitioner-facing decision framework supported by bootstrap and computational-cost statistics. A short closing synthesis (Section~\ref{sec:discussion}) revisits the cross-cutting findings and the threats to validity. Formal metric definitions are given in Section~\ref{sec:tb:metrics} of Chapter~\ref{sec:chapterTheoreticalBackground}; the specific reporting choices made for this study (primary vs.\ secondary metrics, bootstrap confidence intervals, workload proxies) are stated in Section~\ref{sec:metrics} of Chapter~\ref{sec:chapterMethodology}.
+This chapter presents and discusses the empirical findings in research-question order. The baseline comparison addresses RQ1; threshold sensitivity addresses RQ2; the factorial and focused FT-Transformer analyses address RQ3; BAF Base-to-Variant transfer addresses RQ4; and the SHAP and attention analyses address RQ5. The consolidated summary then brings together predictive performance, operational priorities, sampling uncertainty, and computational cost, before the chapter closes with a synthesis and threats to validity.
+
+All interpretations follow the procedures and evidence boundaries defined in Chapter~\ref{sec:chapterMethodology} (p.~\pageref{sec:chapterMethodology}). Formal metric definitions appear in Section~\ref{sec:tb:metrics} (p.~\pageref{sec:tb:metrics}), and the study-specific reporting choices appear in Section~\ref{sec:metrics} (p.~\pageref{sec:metrics}).
 
 % ══════════════════════════════════════════════════════════════════════════
 %  1 — BASELINE MODEL COMPARISON
@@ -32,7 +34,7 @@ This chapter presents the empirical findings of the thesis. Each section address
 \section{Baseline Model Comparison (No Imbalance Strategy)}
 \label{sec:baseline_results}
 
-The baseline establishes the performance ceiling each model can reach when only hyperparameter tuning is applied --- without resampling, cost-sensitive weighting, or any other class-imbalance intervention. Every model is tuned via Optuna TPE (50 trials, 5-fold stratified cross-validation, PR-AUC objective) and evaluated on the holdout test set using the $F_2$-maximising threshold~($\tau$) derived from inner validation (median across folds). The trained models and probability scores produced here are reused without retraining in Section~\ref{sec:threshold_sensitivity}, so that any subsequent variation in operational metrics is attributable to the threshold rule alone.
+The baseline addresses RQ1 by establishing a reference for each model without resampling or cost-sensitive weighting. The four classical supervised models use Optuna TPE with 50 trials and five-fold stratified validation; FT-Transformer uses 50 trials and one internal DEV holdout; and OCSVM uses a fixed configuration without hyperparameter search. Every TEST operating point uses a threshold selected within DEV. Section~\ref{sec:threshold_sensitivity} subsequently applies alternative validation-derived thresholds to the saved baseline TEST scores. For FT-Transformer, the validation model used to reconstruct those study-specific thresholds differs from the original early-stopping run, as reported below.
 
 % ─────────────────── ULB 2013 ───────────────────
 
@@ -41,7 +43,7 @@ The baseline establishes the performance ceiling each model can reach when only 
 Tables~\ref{tab:baseline_ulb} and~\ref{tab:ops_ulb} report the predictive and operational metrics on ULB, and Figure~\ref{fig:prauc_ulb} visualises the PR-AUC ranking.
 
 \noindent\begin{minipage}{\linewidth}\centering
-\captionof{table}[Baseline metrics on ULB 2013]{Baseline comparison on ULB 2013 (strategy\,=\,None, threshold\,=\,max-$F_2$).}
+\captionof{table}[Baseline metrics on ULB 2013]{Baseline comparison on ULB 2013 (strategy\,=\,None, threshold\,=\,max-$F_2$). Brier score is omitted for OCSVM because its decision function is not a probability.}
 \label{tab:baseline_ulb}
 \begin{tabular}{l c c c c c c c c}
 \toprule
@@ -52,7 +54,7 @@ RF         & 0.8667 & 0.9591 & 0.8309 & 0.8583 & 0.7890 & 0.8776 & 0.1920 & 0.00
 LGBM       & 0.8744 & 0.9749 & 0.8235 & 0.8434 & 0.7925 & 0.8571 & 0.1038 & 0.00039 \\
 CatBoost   & 0.8847 & 0.9776 & 0.8333 & 0.8534 & 0.8019 & 0.8673 & 0.0539 & 0.00034 \\
 FT-Trans.  & 0.8562 & 0.9748 & 0.7545 & 0.8074 & 0.6803 & 0.8469 & 0.0350 & 0.00048 \\
-OCSVM      & 0.3354 & 0.9534 & 0.4145 & 0.5268 & 0.3058 & 0.6429 & 2.4887 & 0.00832 \\
+OCSVM      & 0.3354 & 0.9534 & 0.4145 & 0.5268 & 0.3058 & 0.6429 & 2.4887 & --- \\
 \bottomrule
 \end{tabular}
 \end{minipage}
@@ -76,20 +78,20 @@ OCSVM      & 0.00362 & 2.2698 & 0.2430 & 0.7041 & 284 \\
 
 \noindent\begin{minipage}{\linewidth}\centering
 \includegraphics[width=0.78\textwidth]{figures/ulb/prauc_bar_baseline.pdf}
-\captionof{figure}[Baseline PR-AUC by model on ULB 2013]{PR-AUC for all models on ULB 2013 (baseline, Optuna, $F_2$ threshold).}
+\captionof{figure}[Baseline PR-AUC by model on ULB 2013]{PR-AUC for all models on ULB 2013 under the baseline setting and validation-selected max-$F_2$ operating points. OCSVM is not tuned.}
 \label{fig:prauc_ulb}
 \end{minipage}
 
-CatBoost reaches the highest PR-AUC on ULB at 0.885, narrowly ahead of LGBM (0.874) and RF (0.867); the FT-Transformer follows at 0.856, on par with the tree-based ensembles but consistently a fraction behind CatBoost across the secondary metrics. Logistic Regression trails the non-linear models (PR-AUC 0.742) yet remains respectable, an indication that the original PCA-anonymised feature space already separates fraud from legitimate transactions reasonably well even under a linear decision boundary. OCSVM scores 0.335 and serves only as a weak unsupervised reference. The operational view in Table~\ref{tab:ops_ulb} sharpens the picture: the four top supervised models converge on the same alert rate ($\approx 0.19\%$) and the same Precision@$k$/Recall@$k$ at the top $0.5\%$ of scored transactions ($k = 284$), but their FP/TP ratios differ noticeably --- CatBoost's 0.247 means roughly one fewer false alert per true catch than under LGBM (0.262) or RF (0.267), with Logistic Regression and FT-Transformer producing nearly twice as many false alerts per true positive (0.476 and 0.470, respectively).
+CatBoost has the highest ULB PR-AUC at 0.885, followed by LGBM (0.874), RF (0.867), and FT-Transformer (0.856). Logistic Regression records 0.742, whereas the unsupervised OCSVM reference records 0.335. Table~\ref{tab:ops_ulb} shows alert rates between 0.186\% and 0.214\% for the five supervised models. CatBoost, LGBM, and RF have similar FP/TP ratios (0.247, 0.262, and 0.267); relative to CatBoost, the differences are 0.015 and 0.020 additional false alerts per true positive. Logistic Regression and FT-Transformer have higher ratios (0.476 and 0.470). Under the fixed top-$k$ review budget ($k=284$, 0.5\% of TEST), RF, LGBM, and CatBoost have the same reported Precision@$k$ and Recall@$k$, while LR and FT-Transformer are marginally lower.
 
 % ─────────────────── BAF Base ───────────────────
 
 \subsection{BAF Base}
 
-The picture changes considerably on BAF Base, where the absolute scores compress by roughly a factor of five (Tables~\ref{tab:baseline_baf} and~\ref{tab:ops_baf}; Figure~\ref{fig:prauc_baf}).
+BAF Base produces substantially lower PR-AUC values than ULB for the leading models (Tables~\ref{tab:baseline_baf} and~\ref{tab:ops_baf}; Figure~\ref{fig:prauc_baf}).
 
 \noindent\begin{minipage}{\linewidth}\centering
-\captionof{table}[Baseline metrics on BAF Base]{Baseline comparison on BAF Base (strategy\,=\,None, threshold\,=\,max-$F_2$).}
+\captionof{table}[Baseline metrics on BAF Base]{Baseline comparison on BAF Base (strategy\,=\,None, threshold\,=\,max-$F_2$). Brier score is omitted for OCSVM because its decision function is not a probability.}
 \label{tab:baseline_baf}
 \begin{tabular}{l c c c c c c c c}
 \toprule
@@ -100,7 +102,7 @@ RF         & 0.1588 & 0.8778 & 0.2048 & 0.2941 & 0.1360 & 0.4148 & 0.0631 & 0.01
 LGBM       & 0.1768 & 0.8985 & 0.2224 & 0.3159 & 0.1490 & 0.4388 & 0.0636 & 0.00986 \\
 CatBoost   & 0.1796 & 0.8980 & 0.2106 & 0.3143 & 0.1359 & 0.4678 & 0.0573 & 0.00984 \\
 FT-Trans.  & 0.1797 & 0.8974 & 0.2246 & 0.3160 & 0.1515 & 0.4338 & 0.0584 & 0.00986 \\
-OCSVM      & 0.0190 & 0.6279 & 0.0449 & 0.0805 & 0.0258 & 0.1714 & -40.26 & 0.02061 \\
+OCSVM      & 0.0190 & 0.6279 & 0.0449 & 0.0805 & 0.0258 & 0.1714 & -40.26 & --- \\
 \bottomrule
 \end{tabular}
 \end{minipage}
@@ -124,13 +126,13 @@ OCSVM      & 0.07321 & 37.7328 & 0.0300 & 0.0136 & 1000 \\
 
 \noindent\begin{minipage}{\linewidth}\centering
 \includegraphics[width=0.78\textwidth]{figures/baf/prauc_bar_baseline.pdf}
-\captionof{figure}[Baseline PR-AUC by model on BAF Base]{PR-AUC for all models on BAF Base (baseline, Optuna, $F_2$ threshold).}
+\captionof{figure}[Baseline PR-AUC by model on BAF Base]{PR-AUC for all models on BAF Base under the baseline setting and validation-selected max-$F_2$ operating points. OCSVM is not tuned.}
 \label{fig:prauc_baf}
 \end{minipage}
 
-Three models cluster at the top --- CatBoost (0.1796), LGBM (0.1768), and FT-Transformer (0.1797) --- separated by less than $0.003$ PR-AUC. The most informative observation in this group is that the FT-Transformer matches CatBoost almost exactly: $0.1797$ vs.\ $0.1796$ in PR-AUC and $0.3160$ vs.\ $0.3143$ in $F_2$. The fivefold larger training set ($N = 1\,000\,000$ vs.\ $284\,807$) closes the gap that on ULB still favoured the gradient-boosted tree, supporting the broader observation in the tabular deep learning literature that attention-based architectures benefit disproportionately from data volume \cite{gorishniy2021revisiting}. Logistic Regression and Random Forest fall behind by approximately $11\%$ and $20\%$ relative to the top tier, and OCSVM is effectively unable to detect fraud at this scale (PR-AUC $0.019$). The operational metrics paint a far heavier review burden than on ULB: FP/TP ratios in the $5.6$--$6.4$ range for the top models, alert rates around $3\%$, and Recall@$k$ values near $15\%$ when only the top $0.1\%$ of scored applications are inspected.
+Three models cluster at the top --- CatBoost (0.1796), LGBM (0.1768), and FT-Transformer (0.1797) --- within $0.003$ PR-AUC. FT-Transformer and CatBoost also have similar $F_2$ values at their respective baseline thresholds (0.3160 and 0.3143). BAF contains approximately 3.5 times as many observations as ULB (and the same ratio holds for the 80\% DEV partitions); the smaller observed transformer--GBDT gap on BAF is consistent with, but does not by itself prove, a data-volume explanation \cite{gorishniy2021revisiting}. Relative to the highest point estimate, Random Forest is approximately 12\% lower and Logistic Regression approximately 20\% lower in PR-AUC. OCSVM remains weak at 0.019. The operational metrics show a heavier review burden than on ULB: FP/TP ratios are 5.6--6.4 for the three leading models, alert rates are approximately 3--4\%, and Recall@$k$ is about 15\% when the top 0.5\% of TEST applications are inspected ($k=1\,000$).
 
-Taken together, the two baselines define the central tension that motivates the remainder of the chapter. On ULB the FT-Transformer is competitive but never best; on BAF Base it is exactly tied with the strongest gradient-boosted model. Yet both observations were collected under the same fixed defaults --- one specific threshold rule, no resampling, baseline hyperparameters. Whether the rankings survive perturbations of either choice is the question addressed next.
+Together, the two baselines answer RQ1 at the point-estimate level: FT-Transformer does not have the highest PR-AUC on ULB, while on BAF Base its PR-AUC rounds to the same value as CatBoost's. Both comparisons use the None strategy and validation-selected max-$F_2$ operating points under the model-specific procedures described in Chapter~\ref{sec:chapterMethodology}. The following sections examine how threshold and imbalance choices affect these reference results.
 
 % ══════════════════════════════════════════════════════════════════════════
 %  2 — THRESHOLD SENSITIVITY ANALYSIS
@@ -139,7 +141,7 @@ Taken together, the two baselines define the central tension that motivates the 
 \section{Threshold Sensitivity Analysis}
 \label{sec:threshold_sensitivity}
 
-The four threshold strategies introduced in Section~\ref{sec:threshold_study} of the Methodology --- fixed $\tau = 0.5$, max-$F_1$, max-$F_2$, and the lowest $\tau$ ensuring $\text{Precision} \geq 0.5$ --- are applied here to the probability scores produced by the baseline models. No retraining takes place, so any change in the operational metrics is attributable exclusively to the threshold rule. All four thresholds are selected on the validation folds (median across folds) and only then applied to the holdout test set. The analysis is structured around two questions: (i) does the choice of threshold affect $F_2$ in a way that exceeds the model-to-model gap; and (ii) does it preserve or reorder the in-domain model ranking?
+This section addresses RQ2 by applying the four rules introduced in Section~\ref{sec:threshold_study} --- fixed $\tau = 0.5$, max-$F_1$, max-$F_2$, and the lowest validation threshold satisfying $\text{Precision} \geq 0.5$ --- to the saved baseline TEST scores. For the classical models and OCSVM, thresholds are medians from five validation folds. For FT-Transformer, a separate validation model is fitted for the baseline-selected number of epochs on the same deterministic internal split to reconstruct the four thresholds; the saved final-model TEST scores remain unchanged. Consequently, the FT-Transformer max-$F_2$ entry in this section is study-specific and differs from its original baseline operating point, particularly on ULB (0.820 vs.\ 0.807). TEST labels remain excluded from threshold selection throughout. The analysis reports changes in $F_2$, $F_1$, recall, alert rate, and model ordering.
 
 % ─────── ULB 2013 — Threshold Study ───────
 
@@ -215,13 +217,13 @@ OCSVM      & 1.01\% & 0.30\% & 0.36\% & 0.22\% \\
 \end{tabular}
 \end{minipage}
 
-On ULB, threshold choice has a moderate but meaningful effect. The tree-based models (RF, LGBM, CatBoost) are already close to optimal under the na\"ive $\tau = 0.5$ rule because their predicted probabilities are well calibrated on this dataset: most genuine frauds exceed $0.5$ outright, leaving only marginal $F_2$ headroom for explicit optimisation. Logistic Regression, in contrast, gains substantially when the threshold is calibrated --- $F_2$ rises from $0.664$ under the fixed rule to $0.799$ under max-$F_2$, a $20\%$ relative improvement that closes most of the gap to the non-linear models. The FT-Transformer behaves much like the tree ensembles, with its fixed and max-$F_1$ values numerically coinciding ($F_2 \approx 0.82$), consistent with well-separated scores around $0.5$. The Precision\,$\geq$\,0.5 strategy yields the most conservative predictions (lowest alert rates) but at the cost of a clear recall and $F_2$ penalty for every supervised model except OCSVM, where it is dominated by every alternative. Crucially, the model ranking is preserved across all four strategies on ULB: CatBoost\,$>$\,LGBM\,$\approx$\,FT-Trans.\,$\approx$\,RF\,$>$\,LR\,$\gg$\,OCSVM. Threshold choice on ULB therefore tunes the operating point without changing which model would be selected.
+On ULB, threshold choice has a moderate effect. Logistic Regression gains most among the supervised models: $F_2$ rises from 0.664 under the fixed rule to 0.799 under max-$F_2$, a 20\% relative improvement. The tree ensembles gain less because their fixed-threshold $F_2$ values are already closer to their study-specific maxima, but this observation alone is not sufficient to establish probability calibration. The Precision\,$\geq$\,0.5 rule produces the highest recall and alert rate for each supervised model in these TEST results; its validation precision constraint therefore trades additional review workload for recall rather than acting as the lowest-workload rule. Model ordering is not fully preserved: FT-Transformer has the highest fixed-rule $F_2$, RF leads under max-$F_1$ and max-$F_2$, and FT-Transformer leads under the precision-constrained rule. The leading supervised models remain close, but the selected rule can change which one has the highest $F_2$.
 
 % ─────── BAF Base — Threshold Study ───────
 
 \subsection{BAF Base}
 
-The picture on BAF Base is qualitatively different. Tables~\ref{tab:threshold_baf_f2}--\ref{tab:threshold_baf_alert} report the same four metrics; the gap between the worst and best threshold strategy is now an order of magnitude larger than on ULB.
+Threshold effects are substantially larger on BAF Base. Tables~\ref{tab:threshold_baf_f2}--\ref{tab:threshold_baf_alert} report the same four metrics across the four rules.
 
 \noindent\begin{minipage}{\linewidth}\centering
 \captionof{table}[$F_2$ by threshold rule on BAF Base]{Threshold sensitivity on BAF Base~--- $F_2$ by threshold strategy (strategy\,=\,None).}
@@ -291,9 +293,9 @@ OCSVM      & 1.03\% & 4.06\% & 7.32\% & 0.00\% \\
 \end{tabular}
 \end{minipage}
 
-The fixed $\tau = 0.5$ rule is catastrophic on BAF: every supervised model collapses to $F_2 < 0.05$, and Random Forest effectively stops predicting fraud at all ($F_2 = 0.001$, Recall $= 0.0005$). The mechanism is straightforward: with $\approx 1.1\%$ fraud prevalence the score distribution concentrates well below $0.5$, so a na\"ive threshold discards nearly every positive prediction. The max-$F_2$ rule recovers performance dramatically --- CatBoost from $0.037$ to $0.314$, LGBM from $0.042$ to $0.316$, and FT-Transformer from $0.035$ to $0.317$, an almost nine-fold improvement. The max-$F_1$ rule sits between the two extremes, accepting higher precision at the cost of recall, and the Precision\,$\geq$\,0.5 rule is so conservative that OCSVM cannot satisfy it at any threshold ($\tau = \infty$ in the implementation), confirming that the unsupervised baseline is not merely weak but unable to reach a useful precision floor on this dataset. The Alert Rate columns make the workload consequence visible: moving from fixed to max-$F_2$ raises the alert rate from near zero to $3$--$4\%$ for every supervised model, which is the operational cost of recovering most of the fraud the model is capable of detecting.
+On BAF, the fixed $\tau = 0.5$ rule yields $F_2 < 0.05$ for every supervised model, and Random Forest produces almost no positive predictions ($F_2 = 0.001$, Recall $= 0.0005$). Few cases receive scores above 0.5, so the default threshold misses most positives. For the three leading models, max-$F_2$ produces approximately 7.5-fold, 8.5-fold, and 9.1-fold increases for LGBM (0.042 to 0.316), CatBoost (0.037 to 0.314), and FT-Transformer (0.035 to 0.317), respectively. The max-$F_1$ rule has lower recall than max-$F_2$, while the precision-constrained rule raises fewer alerts. OCSVM cannot satisfy the validation precision target, represented by $\tau=\infty$, and therefore produces no TEST alerts under that rule. Moving from fixed to max-$F_2$ raises the supervised alert rate from at most 0.07\% to approximately 3--4\%, making the review-workload trade-off explicit.
 
-A second, subtler observation concerns rankings. Where on ULB the four threshold rules preserve the model ordering, on BAF Base they reshuffle the top three: under fixed $\tau = 0.5$, LGBM leads ($F_2 = 0.042$); under max-$F_2$, FT-Transformer takes the top ($0.317$); under max-$F_1$, CatBoost dominates ($0.274$). Any conclusion about ``which model is best'' on BAF therefore depends on which threshold rule the comparison uses --- a methodological consideration that the leakage-free protocol of Section~\ref{sec:protocol} makes explicit. The headline finding of this section is unambiguous: on a dataset with $\approx 1\%$ fraud prevalence, the threshold rule can change $F_2$ by an order of magnitude, an effect that comfortably exceeds the gap between any two supervised models in Section~\ref{sec:baseline_results}.
+Threshold rules also reorder models on BAF. LGBM has the highest fixed-rule $F_2$ (0.042), FT-Transformer the highest max-$F_2$ value (0.317), CatBoost the highest max-$F_1$ value (0.274), and FT-Transformer the highest precision-constrained value (0.070). Together with the ULB changes, this shows that model selection based on a threshold-dependent metric must specify the operating rule. On BAF, the observed within-model $F_2$ changes are substantially larger than the baseline differences among the leading supervised models; this conclusion is limited to threshold-dependent metrics and does not affect PR-AUC.
 
 % ══════════════════════════════════════════════════════════════════════════
 %  3 — FULL FACTORIAL: IMBALANCE STRATEGY × MODEL
@@ -302,7 +304,7 @@ A second, subtler observation concerns rankings. Where on ULB the four threshold
 \section{Full Factorial Analysis~--- Imbalance Strategy \texorpdfstring{$\times$}{x} Model}
 \label{sec:factorial_results}
 
-This section traverses the full grid of seven imbalance handling strategies $\times$ five supervised models $\times$ two datasets, all evaluated under the primary max-$F_2$ threshold. Hyperparameters are fixed to those obtained in the baseline (strategy\,=\,None), so the only experimental factor in play is the balancing technique itself; this isolates the effect of resampling from confounding changes in model capacity. OCSVM is omitted because it does not use labelled fraud examples during training.
+This section addresses RQ3 through the full grid of seven imbalance handling strategies $\times$ five supervised models $\times$ two datasets, evaluated under the primary max-$F_2$ rule. Hyperparameters are fixed at their baseline-selected values (strategy\,=\,None), so model capacity is held constant while the planned imbalance intervention changes. The conclusions remain conditional on those baseline searches and the model-specific input representations. OCSVM is omitted because it does not use labelled fraud examples during training.
 
 % ─────── ULB 2013 — Factorial ───────
 
@@ -358,7 +360,7 @@ FT-Trans.  & 0.807 & 0.704 & 0.808 & \textbf{0.821} & \textbf{0.821} & 0.795 & 0
 \end{tabular}
 \end{minipage}
 
-The headline pattern on ULB is that the baseline (no resampling) already produces the maximum PR-AUC for four of the five supervised models, with CatBoost reaching the global best of $0.885$. Random Forest is the only model that genuinely benefits from oversampling: ROS pushes its PR-AUC marginally above the baseline ($0.867 \to 0.873$), and SMOTE produces a similar improvement ($0.867 \to 0.870$). The mirror-image of this result is that ROS \emph{degrades} LGBM substantially --- $0.874 \to 0.727$, a $17\%$ relative drop --- and produces smaller but still negative effects on CatBoost and FT-Transformer. The most likely mechanism is that random duplication of rare positives feeds back into LGBM's pseudo-residual updates, biasing the learner toward repeated training points without supplying additional discriminative information. Random Undersampling damages every model heavily on ULB: discarding a substantial share of the majority class in an already small dataset ($N \approx 284\,807$) eliminates decision-boundary information that none of the models can recover from. A consistent and somewhat surprising finding is that SMOTE and SMOTE+Tomek Links produce identical results across all models, indicating that the Tomek cleaning step removes zero borderline examples at this prevalence --- an expected outcome when the minority class is extremely rare and most synthetic SMOTE samples land well away from any majority-class neighbour.
+On ULB, the baseline produces the highest PR-AUC for four of the five supervised models, with CatBoost reaching the overall maximum of 0.885. Random Forest is the exception: ROS increases its PR-AUC from 0.867 to 0.873 and SMOTE to 0.870. By contrast, ROS reduces LGBM from 0.874 to 0.727 (a 17\% relative decrease) and also reduces CatBoost and FT-Transformer. RUS lowers PR-AUC for every supervised model on ULB. SMOTE and SMOTE+Tomek produce identical reported metrics for every model. The saved artefacts do not record how many Tomek links were removed, so this equality supports operational equivalence at the reported precision but does not establish that the cleaning step removed zero samples.
 
 % ─────── BAF Base — Factorial ───────
 
@@ -414,7 +416,7 @@ FT-Trans.  & \textbf{0.316} & 0.289 & 0.310 & 0.255 & 0.255 & 0.269 & 0.301 \\
 \end{tabular}
 \end{minipage}
 
-The BAF picture is starker: \emph{no} strategy improves CatBoost or LGBM by more than $0.01$ PR-AUC beyond their baselines, confirming that well-tuned gradient-boosted trees handle the moderate $\approx 1.1\%$ imbalance natively through their internal loss formulation. The two architecturally different model families react in opposing ways to SMOTE-based resampling: SMOTE and SMOTE+Tomek degrade CatBoost only modestly ($0.180 \to 0.154$, $-14\%$), but the same intervention reduces FT-Transformer PR-AUC from $0.180$ to $0.106$ --- a $41\%$ drop that is dissected in detail in Section~\ref{sec:transformer_imbalance}. Class Weights, which adjusts the loss function rather than the data distribution, preserves baseline performance for both gradient-boosted models and recovers most of the FT-Transformer's score ($0.175$, $-3\%$). The identity SMOTE\,$\equiv$\,SMOTE+Tomek observed on ULB extends to BAF unchanged, which means that the Tomek step buys no precision at any prevalence in our experiments and can safely be omitted in deployments where it has been an unexamined default.
+On BAF, no strategy increases CatBoost or LGBM by more than 0.01 PR-AUC relative to baseline, so the additional interventions provide little gain for these fitted configurations. SMOTE and SMOTE+Tomek reduce CatBoost from 0.180 to 0.154 (14\%) and FT-Transformer from 0.180 to 0.106 (41\%). Class Weights leaves LGBM and CatBoost close to their baselines and produces 0.175 for FT-Transformer, 3\% below its baseline. SMOTE and SMOTE+Tomek again have identical reported metrics. Across the two evaluated datasets, this shows no measured benefit from adding Tomek cleaning to SMOTE, but it does not support a claim about all prevalence levels or untested deployments.
 
 \subsection{Interaction Heatmaps}
 
@@ -444,19 +446,19 @@ The four heatmaps in Figures~\ref{fig:heatmap_ulb_prauc}--\ref{fig:heatmap_baf_f
 \label{fig:heatmap_baf_f2}
 \end{minipage}
 
-Three patterns become immediately legible. First, the RUS column is uniformly red on ULB and only marginally less so on BAF, confirming that random undersampling is the only strategy that fails on every model in every dataset. Second, the SMOTE and SMOTE+Tomek columns are pixel-identical, as the numerical tables already implied. Third, the BAF heatmaps are dominated by near-zero or slightly negative deltas for the gradient-boosted models, reinforcing the practical recommendation that, for these models on this kind of data, the most reliable resampling intervention is none at all.
+Three patterns become visible. First, RUS reduces PR-AUC for every model on both datasets, although its BAF $F_2$ values include small increases for LGBM and CatBoost after validation-based threshold selection. Second, the SMOTE and SMOTE+Tomek columns are identical at the reported precision. Third, the BAF PR-AUC deltas for LGBM and CatBoost are mostly near zero or negative, so the baseline is a defensible default for these models within the evaluated setting.
 
 % ══════════════════════════════════════════════════════════════════════════
 %  4 — TRANSFORMER ROBUSTNESS TO CLASS IMBALANCE
 % ══════════════════════════════════════════════════════════════════════════
 
-\section{Transformer Robustness to Class Imbalance}
+\section{FT-Transformer Sensitivity to Imbalance Interventions}
 \label{sec:transformer_imbalance}
 
-The asymmetry observed in Section~\ref{sec:factorial_results} between FT-Transformer and CatBoost under SMOTE invites a more direct comparison. This section restricts the factorial to the two architectures and asks whether the attention-based model is inherently more or less stable under data-level imbalance interventions than the strongest tree-based competitor.
+To complete the answer to RQ3, this section compares FT-Transformer and CatBoost directly across the implemented imbalance interventions. It describes their empirical spread and their different responses to SMOTE without treating those differences as architecture-only effects.
 
 \noindent\begin{minipage}{\linewidth}\centering
-\captionof{table}[FT-Transformer vs.\ CatBoost robustness on ULB 2013]{FT-Transformer vs.\ best tree (CatBoost): robustness to imbalance strategies on ULB 2013.}
+\captionof{table}[FT-Transformer and CatBoost sensitivity on ULB 2013]{FT-Transformer and CatBoost performance across imbalance strategies on ULB 2013.}
 \label{tab:transformer_robustness_ulb}
 \begin{tabular}{l cc cc}
 \toprule
@@ -477,7 +479,7 @@ Weights   & 0.783 & 0.813 & 0.875 & 0.838 \\
 \end{minipage}
 
 \noindent\begin{minipage}{\linewidth}\centering
-\captionof{table}[FT-Transformer vs.\ CatBoost robustness on BAF Base]{FT-Transformer vs.\ best tree (CatBoost): robustness to imbalance strategies on BAF Base.}
+\captionof{table}[FT-Transformer and CatBoost sensitivity on BAF Base]{FT-Transformer and CatBoost performance across imbalance strategies on BAF Base.}
 \label{tab:transformer_robustness_baf}
 \begin{tabular}{l cc cc}
 \toprule
@@ -497,18 +499,18 @@ Weights   & 0.175 & 0.301 & 0.184 & 0.317 \\
 \end{tabular}
 \end{minipage}
 
-On ULB both architectures follow a similar profile: RUS degrades performance sharply, the remaining strategies cluster near the baseline, and CatBoost retains a small but consistent absolute lead in every condition except RUS (where both models collapse and FT-Transformer marginally outperforms, $0.650$ vs.\ $0.617$). The FT-Transformer's standard deviation across strategies in $F_2$ ($0.044$) is lower than CatBoost's ($0.060$), suggesting that on this dataset the transformer is somewhat \emph{more} stable than the tree under resampling perturbations.
+On ULB both architectures follow a similar profile: RUS produces the largest PR-AUC reduction, while the remaining strategies are closer to baseline. CatBoost retains an absolute lead in every condition except RUS, where FT-Transformer records 0.650 versus 0.617. The reported standard deviations across the seven strategy values are 0.044 versus 0.060 for $F_2$ and 0.072 versus 0.096 for PR-AUC. These are descriptive measures of spread across interventions, not estimates of run-to-run or statistical stability.
 
-On BAF, the conclusion reverses. The two models tie at the baseline ($0.180$ PR-AUC; $F_2 \approx 0.316$), but their reactions to the data-level interventions diverge: SMOTE and SMOTE+Tomek reduce FT-Transformer PR-AUC by $41\%$ ($0.180 \to 0.106$) but reduce CatBoost only by $14\%$ ($0.180 \to 0.154$), and CatBoost's $F_2$ standard deviation is two to four times smaller than the FT-Transformer's. Class Weights is the safest intervention for the FT-Transformer on both datasets because it modifies the loss function without distorting the input distribution that the attention layers see during training. Whether this transformer-specific SMOTE sensitivity reflects a fundamental architectural fragility, or only an interaction between synthetic interpolations and gradient-based optimisation, is examined further in Section~\ref{sec:attention_diagnostics} via the attention diagnostics.
+On BAF, the two models have the same rounded baseline PR-AUC (0.180) and similar $F_2$, but their observed SMOTE responses differ: SMOTE and SMOTE+Tomek reduce FT-Transformer PR-AUC by 41\% (0.180 to 0.106) and CatBoost by 14\% (0.180 to 0.154). Class Weights is the closest non-baseline FT-Transformer intervention on BAF (0.175), but it is not a consistent default across datasets: on ULB, it reduces PR-AUC from 0.856 to 0.783. Moreover, the implemented FT-Transformer resampling path interpolates ordinal category codes and then converts them to integers. The 41\% reduction must therefore be interpreted as sensitivity under this specific preprocessing--SMOTE pipeline, not as evidence of an inherent transformer weakness. The baseline attention diagnostic in Section~\ref{sec:attention_diagnostics} does not test SMOTE-trained attention and is not used to infer the cause of this reduction.
 
 % ══════════════════════════════════════════════════════════════════════════
-%  5 — CROSS-DOMAIN GENERALIZATION (BAF INTERNAL)
+%  5 — CROSS-DOMAIN GENERALISATION (BAF INTERNAL)
 % ══════════════════════════════════════════════════════════════════════════
 
-\section{Cross-Domain Generalization (BAF Internal)}
+\section{Cross-Domain Generalisation (BAF Internal)}
 \label{sec:cross_domain_results}
 
-The cross-domain experiment trains each model on BAF Base and evaluates it on the holdout test sets of Variants~I--V \emph{without retraining}. The Base column repeats the in-domain test-set performance for reference. The two extra columns (\texttt{x1}, \texttt{x2}) present in Variants~III and~V are excluded so that a uniform $30$-feature input is presented to every model.
+This section addresses RQ4 by evaluating each BAF Base-trained model on the holdout test sets of Variants~I--V \emph{without retraining}. The Base column repeats the in-domain test-set performance for reference. The additional \texttt{x1} and \texttt{x2} columns in Variants~III and~V are excluded so that every model receives the same 30-feature input.
 
 \subsection{Cross-Domain Performance}
 
@@ -563,11 +565,11 @@ OCSVM      & 0.6279 & 0.5985 & \textbf{0.6636} & 0.6161 & 0.6462 & 0.5942 \\
 \end{tabular}
 \end{minipage}
 
-Three distinct response profiles emerge from Tables~\ref{tab:crossdomain_prauc}--\ref{tab:crossdomain_rocauc}. The first is exemplified by LGBM, CatBoost, and FT-Transformer, the three top in-domain performers: Variant~II (label shift only) is recovered almost perfectly because the feature distributions are unchanged; Variants~I and~IV produce modest degradation; and Variants~III and~V (which combine covariate shift with feature-space changes, even after the \texttt{x1}, \texttt{x2} alignment) cause PR-AUC drops in the $24$--$34\%$ range. The FT-Transformer offers no cross-domain robustness advantage over the gradient-boosted models in this regime; its degradation pattern mirrors LGBM and CatBoost almost exactly.
+LGBM, CatBoost, and FT-Transformer show similar point-estimate profiles across the controlled variants. Variant~II, which increases group-wise prevalence disparity while equalising group sizes, remains close to or slightly above the Base PR-AUC. Variant~I changes group-size disparity and Variant~IV changes prevalence disparity over time; both produce smaller changes for the three leading models than Variants~III and~V. The latter alter group-wise and temporal separability, respectively, and produce PR-AUC reductions of approximately 24--34\% relative to Base. Within this protocol, FT-Transformer shows no point-estimate transfer advantage over LGBM or CatBoost. Because PR-AUC is prevalence-sensitive, the accompanying ROC-AUC and $F_2$ results are considered alongside it rather than treating every PR-AUC difference as architecture-only degradation.
 
-The second profile is Random Forest's, and it is the most striking finding of the section. Despite trailing the gradient-boosted models in-domain ($0.159$ vs.\ $0.177$--$0.180$ PR-AUC), Random Forest \emph{improves} on four of the five variants under zero-shot transfer (Variants~I, II, III, and IV) and is essentially stable on Variant~V ($0.159 \to 0.159$). On the highest-shift variants (Variants~II and~IV), Random Forest reaches $0.225$ and $0.211$ PR-AUC, exceeding the gradient-boosted models' in-domain Base score. The most plausible explanation is the variance reduction introduced by random feature subsampling in each tree of the forest, which prevents overfitting to Base-specific feature co-occurrence patterns; LGBM and CatBoost grow trees on the global gradient signal and have no equivalent ``forced decorrelation'' mechanism.
+Random Forest differs from the three leading Base models. Its PR-AUC is higher than its Base value on Variants~I--IV and effectively unchanged on Variant~V (0.1588 to 0.1593). Its $F_2$ is higher on Variants~I, II, and IV, but lower on Variants~III and~V. Variant~II produces the highest Random Forest PR-AUC (0.225), followed by Variant~IV (0.211). These results record a distinct empirical transfer profile, but the experiments do not isolate its cause. Random feature subsampling is one possible explanation, not a tested mechanism, and the gradient-boosted configurations also include feature-subsampling controls.
 
-The third profile is OCSVM's --- uniformly weak, with PR-AUC below $0.023$ on every variant, reinforcing that the one-class anomaly framing does not approach the supervised baselines on either in-domain or cross-domain data. A final observation: ROC-AUC is markedly more stable than PR-AUC across all variants (range $0.87$--$0.91$ for the supervised models). This is consistent with the long-standing observation that ROC-AUC is less sensitive to shifts in class prior, but the same property makes it the less informative metric for ranking models under extreme imbalance.
+OCSVM provides a third, consistently lower profile, with PR-AUC below $0.023$ on every Variant. Its one-class objective does not approach the supervised point estimates on either the Base or Variant test distributions. ROC-AUC varies less than PR-AUC across the Variants (approximately $0.87$--$0.91$ for the supervised models), consistent with its lower sensitivity to changes in class prior. That property also makes it less informative than PR-AUC about positive predictive performance under extreme imbalance.
 
 % ══════════════════════════════════════════════════════════════════════════
 %  6 — INTERPRETABILITY (SHAP)
@@ -576,7 +578,7 @@ The third profile is OCSVM's --- uniformly weak, with PR-AUC below $0.023$ on ev
 \section{Interpretability Analysis (SHAP)}
 \label{sec:shap_results}
 
-The interpretability analysis uses SHAP on the BAF Base dataset, where the features have semantic meaning. ULB features (PCA components V1--V28) are not interpretable and SHAP analysis on ULB serves only as a sanity check. Four models are explained --- LR, LGBM, CatBoost, and FT-Transformer --- each with the SHAP explainer best matched to its architecture (LinearExplainer, TreeExplainer, GradientExplainer; see Section~\ref{sec:interpretability}).
+This section addresses the SHAP component of RQ5 on BAF Base, whose features have semantic names. Architecture-compatible cross-model conclusions are restricted to LR, LGBM, and CatBoost using LinearExplainer and TreeExplainer (Section~\ref{sec:interpretability}). A GradientExplainer artefact is displayed for FT-Transformer for transparency, but its categorical inputs pass through a non-differentiable integer conversion in the explainer wrapper. Its global ranking and pairwise Jaccard values are therefore excluded from the substantive conclusions.
 
 \subsection{Global Feature Importance}
 
@@ -584,7 +586,7 @@ The global view orders features by mean $|\text{SHAP}|$ across the test set.
 
 \noindent\begin{minipage}{\linewidth}\centering
 \includegraphics[width=0.88\textwidth]{figures/baf/shap_global.pdf}
-\captionof{figure}[Top-15 SHAP features by model on BAF Base]{Top-15 features by mean $|\text{SHAP}|$ on BAF Base for LR, LGBM, CatBoost, and FT-Transformer.}
+\captionof{figure}[Top-15 SHAP features by model on BAF Base]{Top-15 features by mean $|\text{SHAP}|$ on BAF Base. LR, LGBM, and CatBoost use architecture-compatible explainers over the full test set. The sampled FT-Transformer GradientExplainer panel is retained as an exploratory artefact but is not used for cross-model inference because categorical index conversion is non-differentiable.}
 \label{fig:shap_global}
 \end{minipage}
 
@@ -594,32 +596,31 @@ The global view orders features by mean $|\text{SHAP}|$ across the test set.
 \label{fig:shap_beeswarm}
 \end{minipage}
 
-Figure~\ref{fig:shap_global} shows that LR, LGBM, and CatBoost concentrate their attribution on three features --- \texttt{device\_os}, \texttt{housing\_status}, and \texttt{phone\_home\_valid} --- which together dominate the top of every tree-based and linear ranking. The FT-Transformer, in contrast, places \texttt{name\_email\_similarity}, \texttt{income}, and \texttt{phone\_home\_valid} at the top: only the third entry is shared with the tree-based ranking. The beeswarm in Figure~\ref{fig:shap_beeswarm} reveals the directionality behind LGBM's ranking: low values of \texttt{phone\_home\_valid} push strongly toward the fraud class, and \texttt{device\_os} shows a discrete split with one category carrying most of the fraud signal --- a pattern consistent with a small number of high-risk device fingerprints.
+Figure~\ref{fig:shap_global} shows that LR, LGBM, and CatBoost share the same three leading features --- \texttt{device\_os}, \texttt{housing\_status}, and \texttt{phone\_home\_valid}. The FT-Transformer exploratory panel places \texttt{name\_email\_similarity}, \texttt{income}, and \texttt{phone\_home\_valid} first, but the absence of categorical variables from its displayed top features is compatible with the GradientExplainer limitation and must not be interpreted as a learned preference for continuous inputs. The LGBM beeswarm in Figure~\ref{fig:shap_beeswarm} shows that low values of \texttt{phone\_home\_valid} are associated with positive SHAP contributions and that different \texttt{device\_os} categories have distinct contribution patterns.
 
 \subsection{Cross-Model Feature Consistency}
 
-The Jaccard similarity of the top-10 feature sets between every pair of models quantifies how much the rankings agree.
+The Jaccard similarity between top-10 feature sets quantifies membership overlap; it does not compare the order within each set.
 
 \noindent\begin{minipage}{\linewidth}\centering
-\captionof{table}[Cross-model SHAP top-10 Jaccard agreement]{Jaccard similarity of top-10 SHAP features across model pairs (BAF Base).}
+\captionof{table}[Cross-model SHAP top-10 Jaccard agreement]{Jaccard similarity of top-10 SHAP feature sets for the architecture-compatible LR, LGBM, and CatBoost explanations (BAF Base).}
 \label{tab:shap_consistency}
-\begin{tabular}{l c c c c}
+\begin{tabular}{l c c c}
 \toprule
-          & LR & LGBM & CatBoost & FT-Trans. \\
+          & LR & LGBM & CatBoost \\
 \midrule
-LR         & --- & 0.67 & 0.67 & 0.33 \\
-LGBM       & 0.67 & --- & 1.00 & 0.54 \\
-CatBoost   & 0.67 & 1.00 & --- & 0.54 \\
-FT-Trans.  & 0.33 & 0.54 & 0.54 & --- \\
+LR         & --- & 0.67 & 0.67 \\
+LGBM       & 0.67 & --- & 1.00 \\
+CatBoost   & 0.67 & 1.00 & --- \\
 \bottomrule
 \end{tabular}
 \end{minipage}
 
-LGBM and CatBoost agree perfectly on the top-10 feature set (Jaccard $= 1.00$), and both share $7$ of $10$ features with Logistic Regression (Jaccard $= 0.67$). The convergence across architecturally different supervised learners is strong evidence that these features carry genuine fraud signal rather than model-specific artefacts. The FT-Transformer overlaps the tree-based ranking on only $5$--$6$ of the $10$ features (Jaccard $= 0.54$) and shares just $3$ with LR (Jaccard $= 0.33$). The architectural divergence does not translate into worse predictive accuracy --- the FT-Transformer matches CatBoost on BAF Base --- but it does indicate that the transformer learns a partially distinct feature hierarchy, weighting continuous features more heavily than one-hot encoded categoricals. The mechanism is consistent with FT-Transformer's per-feature linear tokenisation, where continuous features contribute richer gradient signals than the comparatively flat categorical embeddings.
+LGBM and CatBoost have the same top-10 feature set (Jaccard $=1.00$), although the order within that set is not identical. Each shares eight of ten features with Logistic Regression, corresponding to Jaccard $=8/(10+10-8)=0.67$. This agreement supports a common global candidate set across the fitted linear and boosted-tree models, but it does not prove identical reasoning, equal attribution magnitudes, or causal importance.
 
 \subsection{Cross-Variant Feature Stability}
 
-The same Jaccard analysis, run across the six BAF datasets (Base + Variants~I--V), tests whether feature importance ordering survives distribution shift.
+The same Jaccard analysis is applied across the six BAF test distributions (Base and Variants~I--V) to assess whether membership of the Base-trained LGBM top-10 feature set changes under the controlled shifts.
 
 \noindent\begin{minipage}{\linewidth}\centering
 \captionof{table}[Cross-variant SHAP top-10 stability for LGBM]{Jaccard similarity of top-10 SHAP features for LGBM across BAF Variants.}
@@ -638,13 +639,13 @@ Var.~V     & 1.00 & 1.00 & 1.00 & 1.00 & 1.00 & --- \\
 \end{tabular}
 \end{minipage}
 
-The result is unequivocal: LGBM's top-10 feature ranking is identical on every BAF dataset (Jaccard $= 1.00$ for every pairwise comparison). Combined with the cross-domain performance results of Section~\ref{sec:cross_domain_results}, this constrains the source of the observed PR-AUC degradation: the features driving fraud predictions are invariant under the distributional shifts of the BAF suite, so any performance gap on Variants~III and~V must come from changes in the \emph{relationship} between those features and the target, not from a change in which features are informative. This is an unusually strong stability finding and has a practical consequence --- explanations generated on the training distribution remain valid on the shifted variants, so the explanation infrastructure needs no retraining alongside the model.
+The Base-trained LGBM produces the same top-10 feature \emph{set} on all six BAF test distributions (Jaccard $=1.00$ for every pairwise comparison). This records stable membership at the chosen value of $k$ for this fixed model. It does not establish identical ordering, stable attribution magnitudes, unchanged local explanations, or invariance of the feature--target relationship. Explanations should therefore still be monitored under distribution shift even when the global top-10 set is unchanged.
 
 \subsection{Local Explanations and Feature Dependence}
 
 \noindent\begin{minipage}{\linewidth}\centering
 \includegraphics[width=0.95\textwidth]{figures/baf/shap_waterfall_tp_fp_fn.pdf}
-\captionof{figure}[Local SHAP explanations for TP, FP, and FN cases (LGBM)]{SHAP contribution plots for representative True Positive, False Positive, and False Negative cases (LGBM on BAF Base). Red bars push toward fraud; blue bars push toward legitimate.}
+\captionof{figure}[Local SHAP explanations for TP, FP, and FN cases (LGBM)]{SHAP contribution plots for selected true-positive, false-positive, and false-negative cases (LGBM on BAF Base). Red bars contribute towards fraud; blue bars contribute towards legitimate.}
 \label{fig:shap_local}
 \end{minipage}
 
@@ -654,7 +655,7 @@ The result is unequivocal: LGBM's top-10 feature ranking is identical on every B
 \label{fig:shap_dependence}
 \end{minipage}
 
-The waterfall plots in Figure~\ref{fig:shap_local} illustrate the decision process for individual transactions. The True Positive case is supported by multiple features pushing concordantly toward fraud, producing a high final score with no internal contradiction. The False Positive case shows the model attempting to construct a similar coalition from the same features but with smaller individual contributions, suggesting a borderline-looking input that resembles fraud without quite matching the typical pattern. The False Negative is the most informative: legitimate-pushing features narrowly outweigh fraud indicators, producing a final score just below threshold. From an operational standpoint, FN cases of this kind are the principal source of recall losses, and they are difficult to recover without lowering precision substantially. The dependence plots (Figure~\ref{fig:shap_dependence}) confirm that the top features have markedly non-linear effects on the model output, with sharp transitions at specific values rather than smooth monotonic trends.
+The waterfall plots in Figure~\ref{fig:shap_local} decompose the LGBM output for three selected cases. In the true-positive case, several positive contributions combine to produce a score above the decision threshold. The false-positive case contains positive contributions from a similar subset of features but is a legitimate observation, illustrating that a local explanation describes the fitted model rather than validating the prediction. In the false-negative case, negative contributions outweigh the positive contributions and place the score below the threshold. These examples illustrate individual attribution patterns but are not representative estimates of each error class. The dependence plots in Figure~\ref{fig:shap_dependence} show non-linear associations between the selected feature values and their SHAP contributions; they do not establish causal feature effects.
 
 % ══════════════════════════════════════════════════════════════════════════
 %  7 — FT-TRANSFORMER ATTENTION DIAGNOSTICS
@@ -663,16 +664,9 @@ The waterfall plots in Figure~\ref{fig:shap_local} illustrate the decision proce
 \section{FT-Transformer Attention Diagnostics}
 \label{sec:attention_diagnostics}
 
-The attention mechanism is the defining component of the FT-Transformer architecture, and analysing the learned weights provides a mechanistic account of how the model processes tabular features --- in particular, whether any pathological attention pattern explains the absolute performance ceiling observed on BAF. The diagnostic framework distinguishes four candidate patterns:
+This section addresses the attention component of RQ5. The exploratory diagnostic describes the final-layer, head-averaged \texttt{[CLS]} attention distribution; it is not a faithful feature-attribution method and does not identify the cause of predictive performance. The analysis examines overall concentration through normalised entropy, \texttt{[CLS]} self-attention, the balance between categorical and numerical tokens, and selected case-level matrices.
 
-\begin{itemize}
-  \item \textbf{Tunnel Vision:} attention concentrates on a small number of features, ignoring the rest.
-  \item \textbf{Self-Obsession:} the \texttt{[CLS]} classification token attends primarily to itself, blocking information flow from the feature tokens.
-  \item \textbf{Categorical Trap:} categorical feature tokens receive disproportionately high attention relative to numerical ones.
-  \item \textbf{Foggy Vision:} attention is near-uniformly distributed across all tokens, providing no selective emphasis.
-\end{itemize}
-
-Diagnostics are computed on $200\,000$ test samples from BAF Base using the best-performing FT-Transformer configuration ($\tau = 0.058$). The model operates on $31$ tokens: $25$ numerical features, $5$ categorical features, and the \texttt{[CLS]} classification token.
+The quantities are computed on all $200\,000$ BAF Base TEST samples using the baseline FT-Transformer configuration ($\tau = 0.058$). The model operates on $31$ tokens: $25$ numerical features, $5$ categorical features, and the \texttt{[CLS]} classification token. Only the final transformer layer is aggregated, and PyTorch averages the weights across attention heads.
 
 \subsection{Aggregate Attention Distribution}
 
@@ -682,19 +676,19 @@ Diagnostics are computed on $200\,000$ test samples from BAF Base using the best
 \label{fig:attention_aggregate}
 \end{minipage}
 
-Four statistics summarise the aggregate distribution shown in Figure~\ref{fig:attention_aggregate}. The normalised entropy of the attention distribution is $H_{\text{norm}} = 0.976$, meaning the observed entropy ($3.352$ nats) is $97.6\%$ of the theoretical maximum for $31$ tokens ($\ln 31 = 3.434$ nats). The \texttt{[CLS]} self-attention is $3.1\%$, indistinguishable from the uniform baseline of $1/31 \approx 3.2\%$ --- ruling out Self-Obsession. The mean attention paid to categorical vs.\ numerical tokens is $4.0\%$ vs.\ $3.1\%$ (ratio $1.28\times$), a small categorical elevation that is several orders of magnitude below what would constitute a Categorical Trap. The top three tokens by attention --- \texttt{device\_os} ($6.2\%$), \texttt{housing\_status} ($5.0\%$), \texttt{employment\_status} ($3.8\%$) --- coincide with the top SHAP features of the tree-based models reported in Section~\ref{sec:shap_results}, providing convergent evidence that these are the genuinely informative inputs in the BAF feature space. The diagnostic verdict is \textbf{Foggy Vision}: the model exhibits none of Tunnel Vision, Self-Obsession, or Categorical Trap; attention is broadly and near-uniformly spread across all $31$ tokens.
+Four statistics summarise the aggregate distribution shown in Figure~\ref{fig:attention_aggregate}. The normalised entropy is $H_{\text{norm}}=0.976$: the observed entropy (3.352 nats) is 97.6\% of the theoretical maximum for 31 tokens ($\ln 31=3.434$ nats). Mean \texttt{[CLS]} self-attention is 3.1\%, close to the uniform reference of $1/31\approx3.2\%$. Mean attention to categorical and numerical tokens is 4.0\% and 3.1\%, respectively (ratio $1.28\times$). The three largest mean token weights are \texttt{device\_os} (6.2\%), \texttt{housing\_status} (5.0\%), and \texttt{employment\_status} (3.8\%); the first two, but not the third, also appear among the three leading LGBM and CatBoost SHAP features. The final-layer average is therefore diffuse rather than strongly concentrated, although head-specific or earlier-layer structure may be hidden by averaging.
 
 \subsection{Individual Case Attention Heatmaps}
 
 \noindent\begin{minipage}{\linewidth}\centering
 \includegraphics[width=0.80\textwidth]{figures/baf/attention_heatmap_fp.png}
-\captionof{figure}[Attention matrix for a borderline False Positive case]{Full $31{\times}31$ attention matrix for a representative False Positive case (score\,$\approx\tau = 0.0584$). Each cell $(i,j)$ shows the attention weight from query token $i$ to key token $j$. The near-uniform light-blue colouration across the entire matrix confirms the Foggy Vision pattern at the individual case level.}
+\captionof{figure}[Attention matrix for a borderline false-positive case]{Final-layer, head-averaged $31{\times}31$ attention matrix for a selected false-positive case (score\,$\approx\tau = 0.0584$). Each cell $(i,j)$ shows the mean attention weight from query token $i$ to key token $j$. The broadly similar colour intensities are consistent with a diffuse pattern for this case.}
 \label{fig:attention_heatmap_fp}
 \end{minipage}
 
-The full attention matrix for a borderline False Positive (Figure~\ref{fig:attention_heatmap_fp}) is dominated by near-uniform low values, with only marginal concentration on \texttt{device\_os} and \texttt{housing\_status}. False Negative cases (scores just below threshold; see Appendix~\ref{appendixB}) exhibit the same qualitative pattern. In both groups the classification is the product of a broad, distributed aggregation of all feature representations rather than a focused appeal to one or two tokens.
+The final-layer average for the selected false-positive case (Figure~\ref{fig:attention_heatmap_fp}) contains broadly similar values, with limited elevation for \texttt{device\_os} and \texttt{housing\_status}. The selected false-negative cases in Appendix~\ref{appendixB} (p.~\pageref{appendixB}) show a similar qualitative last-layer pattern. These examples illustrate diffuse attention in the inspected cases but do not determine how earlier layers, individual heads, residual paths, or feed-forward blocks contributed to the final prediction.
 
-The Foggy Vision diagnosis carries a specific interpretive implication. The FT-Transformer is not performing at $0.18$ PR-AUC because its attention mechanism is broken or degenerate --- no pathological pattern is present, and the model integrates information across all features. The far more parsimonious reading is that the BAF feature space does not contain enough discriminative signal to reward selective attention: there is no subset of features that, if attended to, would yield better predictions. This is consistent with the dataset-ceiling interpretation suggested by the convergence of CatBoost and FT-Transformer at exactly $0.180$ PR-AUC (Section~\ref{sec:baseline_results}) and by the perfect cross-variant SHAP stability (Section~\ref{sec:shap_results}). The small residual categorical preference ($1.28\times$) is consistent with FT-Transformer's tokenisation design --- categorical embeddings carry slightly richer discrete representations than linear numeric projections --- but does not translate into a performance advantage over tree-based models that handle the same categorical features natively via splitting.
+The attention diagnostic supports one limited conclusion: the final-layer, head-averaged \texttt{[CLS]} attention is diffuse for the fitted baseline model. It does not show that all available signal has been exhausted, that no feature subset could improve prediction, or that the shared rounded PR-AUC of 0.180 is an information-theoretic ceiling. The CatBoost--FT-Transformer parity is therefore reported as an empirical result on BAF Base, while the cause of that parity remains unresolved. Likewise, the 1.28 categorical-to-numerical mean ratio is descriptive and is not interpreted as evidence of superior categorical processing.
 
 \clearpage
 % ══════════════════════════════════════════════════════════════════════════
@@ -704,7 +698,7 @@ The Foggy Vision diagnosis carries a specific interpretive implication. The FT-T
 \section{Consolidated Summary}
 \label{sec:consolidated}
 
-This section consolidates the experimental evidence into three artefacts intended for practitioner use: a side-by-side visual baseline (PR curves), a decision framework mapping deployment scenarios to model+strategy+threshold configurations, and the bootstrap and computational-cost statistics that quantify the uncertainty and resource implications of the recommendations.
+This section consolidates the experimental evidence into three practitioner-oriented summaries: overlaid PR curves, an operational evidence table mapping priorities to evaluated model--strategy--threshold configurations, and bootstrap and computational-cost statistics that describe sampling uncertainty and resource requirements.
 
 \subsection{PR Curves --- All Models Overlaid (Baseline)}
 
@@ -716,36 +710,36 @@ This section consolidates the experimental evidence into three artefacts intende
 \label{fig:pr_curves_consolidated}
 \end{minipage}
 
-The PR curves visually confirm the tabulated baseline rankings of Section~\ref{sec:baseline_results}. On ULB~2013 the curves of CatBoost, LGBM, RF, and FT-Transformer dominate the upper-right region of the plot, Logistic Regression sits slightly below, and OCSVM collapses near the origin. On BAF~Base every supervised curve is compressed into the low-precision region, reflecting the fundamentally harder operating regime imposed by the $\approx 1.1\%$ fraud rate; the four top supervised models are tightly clustered and OCSVM is again clearly separated.
+The PR curves are consistent with the tabulated baseline ordering in Section~\ref{sec:baseline_results}. On ULB~2013, CatBoost, LGBM, RF, and FT-Transformer occupy the strongest region of the plot, Logistic Regression is lower, and OCSVM is weaker. On BAF~Base, the supervised curves occupy a substantially lower-precision region despite BAF having a higher fraud prevalence than ULB (approximately 1.1\% vs.\ 0.172\%). The lower BAF PR-AUC is therefore consistent with weaker score separability in the evaluated setting and cannot be attributed to a lower positive prevalence. LGBM, CatBoost, and FT-Transformer are closely clustered by point estimate, whereas OCSVM remains separated below them.
 
 \subsection{Decision Framework}
 
 \noindent\begin{minipage}{\linewidth}\centering
-\captionof{table}[Decision framework by deployment scenario]{Decision framework: recommended (model, imbalance strategy, threshold rule) configuration by deployment scenario.}
+\captionof{table}[Decision framework by deployment scenario]{Decision framework: evaluated (model, imbalance strategy, threshold rule) candidate selected by the relevant point estimate for each scenario.}
 \label{tab:decision_framework}
 \begin{tabular}{p{4.2cm} l l l}
 \toprule
-Scenario & Model & Strategy & Threshold \\
+Decision context & Model & Strategy & Threshold \\
 \midrule
 High recall, ULB-like      & CatBoost  & None / ROS   & max-$F_2$      \\
-Balanced $F_1$, ULB-like   & CatBoost  & None         & max-$F_1$      \\
+Balanced $F_1$, ULB-like   & RF        & None         & max-$F_1$      \\
 High recall, BAF-like      & LGBM      & None / Weights & max-$F_2$    \\
-Balanced $F_1$, BAF-like   & CatBoost  & ROS          & max-$F_1$      \\
-Cross-domain deployment    & RF        & None         & max-$F_2$      \\
+Balanced $F_1$, BAF-like   & CatBoost  & None         & max-$F_1$      \\
+BAF Variant transfer       & RF        & None         & max-$F_2$      \\
 Interpretability required  & LGBM      & None         & max-$F_2$      \\
-Low workload budget        & CatBoost  & None         & Prec$\geq$0.5  \\
+Validation precision target & CatBoost & None         & Prec$\geq$0.5  \\
 \bottomrule
 \end{tabular}
 \end{minipage}
 
-Table~\ref{tab:decision_framework} translates the experimental evidence into seven deployment scenarios. CatBoost is the default choice for in-domain deployment thanks to its consistently top-tier performance on both datasets. When distribution shift is anticipated, Random Forest is preferred despite its lower in-domain score, because its cross-domain robustness more than compensates for the in-domain gap (Section~\ref{sec:cross_domain_results}). When interpretability is a deployment requirement, LGBM offers the best combination of performance and SHAP-based explainability: its top-10 feature ranking is identical to CatBoost's (Jaccard $= 1.00$) while training is computationally lighter (Section~\ref{sec:shap_results} and the cost tables below). The Precision\,$\geq$\,0.5 threshold is recommended only when investigation capacity is the binding constraint; it accepts a substantial recall penalty in exchange for the guarantee that at least half of the alerts raised will be genuine fraud.
+Table~\ref{tab:decision_framework} translates the evaluated configurations into seven decision contexts using the relevant point estimate. CatBoost is a defensible in-domain candidate because it belongs to the higher-performing group on both datasets. When BAF-like shifts are anticipated, Random Forest provides a contrasting transfer profile, although its advantage is metric- and Variant-dependent (Section~\ref{sec:cross_domain_results}). When global interpretability and computational cost are priorities, LGBM combines competitive performance with exact TreeSHAP; its top-10 feature set matches CatBoost's, while its training and tuning times are lower. Every table entry corresponds to a model--strategy--threshold combination evaluated jointly; this is why the BAF max-$F_1$ row uses the None strategy rather than combining max-$F_1$ with an untested ROS configuration. The Precision\,$\geq$\,0.5 rule enforces its target on validation only and does not guarantee that half of TEST or future alerts will be fraud or that the resulting alert volume will be low.
 
 \subsection{Bootstrap Confidence Intervals}
 
 The bootstrap CIs in Tables~\ref{tab:ci_ulb} and~\ref{tab:ci_baf} quantify the sampling uncertainty of the baseline PR-AUC and ROC-AUC estimates.
 
 \noindent\begin{minipage}{\linewidth}\centering
-\captionof{table}[Bootstrap PR-AUC and ROC-AUC CIs on ULB 2013]{$95\%$ Bootstrap CI for PR-AUC and ROC-AUC on ULB 2013 (strategy\,=\,None, $1\,000$ iterations).}
+\captionof{table}[Bootstrap PR-AUC and ROC-AUC CIs on ULB 2013]{$95\%$ bootstrap confidence intervals for PR-AUC and ROC-AUC on ULB 2013 (strategy\,=\,None, $1\,000$ iterations).}
 \label{tab:ci_ulb}
 \begin{tabular}{l c c c c}
 \toprule
@@ -762,7 +756,7 @@ OCSVM      & 0.335 & [0.252, 0.449] & 0.953 & [0.922, 0.979] \\
 \end{minipage}
 
 \noindent\begin{minipage}{\linewidth}\centering
-\captionof{table}[Bootstrap PR-AUC and ROC-AUC CIs on BAF Base]{$95\%$ Bootstrap CI for PR-AUC and ROC-AUC on BAF Base (strategy\,=\,None, $1\,000$ iterations).}
+\captionof{table}[Bootstrap PR-AUC and ROC-AUC CIs on BAF Base]{$95\%$ bootstrap confidence intervals for PR-AUC and ROC-AUC on BAF Base (strategy\,=\,None, $1\,000$ iterations).}
 \label{tab:ci_baf}
 \begin{tabular}{l c c c c}
 \toprule
@@ -778,14 +772,14 @@ OCSVM      & 0.019 & [0.018, 0.021] & 0.628 & [0.616, 0.639] \\
 \end{tabular}
 \end{minipage}
 
-On ULB the intervals are wide enough that several of the top three models' PR-AUC CIs overlap, indicating that the small absolute gaps between CatBoost, LGBM, and RF are within sampling noise; the gap between this top cluster and Logistic Regression is, however, clearly separated. On BAF Base the intervals are roughly an order of magnitude narrower (driven by the larger test set), and the CatBoost--LGBM--FT-Transformer cluster forms a statistically indistinguishable top tier. This formalises the observation made in Section~\ref{sec:baseline_results} that the FT-Transformer's parity with CatBoost on BAF is not an artefact of a single point estimate.
+On ULB, the PR-AUC intervals are wide and overlap across several models; Logistic Regression's interval also overlaps the lower portions of some higher-scoring models' intervals. On BAF Base, the intervals are narrower because the test set is larger, and the marginal intervals for LGBM, CatBoost, and FT-Transformer overlap substantially. These intervals describe uncertainty for each fitted model separately. Their overlap is compatible with small differences but does not establish statistical equivalence or indistinguishability; a paired bootstrap of model differences would be required for such an inferential claim and was not performed.
 
 \subsection{Computational Cost}
 
-The cost tables capture the operational reality that decisions about model selection cannot be made on accuracy alone.
+The cost tables show that model selection depends on computational requirements as well as predictive and operational metrics.
 
 \noindent\begin{minipage}{\linewidth}\centering
-\captionof{table}[Computational cost on ULB 2013]{Computational cost on ULB 2013 (strategy\,=\,None). Tuning includes Optuna TPE (50 trials, 5-fold CV).}
+\captionof{table}[Computational cost on ULB 2013]{Computational cost on ULB 2013 (strategy\,=\,None). Optuna uses 50 trials: five-fold validation for the classical supervised models and one DEV holdout for FT-Transformer. OCSVM is not tuned.}
 \label{tab:cost_ulb}
 \begin{tabular}{l r r r}
 \toprule
@@ -802,7 +796,7 @@ OCSVM      & --- & 98.1 & 10.117 \\
 \end{minipage}
 
 \noindent\begin{minipage}{\linewidth}\centering
-\captionof{table}[Computational cost on BAF Base]{Computational cost on BAF Base (strategy\,=\,None). Tuning includes Optuna TPE (50 trials, 5-fold CV).}
+\captionof{table}[Computational cost on BAF Base]{Computational cost on BAF Base (strategy\,=\,None). Optuna uses 50 trials: five-fold validation for the classical supervised models and one DEV holdout for FT-Transformer. OCSVM is not tuned.}
 \label{tab:cost_baf}
 \begin{tabular}{l r r r}
 \toprule
@@ -818,7 +812,7 @@ OCSVM      & --- & 919.6 & 71.579 \\
 \end{tabular}
 \end{minipage}
 
-LGBM dominates the cost dimension by a wide margin. On BAF Base it trains in $16$ seconds and tunes in $\approx 21$ minutes; CatBoost requires roughly six times the tuning budget and twice the training time for an indistinguishable PR-AUC, while the FT-Transformer requires roughly $40$ times the tuning budget and $20$ times the training time of LGBM --- for the same end result. The FT-Transformer also requires GPU computation, epoch-based optimisation with early stopping, and careful hyperparameter tuning, with no observed predictive benefit on either dataset. The cost asymmetry sharpens the practical recommendation: when the goal is to deploy a fraud detection model that performs at the BAF ceiling, LGBM achieves that ceiling at a small fraction of the engineering and compute budget required by either CatBoost or the FT-Transformer.
+LGBM has the lowest measured tuning and training times among the leading BAF models. It trains in 16.1 seconds and tunes in approximately 20.7 minutes. CatBoost uses about 5.6 times the tuning time and 2.3 times the training time, while FT-Transformer uses about 37.4 times the tuning time and 21.5 times the training time. FT-Transformer also uses GPU computation and epoch-based optimisation with early stopping. Given the similar BAF point estimates of the three leading models, these measured cost differences favour LGBM when computational efficiency is a primary constraint. The comparison is hardware- and implementation-specific and is not a universal complexity benchmark.
 
 \clearpage
 % ══════════════════════════════════════════════════════════════════════════
@@ -828,13 +822,16 @@ LGBM dominates the cost dimension by a wide margin. On BAF Base it trains in $16
 \section{Synthesis and Threats to Validity}
 \label{sec:discussion}
 
-The experimental chapter has shown that the most consequential design decision in a fraud detection pipeline is not the choice of model family but the choice of decision threshold. On a dataset where positives are rare, the difference between a na\"ive $\tau = 0.5$ and a max-$F_2$ rule selected on validation can change $F_2$ by an order of magnitude, dwarfing every model-to-model and strategy-to-strategy gap observed in the rest of the chapter. Among the supervised models, no choice ``dominates'' in an unqualified sense: CatBoost wins in-domain on the smaller dataset; CatBoost, LGBM, and FT-Transformer are statistically indistinguishable in-domain on the larger one; Random Forest is the only model that gracefully tolerates the BAF distribution shifts despite its lower in-domain score; LGBM offers the most attractive accuracy--cost--interpretability bundle. The factorial analysis additionally establishes that imbalance handling, despite its prominence in the fraud detection literature, contributes second-order improvements at best for well-tuned gradient-boosted trees on data of $\approx 1\%$ prevalence, and that Class Weights is the safest default when an intervention is genuinely necessary --- particularly for the FT-Transformer, which suffers a $41\%$ PR-AUC drop under SMOTE on BAF without any compensating gain. The interpretability and attention analyses close the loop: tree-based and attention-based models converge on the same top features, and the FT-Transformer's normalised attention entropy of $0.976$ is evidence that its parity with CatBoost on BAF reflects a feature-space ceiling rather than an architectural failure.
+The largest observed within-model changes in threshold-dependent $F_2$ arise from the decision rule, especially on BAF; PR-AUC, by definition, is unaffected by this choice. No supervised model dominates every criterion. CatBoost has the highest ULB baseline PR-AUC, while LGBM, CatBoost, and FT-Transformer have closely grouped BAF point estimates with overlapping marginal bootstrap intervals. Random Forest has a distinct BAF transfer profile whose advantage depends on the Variant and metric. LGBM offers a favourable measured performance--cost--TreeSHAP combination. The factorial analysis shows that the tested imbalance interventions provide limited PR-AUC improvement for the fitted gradient-boosted models. For FT-Transformer, Class Weights remains close to baseline on BAF but not on ULB, while the 41\% SMOTE reduction is conditional on a non-categorical-aware resampling path. SHAP supports top-feature-set agreement among LR, LGBM, and CatBoost; FT-Transformer SHAP comparisons are excluded because of the gradient limitation. The attention analysis records diffuse final-layer, head-averaged attention, but neither proves a feature-space ceiling nor explains the SMOTE result.
 
 \subsection*{Threats to Validity}
 \begin{itemize}
-  \item \textbf{Internal:} the hyperparameter tuning budget is fixed at $50$ Optuna trials per model and a single outer holdout split is used in place of repeated random sub-sampling. The FT-Transformer's search space is substantially larger than that of the classical models, which may therefore under-explore its potential within the same budget.
+  \item \textbf{Internal:} the hyperparameter tuning budget is fixed at $50$ Optuna trials per supervised model, and a single outer holdout split is used instead of repeated random subsampling. The FT-Transformer search covers more dimensions than the classical-model searches, so the same trial count may under-explore its potential.
+  \item \textbf{Validation protocol:} the classical models use five-fold inner validation, whereas FT-Transformer uses one internal holdout. The shared TEST partition remains untouched, but threshold dispersion and model-selection variance are not estimated on the same basis.
+  \item \textbf{Resampling representation:} SMOTE operates on one-hot columns for the classical models and on concatenated numerical values and ordinal category codes for FT-Transformer. Subsequent integer conversion of synthetic FT categorical values is a confound, so the observed SMOTE interaction cannot be attributed solely to architecture.
   \item \textbf{External:} ULB features are PCA-anonymised, limiting interpretability and the real-world applicability of ULB-specific findings. The BAF suite is synthetically generated, so fraud patterns may not fully reflect the complexity of production fraud streams, where label noise, adversarial adaptation, and operational feedback loops are present.
-  \item \textbf{Construct:} PR-AUC is sensitive to the class prior, so comparisons of absolute PR-AUC values across datasets with different fraud rates should be made with caution. The ranking conclusions within each dataset, however, are unaffected by this consideration.
-  \item \textbf{Statistical:} the bootstrap CIs assume that the holdout test set is representative of the underlying distribution. Under extreme imbalance, bootstrap resamples may occasionally contain very few positive examples, which widens the CIs and is a known limitation of the procedure.
+  \item \textbf{Construct:} PR-AUC is sensitive to the class prior, so absolute comparisons across ULB, BAF Base, and BAF Variants with different fraud rates require caution. ROC-AUC and operating-point metrics provide complementary views but do not remove all transfer confounding.
+  \item \textbf{Interpretability:} FT-Transformer GradientExplainer attributions are unreliable for categorical embedding indices and are excluded from cross-model conclusions. The attention diagnostic averages heads in the final layer and may hide head- or layer-specific structure; attention is not a faithful output attribution.
+  \item \textbf{Statistical:} the bootstrap CIs assume that the holdout test set is representative of the underlying distribution and quantify test-sample uncertainty conditional on one fitted model. They do not capture split, seed, training, or tuning variability, and overlapping marginal intervals are not a paired test of model differences.
   \item \textbf{Cross-dataset:} ULB and BAF have incompatible feature spaces, which prevents cross-architecture, cross-dataset transfer. The cross-domain study is restricted to the BAF internal transfer setting, which, while controlled, represents a narrower robustness evaluation than matched feature spaces across independent datasets would provide.
 \end{itemize}

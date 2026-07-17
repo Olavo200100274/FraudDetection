@@ -3,19 +3,19 @@
 \label{chapter:annex}
 
 % ══════════════════════════════════════════════════════════════════════════
-\section{Optimal Hyperparameter Configurations}
+\section{Selected Hyperparameter Configurations}
 \label{appendixA}
 % ══════════════════════════════════════════════════════════════════════════
 
-All supervised models were tuned using Optuna with the TPE sampler and MedianPruner (50 trials, PR-AUC objective, 5-fold stratified cross-validation for classical models; single 80/20 holdout within DEV for FT-Transformer). The best hyperparameter configurations found on each dataset are reported below. One-Class SVM was evaluated with default scikit-learn parameters and was excluded from the Optuna search. Hyperparameters are reported for the baseline condition (strategy\,=\,None); these same configurations were reused for all resampling strategy experiments.
+All supervised models were tuned using Optuna with the TPE sampler and MedianPruner: 50 trials with a PR-AUC objective, five-fold stratified cross-validation for the classical models, and one 80/20 holdout within DEV for FT-Transformer. The selected configurations are reported below. One-Class SVM uses the default scikit-learn parameters and is excluded from the Optuna search. The tables report the baseline condition (strategy\,=\,None); the same configurations are reused for all imbalance-strategy experiments.
 
 \par\medskip\noindent\begin{minipage}{\linewidth}\centering
 \small
-\captionof{table}[Best Optuna hyperparameters on ULB 2013]{Best hyperparameter configurations found by Optuna on ULB 2013 (strategy\,=\,None).}
+\captionof{table}[Selected hyperparameters on ULB 2013]{Hyperparameter configurations selected by Optuna on ULB 2013 (strategy\,=\,None).}
 \label{tab:hyperparams_ulb}
 \begin{tabular}{l l r}
 \toprule
-Model & Hyperparameter & Best Value \\
+Model & Hyperparameter & Selected Value \\
 \midrule
 \multirow{2}{*}{Logistic Regression$^\dagger$}
   & $C$ (inverse regularisation strength) & 0.0783 \\
@@ -65,11 +65,11 @@ OCSVM & \multicolumn{2}{l}{Default scikit-learn parameters (no HPO)} \\
 
 \par\medskip\noindent\begin{minipage}{\linewidth}\centering
 \small
-\captionof{table}[Best Optuna hyperparameters on BAF Base]{Best hyperparameter configurations found by Optuna on BAF Base (strategy\,=\,None).}
+\captionof{table}[Selected hyperparameters on BAF Base]{Hyperparameter configurations selected by Optuna on BAF Base (strategy\,=\,None).}
 \label{tab:hyperparams_baf}
 \begin{tabular}{l l r}
 \toprule
-Model & Hyperparameter & Best Value \\
+Model & Hyperparameter & Selected Value \\
 \midrule
 \multirow{2}{*}{Logistic Regression$^\dagger$}
   & $C$ (inverse regularisation strength) & 0.0391 \\
@@ -122,9 +122,9 @@ OCSVM & \multicolumn{2}{l}{Default scikit-learn parameters (no HPO)} \\
 \label{appendixB}
 % ══════════════════════════════════════════════════════════════════════════
 
-The following figures supplement Section~\ref{sec:attention_diagnostics} of the Results chapter. Each bar chart shows the per-feature attention weight for a single test case, with categorical features in orange and numerical features in blue. The dashed horizontal line marks the uniform attention baseline ($1/31 \approx 3.2\%$). All six cases are borderline: their predicted fraud scores lie within $0.001$ of the decision threshold ($\tau = 0.058$), making them the most ambiguous predictions in the test set.
+The following figures supplement Section~\ref{sec:attention_diagnostics} (p.~\pageref{sec:attention_diagnostics}) of the Results and Discussion chapter. Each bar chart shows the final-layer, head-averaged per-feature attention weight for one selected test case, with categorical features in orange and numerical features in blue. The dashed horizontal line marks the uniform reference ($1/31 \approx 3.2\%$). All six cases are close to the decision threshold ($\tau = 0.058$), with predicted fraud scores within $0.001$ of that value.
 
-Even at this individual, maximally uncertain level, no feature receives substantially elevated attention relative to the uniform baseline. This confirms that the Foggy Vision pattern observed in the aggregate (Figure~\ref{fig:attention_aggregate}) is not an averaging artefact but a genuine property of how the FT-Transformer processes these inputs.
+The selected cases show no strongly dominant feature in the inspected final-layer average. Their similarity to the aggregate view is descriptive only: the figures do not determine whether individual heads or earlier layers contain more concentrated patterns.
 
 \begin{figure}[H]
 \centering
@@ -147,7 +147,7 @@ Even at this individual, maximally uncertain level, no feature receives substant
   \caption[FP Case 3]{FP Case 3 (score\,$=\,0.05844$, true label: Legitimate)}
 \end{subfigure}
 
-\caption[Per-feature attention for three False Positive cases]{Per-feature attention weights for three False Positive cases (BAF Base). Orange bars\,=\,categorical features; blue bars\,=\,numerical features. Dashed line\,=\,uniform attention baseline ($1/31 \approx 3.2\%$). All cases have score just above $\tau = 0.058$.}
+\caption[Per-feature attention for three false-positive cases]{Final-layer, head-averaged per-feature attention weights for three false-positive cases (BAF Base). Orange bars\,=\,categorical features; blue bars\,=\,numerical features. The dashed line indicates the uniform attention reference ($1/31 \approx 3.2\%$). All cases have scores just above $\tau = 0.058$.}
 \label{fig:attention_bar_fp}
 \end{figure}
 
@@ -174,6 +174,6 @@ Even at this individual, maximally uncertain level, no feature receives substant
   \caption[FN Case 3]{FN Case 3 (score\,$=\,0.05828$, true label: Fraud)}
 \end{subfigure}
 
-\caption[Per-feature attention for three False Negative cases]{Per-feature attention weights for three False Negative cases (BAF Base). Orange bars\,=\,categorical features; blue bars\,=\,numerical features. Dashed line\,=\,uniform attention baseline ($1/31 \approx 3.2\%$). All cases have score just below $\tau = 0.058$. The Foggy Vision pattern is consistent across FP and FN cases, confirming that the model distributes attention broadly regardless of prediction outcome.}
+\caption[Per-feature attention for three false-negative cases]{Final-layer, head-averaged per-feature attention weights for three false-negative cases (BAF Base). Orange bars\,=\,categorical features; blue bars\,=\,numerical features. The dashed line indicates the uniform attention reference ($1/31 \approx 3.2\%$). All cases have scores just below $\tau = 0.058$. The selected false-positive and false-negative cases show a similar diffuse pattern; this diagnostic does not capture earlier layers or individual attention heads.}
 \label{fig:attention_bar_fn}
 \end{figure}
