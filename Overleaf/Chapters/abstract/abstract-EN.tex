@@ -1,15 +1,14 @@
 \section*{Abstract}
+\markboth{Abstract}{}
 \label{sec:abstract}
 
-Financial fraud detection under extreme class imbalance is a challenging machine learning problem with direct economic and operational consequences. Despite a large body of published work, recurring methodological limitations — data leakage through incorrect resampling, reliance on ROC-AUC as the primary metric under severe imbalance, implicit threshold selection, and single-dataset evaluation — can compromise comparisons between classical and deep learning model families.
+\begin{center}
+\textbf{Financial Fraud Detection under Extreme Class Imbalance: A Leakage-Free Comparative Study of Classical Machine Learning and Tabular Transformers}
+\end{center}
 
-This thesis presents a controlled, leakage-free comparison of six model families — Logistic Regression, Random Forest, LightGBM, CatBoost, One-Class SVM, and FT-Transformer — across two benchmarks: the ULB Credit Card Fraud dataset and the Bank Account Fraud (BAF) suite. A shared outer holdout protects the test data, with model-specific inner validation reported explicitly. A full factorial design evaluates seven class imbalance handling strategies across five supervised models on both datasets, whereas One-Class SVM is retained as a separate unsupervised baseline. Four decision-threshold rules are compared using validation-only selection. Cross-domain generalisation is assessed by applying BAF Base-trained models to five controlled Variants without retraining. SHAP top-feature sets are compared across the linear and tree-based models, and final-layer FT-Transformer attention is examined separately through an entropy-based diagnostic.
-
-On ULB, CatBoost has the highest PR-AUC (0.885) and FT-Transformer reaches 0.856; on BAF Base, CatBoost and FT-Transformer both round to 0.180. On BAF, a fixed threshold of $\tau=0.5$ yields $F_2<0.05$ for every supervised model, whereas validation-selected max-$F_2$ thresholds produce values of 0.29--0.32. Under the implemented, non-categorical-aware resampling path, SMOTE reduces FT-Transformer PR-AUC by 41\% and CatBoost by 14\%. Random Forest records higher PR-AUC than its Base value on Variants I--IV and is effectively unchanged on Variant V, although its $F_2$ decreases on two Variants. LGBM and CatBoost recover the same SHAP top-10 feature set, and the same set is recovered for the Base-trained LGBM across all Variant test distributions. FT-Transformer final-layer, head-averaged attention is diffuse (normalised entropy 0.976); this describes the fitted attention pattern but does not establish an information ceiling.
-
-The results provide a practitioner-oriented decision framework and bounded evidence about when gradient-boosted models remain competitive with a tabular transformer in financial fraud detection, while making the limits of causal and interpretability claims explicit.
+Financial fraud detection under extreme class imbalance requires leakage-free evaluation that separates ranking performance from operational decisions. This dissertation compares six model families on the ULB Credit Card Fraud dataset and Bank Account Fraud suite. The design combines a protected test holdout, model-specific validation, seven imbalance strategies, four validation-derived threshold rules, Base-to-Variant transfer, SHAP comparisons, and an attention diagnostic. CatBoost achieved the highest ULB PR-AUC (0.885); on BAF Base, FT-Transformer, CatBoost, and LGBM reached 0.180, 0.180, and 0.177, respectively. Validation-selected thresholds improved BAF F2 over the fixed 0.5 threshold. On BAF Base, SMOTE reduced FT-Transformer PR-AUC by 41\% under the implemented resampling path. Random Forest recorded the highest PR-AUC and F2 point estimates on all five BAF Variants. Tree-model SHAP top-feature sets were stable, while FT-Transformer attention was diffuse. The findings support leakage-free, threshold-aware evaluation and show that boosted trees remain competitive with tabular transformers.
 
 \section*{Keywords}
 \label{sec:keywords}
 
-Financial fraud detection, machine learning, gradient-boosted decision trees, tabular transformers, class imbalance, leakage-free evaluation, SHAP, attention diagnostics, cross-domain generalisation.
+Financial fraud detection; class imbalance; leakage-free evaluation; decision thresholds; tabular machine learning.

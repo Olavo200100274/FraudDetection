@@ -10,7 +10,7 @@ Section~\ref{sec:objective} links the research questions to the overall experime
 \label{sec:objective}
 % ──────────────────────────────────────────────────────────────────────────
 
-This thesis investigates fraud detection in financial transactions under extreme class imbalance. The work is structured around six complementary research contributions:
+This thesis investigates fraud detection in financial transactions under extreme class imbalance. Its five research questions are operationalised through six complementary contributions; RQ5 is divided into a SHAP consistency analysis and a separate FT-Transformer attention diagnostic:
 
 \begin{enumerate}
   \item \textbf{Unified model comparison.} Compare classical machine learning models and a transformer-based tabular model across distinct fraud datasets using a shared leakage-free outer holdout, common metrics, and model-appropriate validation procedures.
@@ -26,7 +26,7 @@ This thesis investigates fraud detection in financial transactions under extreme
   \item \textbf{FT-Transformer attention diagnostics.} Characterise the concentration of last-layer, head-averaged \texttt{[CLS]} attention across BAF feature tokens as a descriptive diagnostic that is separate from SHAP feature attribution.
 \end{enumerate}
 
-Contributions~5 and~6 form the two complementary components of RQ5. Table~\ref{tab:rq_design_map} shows how all five research questions are operationalised and where their evidence is reported.
+Table~\ref{tab:rq_design_map} shows how the five research questions are operationalised and where their evidence is reported.
 
 \begin{table}[htbp]
 \centering
@@ -46,112 +46,152 @@ RQ5 & SHAP top-feature-set comparisons for compatible explainers and a separate 
 \end{tabular}
 \end{table}
 
-Figure~\ref{fig:pipeline} provides a high-level overview of the end-to-end experimental pipeline described in the remainder of this chapter.
+Figure~\ref{fig:pipeline} provides a high-level overview of the end-to-end experimental pipeline.
 
 % ═══════════════════════════════════════════════════════════════════════════
 %  FIGURE 4.1 — End-to-End Experimental Pipeline
 % ═══════════════════════════════════════════════════════════════════════════
 
-\definecolor{clrData}{HTML}{4472C4}      % Steel blue
-\definecolor{clrSplit}{HTML}{5B9BD5}     % Light blue
-\definecolor{clrDev}{HTML}{FFF2CC}       % Light yellow (DEV zone)
-\definecolor{clrDevBorder}{HTML}{BF8F00} % Dark gold (DEV border)
-\definecolor{clrPrep}{HTML}{ED7D31}      % Orange
-\definecolor{clrTune}{HTML}{FFC000}      % Gold
-\definecolor{clrThresh}{HTML}{F4B183}    % Light orange
-\definecolor{clrFact}{HTML}{E2EFDA}      % Light green (factorial zone)
-\definecolor{clrFactBorder}{HTML}{548235}% Dark green
-\definecolor{clrTest}{HTML}{D6E4F0}      % Light blue (TEST zone)
-\definecolor{clrTestBorder}{HTML}{2E75B6}% Dark blue
-\definecolor{clrFinal}{HTML}{2E75B6}     % Blue
-\definecolor{clrEval}{HTML}{00B050}      % Green
-\definecolor{clrShap}{HTML}{7030A0}      % Purple
+\definecolor{pipeNavy}{HTML}{214761}
+\definecolor{pipeBlue}{HTML}{DCEAF3}
+\definecolor{pipeTeal}{HTML}{2F6F68}
+\definecolor{pipeAmber}{HTML}{A66A14}
+\definecolor{pipeAmberLight}{HTML}{FBF1DE}
+\definecolor{pipeGrey}{HTML}{F2F4F5}
+\definecolor{pipeBorder}{HTML}{68737D}
+\definecolor{pipeInk}{HTML}{263238}
 
 \par\medskip\noindent\begin{minipage}{\linewidth}\centering
 \begin{tikzpicture}[
-    node distance=0.6cm,
-    >={Stealth[length=3mm]},
-    box/.style={
-        rectangle, rounded corners=3pt, minimum width=10.5cm, minimum height=1.1cm,
-        text=white, font=\footnotesize\bfseries, align=center,
-        drop shadow={shadow xshift=1pt, shadow yshift=-1pt}
+    node distance=0.28cm,
+    source/.style={
+        rectangle, rounded corners=2pt, draw=pipeNavy, fill=pipeNavy,
+        text=white, text width=13.25cm, minimum height=1.02cm,
+        inner xsep=6pt, inner ysep=4pt, align=center, font=\small
     },
-    smallbox/.style={
-        rectangle, rounded corners=3pt, minimum width=8cm, minimum height=0.9cm,
-        font=\footnotesize\bfseries, align=center,
-        drop shadow={shadow xshift=1pt, shadow yshift=-1pt}
+    split/.style={
+        rectangle, rounded corners=2pt, draw=pipeNavy, line width=0.7pt,
+        fill=pipeBlue, text=pipeInk, text width=7.2cm, minimum height=0.82cm,
+        inner xsep=5pt, inner ysep=3pt, align=center, font=\small
     },
-    arrow/.style={->, thick, black!70},
-    zone/.style={rectangle, rounded corners=5pt, draw=#1, line width=1.2pt, dashed, inner sep=10pt},
+    devstep/.style={
+        rectangle, rounded corners=2pt, draw=pipeNavy, line width=0.65pt,
+        fill=white, text=pipeInk, text width=9.05cm, minimum height=0.72cm,
+        inner xsep=5pt, inner ysep=3pt, align=center, font=\small
+    },
+    emphasis/.style={devstep, fill=pipeBlue!65},
+    testhold/.style={
+        rectangle, rounded corners=2pt, draw=pipeAmber, line width=0.85pt,
+        fill=pipeAmberLight, text=pipeInk, text width=2.45cm,
+        minimum height=1.82cm, inner xsep=4pt, inner ysep=4pt,
+        align=center, font=\footnotesize
+    },
+    evaluation/.style={
+        rectangle, rounded corners=2pt, draw=pipeTeal, fill=pipeTeal,
+        text=white, text width=13.25cm, minimum height=0.92cm,
+        inner xsep=6pt, inner ysep=4pt, align=center, font=\small
+    },
+    analysis/.style={
+        rectangle, rounded corners=2pt, draw=pipeBorder, line width=0.6pt,
+        fill=pipeGrey, text=pipeInk, text width=3.78cm, minimum height=1.05cm,
+        inner xsep=4pt, inner ysep=3pt, align=center, font=\footnotesize
+    },
+    devzone/.style={
+        rectangle, rounded corners=3pt, draw=pipeNavy, line width=0.75pt,
+        fill=pipeBlue!24, inner sep=7pt
+    },
+    flow/.style={-{Stealth[length=2.2mm,width=1.5mm]}, semithick, draw=pipeInk!78},
 ]
 
-% ── Datasets ──
-\node[box, fill=clrData] (data)
-    {1.\ Datasets\\[-2pt]
-     \fontsize{7}{8}\selectfont ULB 2013 ($N{=}284\text{K}$, $0.17\%$ fraud)
-     \;\;$\cdot$\;\; BAF Suite ($N{=}1\text{M}$, ${\approx}1.1\%$ fraud)};
+% Model-development datasets
+\node[source] (data)
+    {\textbf{1.\ Model-development datasets}\\[-1pt]
+     {\scriptsize ULB 2013 ($N{=}284\,807$; $0.173\%$ fraud)
+     \quad$\vert$\quad BAF Base ($N{=}1\,000\,000$; ${\approx}1.1\%$ fraud)}};
 
-% ── Split ──
-\node[box, fill=clrSplit, below=of data] (split)
-    {2.\ Stratified Holdout Split\\[-2pt]
-     \fontsize{7}{8}\selectfont 80\% DEV \;/\; 20\% TEST \;\;$\cdot$\;\; stratified by target};
+% Shared outer split
+\node[split, below=0.42cm of data] (split)
+    {\textbf{2.\ Stratified outer holdout}\\[-1pt]
+     {\scriptsize $80\%$ DEV \quad$\vert$\quad $20\%$ TEST \quad$\vert$\quad split seed ${=}42$}};
 
-% ── DEV zone ──
-\node[box, fill=clrPrep, below=0.85cm of split] (prep)
-    {3.\ Preprocessing\\[-2pt]
-     \fontsize{7}{8}\selectfont Classical/OCSVM: impute, scale, one-hot \;\;$\cdot$\;\; FT: scale numerical, ordinal categories};
+% DEV-only model development
+\node[devstep, below=0.76cm of split, xshift=-2.05cm] (prep)
+    {\textbf{3.\ Leakage-free preprocessing}\\[-1pt]
+     {\scriptsize Classical/OCSVM: imputation, standardisation, one-hot encoding
+     \quad$\vert$\quad FT: standardisation and ordinal encoding}};
 
-\node[box, fill=clrTune, below=of prep] (tune)
-    {4.\ Supervised-model Hyperparameter Tuning (Optuna)\\[-2pt]
-     \fontsize{7}{8}\selectfont TPE sampler \;\;$\cdot$\;\; 50 trials \;\;$\cdot$\;\; PR-AUC objective};
+\node[emphasis, below=of prep] (hpo)
+    {\textbf{4.\ Baseline-only hyperparameter optimisation}\\[-1pt]
+     {\scriptsize Five supervised models \quad$\vert$\quad Optuna TPE, 50 trials, PR-AUC
+     \quad$\vert$\quad reuse selected parameters}};
 
-\node[box, fill=clrThresh, text=black, below=of tune] (thresh)
-    {5.\ Validation and Threshold Selection\\[-2pt]
-     \fontsize{7}{8}\selectfont Classical/OCSVM: 5-fold median $\tau$ \;\;$\cdot$\;\; FT: single DEV holdout $\tau$};
+\node[devstep, below=of hpo] (configs)
+    {\textbf{5.\ Imbalance configurations}\\[-1pt]
+     {\scriptsize $7$ strategies $\times$ $5$ supervised models ${=}35$ per dataset
+     \quad$\vert$\quad OCSVM evaluated separately}};
 
-% ── Factorial annotation ──
-\node[smallbox, fill=clrFact!80, text=clrFactBorder, draw=clrFactBorder,
-      line width=0.8pt, below=of thresh] (fact)
-    {$7$ strategies $\times$ $5$ models $= 35$ configurations per dataset};
+\node[devstep, below=of configs] (validation)
+    {\textbf{6.\ Model-specific validation and threshold calibration}\\[-1pt]
+     {\scriptsize Classical/OCSVM: five-fold median $\tau$ \quad$\vert$\quad
+     FT: single internal holdout $\tau$}};
 
-% DEV zone background
+\node[emphasis, below=of validation] (refit)
+    {\textbf{7.\ Final fit of each configuration on full DEV}\\[-1pt]
+     {\scriptsize Full-DEV preprocessing/resampling and fit \quad$\vert$\quad
+     fixed hyperparameters and $\tau$ \quad$\vert$\quad no TEST access}};
+
+% Locked TEST branch
+\node[testhold, right=0.45cm of validation] (test)
+    {\textbf{Held-out TEST (20\%)}\\[3pt]
+     {\scriptsize No fitting or resampling\\[2pt]
+     No model or threshold selection}};
+
+% DEV boundary
 \begin{scope}[on background layer]
-    \node[zone=clrDevBorder, fill=clrDev, fit=(prep)(tune)(thresh)(fact),
-          label={[font=\footnotesize\bfseries, text=clrDevBorder]above left:DEV}] (devzone) {};
+    \node[devzone, fit=(prep)(hpo)(configs)(validation)(refit)] (devarea) {};
 \end{scope}
+\node[font=\scriptsize\bfseries, text=pipeNavy, anchor=south west,
+      fill=white, inner xsep=3pt, inner ysep=1pt]
+      at ($(devarea.north west)+(0.08cm,0.02cm)$) {DEV only (80\%)};
 
-% ── TEST zone ──
-\node[box, fill=clrFinal, below=1.0cm of fact] (final)
-    {6.\ Final Training\\[-2pt]
-     \fontsize{7}{8}\selectfont Full training partition \;\;$\cdot$\;\; selected configuration};
+% One held-out evaluation after all choices are frozen
+\node[evaluation, below=0.62cm of refit, xshift=2.05cm] (evaluation)
+    {\textbf{8.\ Held-out evaluation after configuration freeze}\\[-1pt]
+     {\scriptsize Apply fixed $\tau$ once to TEST \quad$\vert$\quad predictive and workload metrics
+     \quad$\vert$\quad bootstrap $95\%$ CIs ($B{=}1\,000$)}};
 
-\node[box, fill=clrEval, below=of final] (eval)
-    {7.\ Held-Out Test Evaluation\\[-2pt]
-     \fontsize{7}{8}\selectfont Apply validation-derived $\tau$ \;\;$\cdot$\;\; Bootstrap 95\% CI ($B{=}1000$)};
+% Downstream analyses aligned with the remaining research questions
+\node[analysis, below=0.62cm of evaluation] (transfer)
+    {\textbf{RQ4: BAF transfer}\\[-1pt]
+     {\scriptsize Base model and $\tau$ to Variants I--V; no retraining}};
+\node[analysis, left=0.34cm of transfer] (thresholds)
+    {\textbf{RQ2: Threshold sensitivity}\\[-1pt]
+     {\scriptsize Four DEV-derived rules on saved baseline TEST scores}};
+\node[analysis, right=0.34cm of transfer] (interpretability)
+    {\textbf{RQ5: Interpretability}\\[-1pt]
+     {\scriptsize BAF Base SHAP; separate FT attention diagnostic}};
 
-% TEST zone background
-\begin{scope}[on background layer]
-    \node[zone=clrTestBorder, fill=clrTest, fit=(final)(eval),
-          label={[font=\footnotesize\bfseries, text=clrTestBorder]above left:TEST}] (testzone) {};
-\end{scope}
+% Flow and holdout barrier
+\draw[flow] (data) -- (split);
+\coordinate (outerbranch) at ($(split.south)+(0,-0.34cm)$);
+\draw[semithick, draw=pipeInk!78] (split.south) -- (outerbranch);
+\draw[flow] (outerbranch) -| (prep.north);
+\draw[flow] (outerbranch) -| (test.north);
+\draw[flow] (prep) -- (hpo);
+\draw[flow] (hpo) -- (configs);
+\draw[flow] (configs) -- (validation);
+\draw[flow] (validation) -- (refit);
+\draw[flow] (refit.south) |- ($(evaluation.north)+(-2.35cm,0)$);
+\draw[flow] (test.south) |- ($(evaluation.north)+(4.35cm,0)$);
 
-% ── SHAP ──
-\node[box, fill=clrShap, below=1.0cm of eval] (shap)
-    {8.\ Interpretability Analyses\\[-2pt]
-     \fontsize{7}{8}\selectfont SHAP feature sets and local cases \;\;$\cdot$\;\; FT attention diagnostic};
-
-% ── Arrows ──
-\draw[arrow] (data) -- (split);
-\draw[arrow] (split) -- (prep);
-\draw[arrow] (prep) -- (tune);
-\draw[arrow] (tune) -- (thresh);
-\draw[arrow] (thresh) -- (fact);
-\draw[arrow] (fact) -- (final);
-\draw[arrow] (final) -- (eval);
-\draw[arrow] (eval) -- (shap);
+\coordinate (analysisbranch) at ($(evaluation.south)+(0,-0.31cm)$);
+\draw[semithick, draw=pipeInk!78] (evaluation.south) -- (analysisbranch);
+\draw[flow] (analysisbranch) -| (thresholds.north);
+\draw[flow] (analysisbranch) -- (transfer.north);
+\draw[flow] (analysisbranch) -| (interpretability.north);
 
 \end{tikzpicture}
-\captionof{figure}[End-to-end experimental pipeline for fraud detection]{End-to-end experimental pipeline for fraud detection under extreme class imbalance. Stages~3--5 operate exclusively on the DEV partition (80\%): classical models and OCSVM use five-fold validation, whereas FT-Transformer uses a single internal holdout. Stages~6--7 provide one evaluation on the untouched TEST partition (20\%). Stage~8 comprises SHAP for the linear and tree-based models and a separate attention diagnostic for FT-Transformer.}
+\captionof{figure}[End-to-end experimental pipeline for fraud detection]{Leakage-free experimental pipeline. Model development and threshold calibration remain within DEV, and TEST is accessed only after configuration freeze. The factorial study covers 35 supervised configurations per dataset plus OCSVM; downstream analyses examine thresholds, BAF transfer, and interpretability.}
 \label{fig:pipeline}
 \end{minipage}\par\medskip
 \clearpage
@@ -162,10 +202,10 @@ Figure~\ref{fig:pipeline} provides a high-level overview of the end-to-end exper
 % ──────────────────────────────────────────────────────────────────────────
 
 \paragraph{Credit Card Fraud Detection 2013 (ULB).}
-The ULB dataset contains European credit card transactions with anonymised features (PCA components V1--V28, plus \texttt{Time} and \texttt{Amount}) and a binary target indicating fraud. The dataset exhibits extreme class imbalance ($\approx$0.17\% fraud).
+The ULB dataset~\cite{dalpozzolo2017realistic,ulb2013dataset} contains 284\,807 European credit card transactions, including 492 frauds (0.1727\%), with anonymised features (PCA components V1--V28, plus \texttt{Time} and \texttt{Amount}) and a binary target indicating fraud.
 
 \paragraph{Bank Account Fraud (BAF) Suite (NeurIPS 2022).}
-The BAF suite contains a Base dataset and five variants (Variant~I--V) designed to stress-test models under controlled bias and distributional conditions. Each dataset comprises $\approx$1\,000\,000 instances with mixed numerical and categorical variables (5 categorical features: \texttt{payment\_type}, \texttt{employment\_status}, \texttt{housing\_status}, \texttt{source}, \texttt{device\_os}) and a binary label \texttt{fraud\_bool} ($\approx$1.1\% fraud in Base). The raw Base file contains 32 columns, including the target and the \texttt{month} field. The pipeline excludes both fields from the predictors, yielding 30 modelling features. Variants~III and~V additionally contain \texttt{x1} and \texttt{x2}; these synthetic columns are also excluded so that all Base-to-Variant evaluations use the same 30-feature input.
+The BAF suite~\cite{jesus2022turning,feedzai2022bafdataset} contains a Base dataset and five variants (Variant~I--V) designed to stress-test models under controlled bias and distributional conditions. Each dataset comprises $\approx$1\,000\,000 instances with mixed numerical and categorical variables (5 categorical features: \texttt{payment\_type}, \texttt{employment\_status}, \texttt{housing\_status}, \texttt{source}, \texttt{device\_os}) and a binary label \texttt{fraud\_bool} ($\approx$1.1\% fraud in Base). The raw Base file contains 32 columns, including the target and the \texttt{month} field. The pipeline excludes both fields from the predictors, yielding 30 modelling features. Variants~III and~V additionally contain \texttt{x1} and \texttt{x2}; these synthetic columns are also excluded so that all Base-to-Variant evaluations use the same 30-feature input.
 
 \paragraph{Cross-dataset compatibility note.}
 The ULB and BAF datasets have incompatible feature spaces (PCA-anonymised vs.\ semantic features). Therefore, cross-dataset transfer between ULB and BAF is not feasible. Cross-domain generalisation is studied \emph{within} the BAF suite, where a shared modelling feature space enables Base-trained models to be evaluated on each controlled variant.
@@ -199,7 +239,7 @@ The implemented samplers operate after model-specific preprocessing. For the cla
 \label{sec:protocol}
 % ──────────────────────────────────────────────────────────────────────────
 
-A central methodological concern in fraud detection is preventing data leakage: information from the test set must never influence model selection, preprocessing, resampling, or threshold calibration. This section formalises the leakage-free protocol adopted throughout this thesis. Figure~\ref{fig:cv_protocol} illustrates the inner workings of a single cross-validation fold.
+A central methodological concern in fraud detection is preventing data leakage: information from the test set must never influence model selection, preprocessing, resampling, or threshold calibration. This section formalises the leakage-free protocol adopted throughout this thesis. Figure~\ref{fig:cv_protocol} illustrates one fold and the subsequent aggregation across all five folds.
 
 \subsection{Outer Split (Holdout Test Set)}
 For each dataset, an outer stratified split creates an 80\% development partition (DEV) and a 20\% holdout test partition (TEST). TEST is not used to fit preprocessing, resample data, select hyperparameters, or select decision thresholds. Post-hoc analyses that use TEST are conducted only after the predictive evaluation has been fixed.
@@ -217,6 +257,10 @@ For the classical supervised models and OCSVM, selection occurs exclusively with
 
 For OCSVM, the model is fitted only on legitimate examples from each training fold, while the corresponding validation fold retains both classes for threshold selection and evaluation. FT-Transformer replaces five-fold cross-validation with one stratified 80/20 holdout inside DEV. Its preprocessing, early stopping, hyperparameter selection, and $F_2$ threshold selection use only this internal training/validation split. This model-specific difference reduces computational cost but means that fold dispersion and median thresholds are available only for the classical models and OCSVM.
 
+% Figure 4.2 is an indivisible minipage and therefore starts on the next page.
+% Avoid stretching the subsection spacing on the preceding page to force a
+% flush bottom; normal flush-bottom pagination is restored after the figure.
+\raggedbottom
 \subsection{Final Training and Test Evaluation}
 For each model--strategy--dataset configuration, the final model is fitted on the full DEV partition. For the classical models and OCSVM, the decision threshold $\tau$ applied to TEST is the median of the five validation-fold thresholds. For FT-Transformer, it is the threshold selected on the single internal validation split. In both paths, TEST remains untouched until the final predictive evaluation.
 
@@ -224,128 +268,145 @@ For each model--strategy--dataset configuration, the final model is fitted on th
 %  FIGURE 4.2 — Leakage-Free Inner Cross-Validation Protocol
 % ═══════════════════════════════════════════════════════════════════════════
 
-\definecolor{clrTrainFold}{HTML}{DAE8FC}    % Light blue (train fold)
-\definecolor{clrValFold}{HTML}{D5E8D4}      % Light green (validation fold)
-\definecolor{clrBarrier}{HTML}{CC0000}       % Red (leakage barrier)
-\definecolor{clrStep}{HTML}{4472C4}         % Blue (process steps)
-\definecolor{clrValStep}{HTML}{548235}      % Green (validation steps)
-\definecolor{clrWarn}{HTML}{CC0000}         % Red (warning annotations)
-
 \par\medskip\noindent\begin{minipage}{\linewidth}\centering
 \begin{tikzpicture}[
-    >={Stealth[length=2.5mm]},
-    node distance=0.5cm,
-    procstep/.style={
-        rectangle, rounded corners=2pt, minimum width=3.8cm, minimum height=0.8cm,
-        font=\footnotesize\bfseries, align=center, text=white,
-        drop shadow={shadow xshift=0.8pt, shadow yshift=-0.8pt}
+    node distance=0.34cm,
+    foldhead/.style={
+        rectangle, rounded corners=2pt, draw=pipeNavy, fill=pipeNavy,
+        text=white, text width=13.25cm, minimum height=0.92cm,
+        inner xsep=6pt, inner ysep=4pt, align=center, font=\small
     },
-    trainstep/.style={procstep, fill=clrStep},
-    valstep/.style={procstep, fill=clrValStep},
-    annot/.style={font=\scriptsize, text=black!60, align=center},
-    warnnote/.style={font=\scriptsize\itshape, text=clrWarn, align=center},
-    arrow/.style={->, thick, black!60},
-    zone/.style={rectangle, rounded corners=4pt, draw=#1, line width=1.2pt, inner sep=10pt},
+    trainbox/.style={
+        rectangle, rounded corners=2pt, draw=pipeNavy, line width=0.65pt,
+        fill=white, text=pipeInk, text width=3.62cm, minimum height=1.45cm,
+        inner xsep=4pt, inner ysep=4pt, align=center, font=\footnotesize
+    },
+    valbox/.style={
+        rectangle, rounded corners=2pt, draw=pipeTeal, line width=0.65pt,
+        fill=white, text=pipeInk, text width=3.62cm, minimum height=1.45cm,
+        inner xsep=4pt, inner ysep=4pt, align=center, font=\footnotesize
+    },
+    lanehead/.style={
+        rectangle, rounded corners=1.5pt, text=white, text width=12.55cm,
+        minimum height=0.34cm, inner xsep=4pt, inner ysep=2pt,
+        align=center, font=\scriptsize\bfseries
+    },
+    trainhead/.style={lanehead, draw=pipeNavy, fill=pipeNavy},
+    valhead/.style={lanehead, draw=pipeTeal, fill=pipeTeal},
+    trainzone/.style={
+        rectangle, rounded corners=3pt, draw=pipeNavy, line width=0.75pt,
+        fill=pipeBlue!24, inner sep=7pt
+    },
+    valzone/.style={
+        rectangle, rounded corners=3pt, draw=pipeTeal, line width=0.75pt,
+        fill=pipeTeal!9, inner sep=7pt
+    },
+    aggregate/.style={
+        rectangle, rounded corners=2pt, draw=pipeBorder, line width=0.65pt,
+        fill=pipeGrey, text=pipeInk, text width=10.4cm, minimum height=0.82cm,
+        inner xsep=5pt, inner ysep=4pt, align=center, font=\footnotesize
+    },
+    scopenote/.style={
+        rectangle, rounded corners=2pt, draw=pipeAmber, line width=0.65pt,
+        fill=pipeAmberLight, text=pipeInk, text width=12.9cm,
+        minimum height=0.66cm, inner xsep=5pt, inner ysep=3pt,
+        align=center, font=\scriptsize
+    },
+    boundarynote/.style={
+        rectangle, rounded corners=1.5pt, draw=pipeAmber, line width=0.65pt,
+        fill=pipeAmberLight, text=pipeAmber, text width=7.6cm,
+        minimum height=0.38cm, inner xsep=4pt, inner ysep=2pt,
+        align=center, font=\scriptsize\bfseries
+    },
+    foldflow/.style={-{Stealth[length=2.1mm,width=1.45mm]}, semithick, draw=pipeInk!78},
 ]
 
-% ── Title ──
-\node[font=\small\bfseries, text=black!80] (title) {One Classical/OCSVM Inner CV Fold ($k$ of $K{=}5$)};
+% Fold scope
+\node[foldhead] (foldtitle)
+    {\textbf{One leakage-free inner fold ($k$ of $K{=}5$)}};
 
-% ── TRAIN FOLD (left side) ──
-\node[trainstep, below=0.9cm of title, xshift=-5.2cm] (fitpre)
-    {1.\ Fit Preprocessor};
-\node[annot, below=0.15cm of fitpre] {on train subset only};
+% TRAIN_k lane: left-to-right fitting flow
+\node[trainhead, below=0.42cm of foldtitle] (trainlabel)
+    {TRAIN$_k$ --- fitting permitted};
 
-\node[trainstep, below=1.0cm of fitpre] (resample)
-    {2.\ Apply Resampling};
-\node[annot, below=0.15cm of resample] {RUS / ROS / SMOTE / \ldots};
+\node[trainbox, below=0.18cm of trainlabel, xshift=-4.30cm] (subset)
+    {\textbf{1.\ Fitting subset}\\[-1pt]
+     {\scriptsize Supervised: all TRAIN$_k$ cases\\
+     OCSVM: legitimate TRAIN$_k$ cases only}};
 
-\node[trainstep, below=1.0cm of resample] (train)
-    {3.\ Train Model};
-\node[annot, below=0.15cm of train] {on resampled train data};
+\node[trainbox, right=0.34cm of subset] (cvprep)
+    {\textbf{2.\ Fit preprocessing}\\[-1pt]
+     {\scriptsize Mean/mode imputation\\
+     Standardisation; one-hot encoding}};
 
-% Train zone background
+\node[trainbox, right=0.34cm of cvprep] (fitmodel)
+    {\textbf{3.\ Fit model}\\[-1pt]
+     {\scriptsize Baseline/OCSVM: no intervention\\
+     Resampling after preprocessing\\
+     Class weights during supervised fitting}};
+
 \begin{scope}[on background layer]
-    \node[zone=clrStep!70, fill=clrTrainFold, fit=(fitpre)(resample)(train),
-          inner sep=16pt,
-          label={[font=\footnotesize\bfseries, text=clrStep]above:TRAIN FOLD}] (trainzone) {};
+    \node[trainzone, fit=(trainlabel)(subset)(cvprep)(fitmodel)] (trainarea) {};
 \end{scope}
 
-% ── VALIDATION FOLD (right side) ──
-\node[valstep, below=0.9cm of title, xshift=5.2cm] (transform)
-    {4.\ Transform Only};
-\node[annot, below=0.15cm of transform] {preprocessor fitted on train};
+% Explicit one-way boundary between fitting and validation
+\node[boundarynote, below=0.26cm of trainarea] (boundary)
+    {ONE-WAY BOUNDARY --- fitted artefacts only};
 
-\node[valstep, below=1.0cm of transform] (score)
-    {5.\ Score Predictions};
-\node[annot, below=0.15cm of score] {PR-AUC \;\;$\cdot$\;\; predicted scores};
+% VAL_k lane: right-to-left evaluation flow
+\node[valhead, below=0.26cm of boundary] (vallabel)
+    {VAL$_k$ --- transformation and evaluation only};
 
-\node[valstep, below=1.0cm of score] (threshold)
-    {6.\ Select Threshold $\tau$};
-\node[annot, below=0.15cm of threshold] {maximise $F_2$ on validation};
+\node[valbox, below=0.18cm of vallabel, xshift=4.30cm] (transform)
+    {\textbf{4.\ Transform VAL$_k$}\\[-1pt]
+     {\scriptsize Retain both classes\\
+     Apply the train-fitted preprocessing only}};
 
-% Validation zone background
+\node[valbox, left=0.34cm of transform] (score)
+    {\textbf{5.\ Validation scores}\\[-1pt]
+     {\scriptsize Probabilities; negated decision score for OCSVM}};
+
+\node[valbox, left=0.34cm of score] (foldoutput)
+    {\textbf{6.\ Fold evidence}\\[-1pt]
+     {\scriptsize HPO pass: PR-AUC$_k$\\
+     Threshold pass: metrics and
+     $\tau_k{=}\arg\max_{\tau}F_2(\tau)$}};
+
 \begin{scope}[on background layer]
-    \node[zone=clrValStep!70, fill=clrValFold, fit=(transform)(score)(threshold),
-          inner sep=16pt,
-          label={[font=\footnotesize\bfseries, text=clrValStep]above:VALIDATION FOLD}] (valzone) {};
+    \node[valzone, fit=(vallabel)(transform)(score)(foldoutput)] (valarea) {};
 \end{scope}
 
-% ── LEAKAGE BARRIER (centred between zones) ──
-\coordinate (barTop) at ($(trainzone.north east)!0.5!(valzone.north west)+(0,0.4)$);
-\coordinate (barBot) at ($(trainzone.south east)!0.5!(valzone.south west)+(0,-0.4)$);
-\draw[clrBarrier, line width=2.5pt, dashed] (barTop) -- (barBot);
-\node[font=\footnotesize\bfseries, text=clrBarrier, rotate=90, anchor=south]
-    at ($(barTop)!0.5!(barBot)+(0.35,0)$) {LEAKAGE BARRIER};
+% Fold flow
+\draw[foldflow] (subset) -- (cvprep);
+\draw[foldflow] (cvprep) -- (fitmodel);
+\draw[foldflow] (fitmodel) -- (transform);
+\draw[foldflow] (transform) -- (score);
+\draw[foldflow] (score) -- (foldoutput);
 
-% ── Arrows within train ──
-\draw[arrow] (fitpre) -- (resample);
-\draw[arrow] (resample) -- (train);
+% Across-fold aggregation and scope note
+\node[aggregate, below=0.58cm of score] (aggregation)
+    {\textbf{Across $K{=}5$ folds:}\quad report mean $\pm$ SD validation metrics
+     \quad$\vert$\quad $\tau_{\mathrm{final}}=\mathrm{median}(\tau_1,\ldots,\tau_5)$};
+\draw[foldflow] (foldoutput.south) |- ($(aggregation.north)+(-4.0cm,0)$);
 
-% ── Arrows within validation ──
-\draw[arrow] (transform) -- (score);
-\draw[arrow] (score) -- (threshold);
-
-% ── Cross-zone arrows (train → validation) ──
-\draw[->, thick, clrStep!60, densely dotted]
-    (fitpre.east) -- ++(0.55,0) |- (transform.west)
-    node[pos=0.25, above, font=\scriptsize, text=clrStep] {fitted preprocessor};
-\draw[->, thick, clrStep!60, densely dotted]
-    (train.east) -- ++(0.55,0) |- (score.west)
-    node[pos=0.25, below, font=\scriptsize, text=clrStep] {trained model};
-
-% ── Warning annotations ──
-\node[warnnote, below=0.5cm of trainzone.south] (warn1)
-    {$\triangleright$ No fit on validation data};
-\node[warnnote, below=0.5cm of valzone.south] (warn2)
-    {$\triangleright$ No resampling on validation data};
-
-% ── Output ──
-\node[rectangle, rounded corners=3pt, fill=black!8, draw=black!30,
-      minimum width=8cm, minimum height=0.7cm,
-      font=\footnotesize\bfseries, align=center,
-      below=1.2cm of warn1.south east] (output)
-    {Output:\; PR-AUC$_k$ \quad $\tau_k$ \quad $F_{1,k}$ \quad $F_{2,k}$ \quad $\{TN,FP,FN,TP\}_k$};
-
-\draw[arrow] (threshold.south) |- (output.east);
-
-% ── Final aggregation note ──
-\node[annot, below=0.2cm of output]
-    {Repeat for $k = 1, \ldots, K$. \quad Final $\tau = \mathrm{median}(\tau_1, \ldots, \tau_K)$.};
+\node[scopenote, below=0.30cm of aggregation] (scope)
+    {\textbf{Scope:} classical supervised models and OCSVM. FT-Transformer uses one
+     internal DEV holdout; TEST remains outside both selection paths.};
 
 \end{tikzpicture}
-\captionof{figure}[Leakage-free inner cross-validation protocol]{Leakage-free inner cross-validation protocol for the classical supervised models and OCSVM. Within each fold, preprocessing is fitted and any applicable resampling is performed exclusively on the training subset (left); the validation subset (right) is only transformed and scored. The dashed red line represents the leakage barrier, and the final decision threshold is the median across all $K{=}5$ folds. FT-Transformer instead uses the separate DEV holdout procedure described in the text.}
+\captionof{figure}[Leakage-free inner cross-validation protocol]{Leakage-free five-fold inner validation for the classical supervised models and OCSVM. Fitting and imbalance interventions remain within TRAIN$_k$; the fitted pipeline is applied to VAL$_k$. Fold thresholds are aggregated by their median. FT-Transformer uses a separate internal DEV holdout.}
 \label{fig:cv_protocol}
 \end{minipage}\par\medskip
 
 \clearpage
+\flushbottom
 
 % ──────────────────────────────────────────────────────────────────────────
 \section{Threshold Selection Study}
 \label{sec:threshold_study}
 % ──────────────────────────────────────────────────────────────────────────
 
-Threshold selection is often implicit in fraud detection studies, and selecting a threshold on the test set constitutes data leakage. This thesis instead compares four explicit rules: the fixed default $\tau{=}0.5$; the validation-optimal $F_1$ threshold ($\tau^{*}=\arg\max_{\tau} F_1(\tau)$), which gives precision and recall equal weight; the validation-optimal $F_2$ threshold ($\tau^{*}=\arg\max_{\tau} F_2(\tau)$), which assigns greater weight to recall; and a precision-constrained rule that selects the smallest $\tau$ for which $\text{Precision}(\tau) \geq 0.5$ on validation. The last rule represents a minimum validation-precision target, not a guarantee that test precision will remain above 0.5 under sampling variation or distribution shift. Section~\ref{sec:tb:thresholds} defines these rules, and Section~\ref{sec:tb:metrics} defines $F_{\beta}$.
+Threshold selection is often implicit in fraud detection studies, and selecting a threshold on the test set constitutes data leakage. This thesis instead compares four explicit rules: the fixed default $\tau{=}0.5$; the validation-optimal $F_1$ threshold ($\tau^{*}=\arg\max_{\tau} F_1(\tau)$), which gives precision and recall equal weight; the validation-optimal $F_2$ threshold ($\tau^{*}=\arg\max_{\tau} F_2(\tau)$), which assigns greater weight to recall; and a precision-constrained rule that selects the smallest $\tau$ for which $\text{Precision}(\tau) \geq 0.5$ on validation. The last rule represents a minimum validation-precision target, not a guarantee that test precision will remain above 0.5 under sampling variation or distribution shift. If no validation threshold satisfies the target, the implementation records $\tau=\infty$; this no-alert convention produces no positive TEST predictions and therefore zero alert rate, recall, and $F$ scores. Section~\ref{sec:tb:thresholds} defines these rules, and Section~\ref{sec:tb:metrics} defines $F_{\beta}$.
 
 For OCSVM, these rules operate on the negated decision function rather than a calibrated probability. Its fixed value of 0.5 is retained as a numerical sensitivity reference but is not equivalent to a 50\% posterior-probability decision.
 
@@ -390,7 +451,7 @@ The protocol is as follows:
   \item \textbf{Descriptive comparison:} Report PR-AUC, ROC-AUC, $F_1$, and $F_2$ on Base and each Variant. Differences are measured relative to the Base reference, not to separately trained in-domain Variant models.
 \end{enumerate}
 
-This is a controlled stress test of a fixed Base-trained model under the BAF suite's predefined conditions. It does not reproduce the full complexity of transfer between institutions or production concept drift. Figure~\ref{fig:cross_domain} illustrates the protocol.
+This is a controlled stress test of a fixed Base-trained model under the BAF suite's predefined conditions. It does not reproduce the full complexity of transfer between institutions or production concept drift. Figure~\ref{fig:cross_domain} summarises this fixed Base-to-Variant protocol.
 
 \paragraph{Note on ULB \texorpdfstring{$\leftrightarrow$}{<->} BAF.}
 Cross-dataset transfer between ULB~2013 and the BAF suite is not feasible due to incompatible feature spaces (PCA-anonymised vs.\ semantic features). The BAF internal transfer setting instead provides controlled Variant test distributions with a matched 30-feature modelling space.
@@ -399,69 +460,149 @@ Cross-dataset transfer between ULB~2013 and the BAF suite is not feasible due to
 %  FIGURE 4.3 — Cross-Domain Generalisation Protocol (BAF Suite)
 % ═══════════════════════════════════════════════════════════════════════════
 
-\definecolor{clrBase}{HTML}{4472C4}      % Blue (BAF Base)
-\definecolor{clrVariant}{HTML}{ED7D31}   % Orange (Variants)
-\definecolor{clrDrop}{HTML}{CC0000}      % Red (degradation)
-
 \par\medskip\noindent\begin{minipage}{\linewidth}\centering
 \begin{tikzpicture}[
-    >={Stealth[length=2.5mm]},
-    node distance=0.6cm,
-    basebox/.style={
-        rectangle, rounded corners=3pt, minimum width=7cm, minimum height=1.1cm,
-        fill=clrBase, text=white, font=\footnotesize\bfseries, align=center,
-        drop shadow={shadow xshift=1pt, shadow yshift=-1pt}
+    node distance=0.34cm,
+    transferhead/.style={
+        rectangle, rounded corners=2pt, draw=pipeNavy, fill=pipeNavy,
+        text=white, text width=13.25cm, minimum height=0.92cm,
+        inner xsep=6pt, inner ysep=4pt, align=center, font=\small
     },
-    varbox/.style={
-        rectangle, rounded corners=3pt, minimum width=2.4cm, minimum height=1.1cm,
-        text width=2.15cm,
-        fill=clrVariant, text=white, font=\footnotesize\bfseries, align=center,
-        drop shadow={shadow xshift=0.8pt, shadow yshift=-0.8pt}
+    devbox/.style={
+        rectangle, rounded corners=2pt, draw=pipeNavy, line width=0.65pt,
+        fill=white, text=pipeInk, text width=3.72cm, minimum height=1.62cm,
+        inner xsep=4pt, inner ysep=4pt, align=center, font=\footnotesize
     },
-    compbox/.style={
-        rectangle, rounded corners=3pt, minimum width=7cm, minimum height=0.8cm,
-        fill=clrDrop!15, draw=clrDrop, line width=0.8pt,
-        text=clrDrop, font=\footnotesize\bfseries, align=center
+    frozenbox/.style={
+        devbox, draw=pipeTeal, fill=pipeTeal!9
     },
-    annot/.style={font=\scriptsize, text=black!60, align=center},
-    arrow/.style={->, thick, black!60},
+    devarea/.style={
+        rectangle, rounded corners=3pt, draw=pipeNavy, line width=0.75pt,
+        fill=pipeBlue!24, inner sep=7pt
+    },
+    constraint/.style={
+        rectangle, rounded corners=1.5pt, draw=pipeAmber, line width=0.65pt,
+        fill=pipeAmberLight, text=pipeAmber, text width=12.25cm,
+        minimum height=0.44cm, inner xsep=4pt, inner ysep=2pt,
+        align=center, font=\scriptsize\bfseries
+    },
+    applybox/.style={
+        rectangle, rounded corners=2pt, draw=pipeTeal, fill=pipeTeal,
+        text=white, text width=12.9cm, minimum height=0.72cm,
+        inner xsep=5pt, inner ysep=3pt, align=center, font=\footnotesize\bfseries
+    },
+    evalhead/.style={
+        rectangle, rounded corners=1.5pt, draw=pipeTeal, fill=pipeTeal,
+        text=white, text width=12.55cm, minimum height=0.34cm,
+        inner xsep=4pt, inner ysep=2pt, align=center, font=\scriptsize\bfseries
+    },
+    testbox/.style={
+        rectangle, rounded corners=2pt, line width=0.65pt,
+        text=pipeInk, text width=2.17cm, minimum height=1.18cm,
+        inner xsep=3pt, inner ysep=5pt, align=center, font=\scriptsize
+    },
+    varianttest/.style={testbox, draw=pipeAmber, fill=pipeAmberLight},
+    basetest/.style={
+        rectangle, rounded corners=2pt, draw=pipeNavy, line width=0.65pt,
+        fill=pipeBlue!55, text=pipeInk, text width=12.25cm,
+        minimum height=0.48cm, inner xsep=4pt, inner ysep=3pt,
+        align=center, font=\scriptsize
+    },
+    testarea/.style={
+        rectangle, rounded corners=3pt, draw=pipeTeal, line width=0.75pt,
+        fill=pipeTeal!7, inner sep=7pt
+    },
+    metricbox/.style={
+        rectangle, rounded corners=2pt, draw=pipeBorder, line width=0.65pt,
+        fill=pipeGrey, text=pipeInk, text width=11.5cm, minimum height=0.78cm,
+        inner xsep=5pt, inner ysep=4pt, align=center, font=\footnotesize
+    },
+    comparebox/.style={
+        rectangle, rounded corners=2pt, draw=pipeNavy, line width=0.65pt,
+        fill=pipeBlue!35, text=pipeInk, text width=12.9cm,
+        minimum height=0.78cm, inner xsep=5pt, inner ysep=4pt,
+        align=center, font=\footnotesize
+    },
+    transferflow/.style={-{Stealth[length=2.1mm,width=1.45mm]}, semithick, draw=pipeInk!78},
 ]
 
-% ── BAF Base (source) ──
-\node[basebox] (base)
-    {BAF Base (Train)\\[-2pt]
-     \fontsize{7}{8}\selectfont $N{=}800\text{K}$ DEV \;\;$\cdot$\;\; 30 features \;\;$\cdot$\;\; selected hyperparameters + $\tau$};
+% Base-only development
+\node[transferhead] (title)
+    {\textbf{Controlled BAF Base-to-Variant transfer protocol}};
 
-% ── Variants (targets) — single-line descriptions ──
-\node[varbox, below=2.0cm of base, xshift=-5.2cm] (v1)
-    {Variant I\\[-2pt] \fontsize{6.2}{7.2}\selectfont Group-size disparity};
-\node[varbox, right=0.3cm of v1] (v2)
-    {Variant II\\[-2pt] \fontsize{6.2}{7.2}\selectfont Prevalence disparity};
-\node[varbox, right=0.3cm of v2] (v3)
-    {Variant III\\[-2pt] \fontsize{6.2}{7.2}\selectfont Separability disparity};
-\node[varbox, right=0.3cm of v3] (v4)
-    {Variant IV\\[-2pt] \fontsize{6.2}{7.2}\selectfont Temporal prevalence};
-\node[varbox, right=0.3cm of v4] (v5)
-    {Variant V\\[-2pt] \fontsize{6.2}{7.2}\selectfont Temporal separability};
+\node[devbox, below=0.58cm of title, xshift=-4.30cm] (basedev)
+    {\textbf{1.\ BAF Base DEV}\\[-1pt]
+     {\scriptsize $80\%$ ($N{=}800\,000$)\\
+     Common 30-feature schema}};
 
-% ── Cross-domain label ──
-\node[font=\scriptsize\bfseries, text=clrBase]
-    at ($(base.south)!0.5!(v3.north)$) {Cross-domain transfer (no retraining)};
+\node[devbox, right=0.24cm of basedev] (develop)
+    {\textbf{2.\ Base-only development}\\[-1pt]
+     {\scriptsize Fit preprocessing and baseline model\\
+     Select/fix parameters; calibrate $\tau$\\
+     Refit on full Base DEV}};
 
-% ── Cross-domain arrows ──
-\draw[arrow, clrBase] (base.south) -- ++(0,-0.5) -| (v1.north);
-\draw[arrow, clrBase] (base.south) -- ++(0,-0.5) -| (v2.north);
-\draw[arrow, clrBase] (base.south) -- ++(0,-0.5) -| (v3.north);
-\draw[arrow, clrBase] (base.south) -- ++(0,-0.5) -| (v4.north);
-\draw[arrow, clrBase] (base.south) -- ++(0,-0.5) -| (v5.north);
+\node[frozenbox, right=0.24cm of develop] (frozen)
+    {\textbf{3.\ Frozen Base pipeline}\\[-1pt]
+     {\scriptsize Base-fitted preprocessing\\
+     Saved baseline model\\
+     Base-derived $\tau$}};
 
-% ── Comparison ──
-\node[compbox, below=1.0cm of v3] (comp)
-    {Compare transferred metrics with the BAF Base reference};
-\node[annot, below=0.2cm of comp] {PR-AUC \qquad ROC-AUC \qquad $F_1$ \qquad $F_2$};
+\begin{scope}[on background layer]
+    \node[devarea, fit=(basedev)(develop)(frozen)] (developmentarea) {};
+\end{scope}
+
+\node[constraint, below=0.30cm of developmentarea] (constraint)
+    {No Variant Retraining, Retuning, or Threshold Recalibration};
+
+\node[applybox, below=0.30cm of constraint] (apply)
+    {4.\ Apply each frozen Base baseline pipeline unchanged};
+
+% TEST-only evaluation distributions
+\node[evalhead, below=0.42cm of apply] (testlabel)
+    {TEST-only evaluation distributions: $20\%$ ($N{=}200\,000$ each)};
+
+\node[basetest, below=0.18cm of testlabel] (basetest)
+    {\textbf{BAF Base TEST} \quad---\quad in-domain reference};
+
+\node[varianttest, below=0.18cm of basetest, xshift=-5.12cm] (v1)
+    {\textbf{Variant I}\\[-1pt]
+     Group-size disparity};
+\node[varianttest, right=0.18cm of v1] (v2)
+    {\textbf{Variant II}\\[-1pt]
+     Prevalence disparity};
+\node[varianttest, right=0.18cm of v2] (v3)
+    {\textbf{Variant III}\\[-1pt]
+     Separability disparity};
+\node[varianttest, right=0.18cm of v3] (v4)
+    {\textbf{Variant IV}\\[-1pt]
+     Temporal prevalence};
+\node[varianttest, right=0.18cm of v4] (v5)
+    {\textbf{Variant V}\\[-1pt]
+     Temporal separability};
+
+\begin{scope}[on background layer]
+    \node[testarea, fit=(testlabel)(basetest)(v1)(v2)(v3)(v4)(v5)] (evaluationarea) {};
+\end{scope}
+
+\node[metricbox, below=0.36cm of evaluationarea] (metrics)
+    {\textbf{Common evaluation:}\quad use the same model-specific Base $\tau$ on all six
+     distributions \quad$\vert$\quad PR-AUC, ROC-AUC, $F_1$, $F_2$, and bootstrap CIs};
+
+\node[comparebox, below=0.28cm of metrics] (comparison)
+    {\textbf{Descriptive comparison:}\quad each Variant TEST result versus the BAF Base TEST
+     reference; same 30 features, with \texttt{x1}/\texttt{x2} excluded from Variants III/V};
+
+% Transfer flow
+\draw[transferflow] (basedev) -- (develop);
+\draw[transferflow] (develop) -- (frozen);
+\draw[transferflow] (frozen.south) |- ($(constraint.north)+(3.6cm,0)$);
+\draw[transferflow] (constraint) -- (apply);
+\draw[transferflow] (apply) -- (testlabel);
+\draw[transferflow] (evaluationarea) -- (metrics);
+\draw[transferflow] (metrics) -- (comparison);
 
 \end{tikzpicture}
-\captionof{figure}[Cross-domain generalisation protocol within the BAF suite]{Cross-domain generalisation protocol within the BAF suite. A model trained on BAF~Base is applied directly to Variants~I--V without retraining or threshold recalibration. The transferred metrics are compared descriptively with the Base reference; no separate in-domain Variant models are trained.}
+\captionof{figure}[Controlled BAF Base-to-Variant transfer protocol]{Controlled BAF Base-to-Variant transfer. Base-fitted preprocessing, model, and threshold are frozen and applied to Base TEST and Variant~I--V TEST partitions without retraining or recalibration. All evaluations use the aligned 30-feature input.}
 \label{fig:cross_domain}
 \end{minipage}\par\medskip
 
@@ -485,6 +626,9 @@ Two proxies for human review workload are reported: the alert rate $\frac{TP+FP}
 
 \paragraph{Confidence intervals.}
 Bootstrap $95\%$ confidence intervals ($B{=}1\,000$ iterations) are computed on the held-out test set for PR-AUC, ROC-AUC, and $F_2$. These intervals describe test-sample uncertainty conditional on each fitted model and split; they do not capture training-seed, split, or hyperparameter-search variability, and overlap between separate marginal intervals is not a formal paired significance test.
+
+\paragraph{Reporting precision.}
+Baseline and cross-domain tables retain four decimal places where close point estimates must be distinguished. Factorial and threshold tables, figures, and running text generally use three decimal places for readability. All deltas and derived summaries are computed from the unrounded saved metrics; apparent discrepancies of approximately $0.001$ may therefore result from display rounding.
 
 % ──────────────────────────────────────────────────────────────────────────
 \section{Computational Cost and Reproducibility}

@@ -1,6 +1,6 @@
 \begin{table}[H]
 \centering
-\caption{FT-Transformer vs.\ best tree (CatBoost): robustness to imbalance strategies on ULB 2013.}
+\caption{FT-Transformer and CatBoost performance across imbalance strategies on ULB 2013. The final row is the population standard deviation across the seven complete strategy values, computed from unrounded metrics.}
 \label{tab:transformer_robustness_ulb}
 \begin{tabular}{l cc cc}
 \toprule
@@ -15,7 +15,7 @@ SM+Tomek  & 0.845 & 0.821 & 0.857 & 0.823 \\
 SMOTEENN  & 0.772 & 0.795 & 0.846 & 0.816 \\
 Weights   & 0.783 & 0.813 & 0.875 & 0.838 \\
 \midrule
-\textit{Std.\ dev.} & \textit{0.072} & \textit{0.044} & \textit{0.096} & \textit{0.060} \\
+\textit{Pop.\ std.\ dev.} & \textit{0.067} & \textit{0.038} & \textit{0.088} & \textit{0.054} \\
 \bottomrule
 \end{tabular}
 \end{table}

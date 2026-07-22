@@ -1,5 +1,13 @@
 # ULB/ Reference Curation Notes
 
+> **Final project status (22 July 2026):** This is an archival record of the
+> completed ULB literature-curation process. Both halves described below were
+> completed. The dissertation V3 has been sent to the supervisors, and the
+> authoritative final selection is `Overleaf/references.bib`: 46 entries, 41
+> cited. Any earlier wording such as "pending", proposed keys, or future
+> curation actions is historical and does not represent outstanding thesis
+> work.
+
 **Curated by**: Claude Opus 4.7 (1M context)
 **Date**: 2026-05-04 (Phase 2 part 1; second half pending)
 **Source**: User uploaded ~57 PDFs to ULB/ during Phase 1-3.

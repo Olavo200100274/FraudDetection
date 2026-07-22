@@ -1,5 +1,12 @@
 # General/ Reference Curation Notes
 
+> **Final project status (22 July 2026):** This is an archival record of the
+> literature-curation stage. The dissertation is complete and the V3 PDF has
+> been sent to the supervisors. The authoritative final selection is
+> `Overleaf/references.bib`: it contains 46 entries, of which 41 are cited in
+> the dissertation. Conditional references and Phase 5 writing instructions
+> below are historical context rather than pending work.
+
 **Curated by**: Claude Opus 4.7 (1M context)
 **Date**: 2026-05-04
 **Source**: triagem de `referencesForAproval/` (Phase 3 do plano de SoA)

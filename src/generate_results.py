@@ -613,6 +613,73 @@ def generate_factorial_tables(fdata, dataset_label, filename):
     )
 
 
+def generate_transformer_robustness_table(fdata, dataset_label, filename):
+    """Compare FT-Transformer and CatBoost across all seven strategies.
+
+    The final row is the population standard deviation (``ddof=0``) across the
+    complete set of designed strategy conditions, computed from the unrounded
+    metrics stored in the run artefacts.
+    """
+    models = ("fttransformer", "catboost")
+    if any(fdata[model].get(strategy) is None
+           for model in models for strategy in BALANCE_ORDER):
+        print(f"  Incomplete {dataset_label} robustness grid — skipping.")
+        return
+
+    row_labels = {
+        "none": "None",
+        "rus": "RUS",
+        "ros": "ROS",
+        "smote": "SMOTE",
+        "smote_tomek": "SM+Tomek",
+        "smoteenn": "SMOTEENN",
+        "weights": "Weights",
+    }
+    lines = [
+        r"\begin{table}[H]",
+        r"\centering",
+        (r"\caption{FT-Transformer and CatBoost performance across imbalance "
+         rf"strategies on {dataset_label}. The final row is the population "
+         r"standard deviation across the seven complete strategy values, "
+         r"computed from unrounded metrics.}"),
+        rf"\label{{tab:transformer_robustness_{filename}}}",
+        r"\begin{tabular}{l cc cc}",
+        r"\toprule",
+        r"& \multicolumn{2}{c}{FT-Transformer} & \multicolumn{2}{c}{CatBoost} \\",
+        r"Strategy & PR-AUC & $F_2$ & PR-AUC & $F_2$ \\",
+        r"\midrule",
+    ]
+
+    for strategy in BALANCE_ORDER:
+        ft_metrics = fdata["fttransformer"][strategy]
+        cb_metrics = fdata["catboost"][strategy]
+        lines.append(
+            f"{row_labels[strategy]:<9s} & {ft_metrics['PR-AUC']:.3f} & "
+            f"{ft_metrics['F2']:.3f} & {cb_metrics['PR-AUC']:.3f} & "
+            f"{cb_metrics['F2']:.3f} " + r"\\"
+        )
+
+    def population_sd(model, metric):
+        values = [fdata[model][strategy][metric] for strategy in BALANCE_ORDER]
+        return float(np.std(values, ddof=0))
+
+    lines.extend([
+        r"\midrule",
+        (r"\textit{Pop.\ std.\ dev.} & "
+         f"\\textit{{{population_sd('fttransformer', 'PR-AUC'):.3f}}} & "
+         f"\\textit{{{population_sd('fttransformer', 'F2'):.3f}}} & "
+         f"\\textit{{{population_sd('catboost', 'PR-AUC'):.3f}}} & "
+         f"\\textit{{{population_sd('catboost', 'F2'):.3f}}} " + r"\\"),
+        r"\bottomrule",
+        r"\end{tabular}",
+        r"\end{table}",
+    ])
+
+    out = _tables_dir(filename) / "transformer_robustness.tex"
+    out.write_text("\n".join(lines), encoding="utf-8")
+    _emit(out)
+
+
 def generate_factorial_heatmap(fdata, dataset_label, filename):
     """
     Generate a heatmap of ΔPR-AUC (strategy − baseline) for each model.
@@ -1217,17 +1284,28 @@ def generate_shap_dependence(global_data):
         # Top-3 features from global importance
         top3 = list(global_data["lgbm"].keys())[:3]
 
+        # The global report groups one-hot columns back to their source
+        # categorical features.  A grouped name therefore cannot be plotted
+        # directly against a single transformed column.  Do not emit a
+        # partially empty and potentially misleading figure when this occurs.
+        missing_features = [name for name in top3 if name not in feature_names]
+        if missing_features:
+            print(
+                "  [WARN] SHAP dependence plot skipped: grouped top-feature "
+                f"names are absent from the transformed matrix: {missing_features}"
+            )
+            return
+
         fig, axes = plt.subplots(1, 3, figsize=(18, 5))
         for ax, feat_name in zip(axes, top3):
-            if feat_name in feature_names:
-                idx = feature_names.index(feat_name)
-                ax.scatter(X_transformed_np[:, idx], shap_values[:, idx],
-                          alpha=0.05, s=3, c=shap_values[:, idx],
-                          cmap="coolwarm", rasterized=True)
-                ax.set_xlabel(feat_name, fontsize=11)
-                ax.set_ylabel("SHAP value", fontsize=11)
-                ax.axhline(0, color="black", linewidth=0.5, alpha=0.5)
-                ax.grid(alpha=0.2)
+            idx = feature_names.index(feat_name)
+            ax.scatter(X_transformed_np[:, idx], shap_values[:, idx],
+                       alpha=0.05, s=3, c=shap_values[:, idx],
+                       cmap="coolwarm", rasterized=True)
+            ax.set_xlabel(feat_name, fontsize=11)
+            ax.set_ylabel("SHAP value", fontsize=11)
+            ax.axhline(0, color="black", linewidth=0.5, alpha=0.5)
+            ax.grid(alpha=0.2)
 
         plt.suptitle("SHAP Dependence Plots — LGBM on BAF Base (top-3 features)",
                      fontsize=13)
@@ -1299,6 +1377,7 @@ def main():
     if n_combos > 0:
         print(f"\n── ULB 2013 — Factorial ({n_combos} combos) ──")
         generate_factorial_tables(ulb_fact, "ULB 2013", "ulb")
+        generate_transformer_robustness_table(ulb_fact, "ULB 2013", "ulb")
         generate_factorial_heatmap(ulb_fact, "ULB 2013", "ulb")
     else:
         print("\n  No ULB factorial results found — skipping.")
@@ -1337,6 +1416,7 @@ def main():
     if n_baf_combos > 0:
         print(f"\n── BAF Base — Factorial ({n_baf_combos} combos) ──")
         generate_factorial_tables(baf_fact, "BAF Base", "baf")
+        generate_transformer_robustness_table(baf_fact, "BAF Base", "baf")
         generate_factorial_heatmap(baf_fact, "BAF Base", "baf")
     else:
         print("\n  No BAF factorial results found — skipping.")

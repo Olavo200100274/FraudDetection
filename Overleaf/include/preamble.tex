@@ -17,7 +17,9 @@
 \usepackage{enumitem}
 \usepackage{ragged2e}
 \usepackage[utf8]{inputenc}
-\usepackage[british]{babel}
+% Keep British English as the document default; enable Portuguese for
+% language-scoped front-matter sections.
+\usepackage[portuguese,british]{babel}
 \usepackage[pdftex]{hyperref}
 
 
@@ -68,6 +70,9 @@
 
 \usepackage{parskip}
 \usepackage{fancyhdr}	
+% Suppress running headers and page numbers on blank verso pages inserted by
+% \cleardoublepage in the two-sided, open-right layout.
+\usepackage{emptypage}
 \usepackage{eso-pic}	
 \usepackage{makeidx}
 \usepackage[toc,page]{appendix}

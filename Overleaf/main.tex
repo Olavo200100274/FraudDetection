@@ -7,11 +7,9 @@
 %\input{glossary.tex}
 
 \pagenumbering{roman}
-\setcounter{page}{0}
 
 % TITLE PAGE
 \input{include/0-titlepage-EN.tex}
-\null\newpage
 % ENTITIES
 %\input{include/emptyPage.tex}
 %\input{include/entities.tex}
@@ -20,8 +18,10 @@
 %\input{include/emptyPage.tex}
 %\input{include/copyright.tex}
 
+% DECLARATION ON THE USE OF GENERATIVE ARTIFICIAL INTELLIGENCE
+\input{include/ai-declaration.tex}
+
 % ACKNOWLEDGMENTS [OPTIONAL]
-\input{include/emptyPage.tex}
 \input{include/acknowledgments.tex}
 
 
@@ -33,15 +33,9 @@
 %\input{include/emptyPage.tex}
 %\input{include/financing.tex}
 
-%\renewcommand{\epigraphsize}
-
-% EPIGRAPH [OPTIONAL]	
-\input{include/emptyPage.tex}
-\input{include/epigraph.tex}
-
 % PORTUGUESE ABSTRACT
-%\input{include/emptyPage.tex}
-%\input{Chapters/abstract/abstract-PT.tex}
+\input{include/emptyPage.tex}
+\input{Chapters/abstract/abstract-PT.tex}
 
 % ABSTRACT
 \input{include/emptyPage.tex}
@@ -59,8 +53,9 @@
 
 % ABBREVIATIONS
 \input{include/abbreviation.tex}
+% abbreviation.tex ships its final page while Roman numbering is active;
+% start the main matter directly to avoid an intervening Arabic page 0.
 \pagenumbering{arabic}
-\setcounter{page}{0}
 
 \input{Chapters/1-Introduction}
 \input{Chapters/2-State of the Art}
@@ -70,23 +65,12 @@
 \input{Chapters/6-conclusion}
 \input{Chapters/7-appendices}
 
-% APPENDICES [OPTIONAL]
-\newpage\null\newpage
-%\input{../chapters/appendices/appendix.tex}
-
 % REFERENCES / BIBLIOGRAPHY
 \cleardoublepage
 
 \bibliographystyle{IEEEtran}
 
 \bibliography{references}
-
-
-% INDEX [OPTIONAL]
-% Each time you want to add an entry to index you need to use \index{text}
-\newpage\null\newpage
-\printindex
-
 
 \end{document}
 

@@ -2,6 +2,7 @@
 % !TEX encoding = UTF-8 Unicode
 
 \chapter*{Abbreviations}
+\markboth{Abbreviations}{}
 \label{chapter:abbreviations}
 \addcontentsline{toc}{chapter}{Abbreviations}
 
@@ -58,3 +59,8 @@
 
 \acresetall
 \end{acronym}
+
+% Ship every Abbreviations page while Roman numbering is still active.  The
+% following \cleardoublepage in main.tex then handles open-right parity before
+% the Arabic page counter is started.
+\clearpage

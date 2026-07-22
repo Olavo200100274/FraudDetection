@@ -2,6 +2,11 @@
 \chapter{Appendix}
 \label{chapter:annex}
 
+% The appendix contains page-sized, non-floating tables and fixed-position
+% figure groups. Keep residual space at page bottoms rather than stretching
+% paragraph and section spacing around these indivisible blocks.
+\raggedbottom
+
 % ══════════════════════════════════════════════════════════════════════════
 \section{Selected Hyperparameter Configurations}
 \label{appendixA}
@@ -124,8 +129,6 @@ OCSVM & \multicolumn{2}{l}{Default scikit-learn parameters (no HPO)} \\
 
 The following figures supplement Section~\ref{sec:attention_diagnostics} (p.~\pageref{sec:attention_diagnostics}) of the Results and Discussion chapter. Each bar chart shows the final-layer, head-averaged per-feature attention weight for one selected test case, with categorical features in orange and numerical features in blue. The dashed horizontal line marks the uniform reference ($1/31 \approx 3.2\%$). All six cases are close to the decision threshold ($\tau = 0.058$), with predicted fraud scores within $0.001$ of that value.
 
-The selected cases show no strongly dominant feature in the inspected final-layer average. Their similarity to the aggregate view is descriptive only: the figures do not determine whether individual heads or earlier layers contain more concentrated patterns.
-
 \begin{figure}[H]
 \centering
 \begin{subfigure}[b]{0.82\textwidth}
@@ -177,3 +180,10 @@ The selected cases show no strongly dominant feature in the inspected final-laye
 \caption[Per-feature attention for three false-negative cases]{Final-layer, head-averaged per-feature attention weights for three false-negative cases (BAF Base). Orange bars\,=\,categorical features; blue bars\,=\,numerical features. The dashed line indicates the uniform attention reference ($1/31 \approx 3.2\%$). All cases have scores just below $\tau = 0.058$. The selected false-positive and false-negative cases show a similar diffuse pattern; this diagnostic does not capture earlier layers or individual attention heads.}
 \label{fig:attention_bar_fn}
 \end{figure}
+
+Across Figures~\ref{fig:attention_bar_fp} and~\ref{fig:attention_bar_fn}, the selected cases show no strongly dominant feature in the inspected final-layer average. Their similarity to the aggregate view is descriptive only: the figures do not determine whether individual heads or earlier layers contain more concentrated patterns.
+
+% Ship the final Appendix page with natural spacing, then restore the default
+% pagination before the bibliography.
+\clearpage
+\flushbottom

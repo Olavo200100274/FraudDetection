@@ -1,15 +1,18 @@
+\begin{otherlanguage}{portuguese}
+
 \section*{Resumo}
+\markboth{Resumo}{}
 \label{sec:resumo}
 
-A deteção de fraude financeira sob extremo desequilíbrio de classes é um problema de aprendizagem automática com consequências económicas e operacionais diretas. Apesar do elevado volume de trabalho publicado, a literatura apresenta limitações metodológicas recorrentes — fuga de dados através de reamostragem incorreta, utilização de ROC-AUC como métrica principal em cenários de desequilíbrio severo, seleção implícita de limiar de decisão e avaliações em conjunto de dados único — que impedem comparações fiáveis entre famílias de modelos clássicos e de aprendizagem profunda.
+\begin{center}
+\textbf{Deteção de fraude financeira em contexto de desequilíbrio extremo de classes: um estudo comparativo sem fuga de dados entre aprendizagem automática clássica e transformers para dados tabulares}
+\end{center}
 
-Esta dissertação apresenta uma comparação controlada e livre de fuga de dados envolvendo seis famílias de modelos — Regressão Logística, Random Forest, LightGBM, CatBoost, One-Class SVM e FT-Transformer — em dois conjuntos de dados de referência: ULB Credit Card Fraud e Bank Account Fraud (BAF). Um desenho fatorial completo avalia sete estratégias de tratamento do desequilíbrio de classes em cinco modelos supervisionados, mantendo o One-Class SVM como uma referência não supervisionada separada. São comparadas quatro regras de seleção de limiar, escolhidas exclusivamente com dados de validação. A generalização entre domínios é avaliada aplicando modelos treinados no BAF Base a cinco variantes controladas, sem novo treino. Os conjuntos das principais características SHAP são comparados entre os modelos linear e baseados em árvores, enquanto a atenção da última camada do FT-Transformer é examinada separadamente através de um diagnóstico baseado em entropia.
+A deteção de fraude financeira sob desequilíbrio extremo exige avaliação sem fuga de dados, distinguindo ordenação e decisões operacionais. Esta dissertação compara seis famílias nos conjuntos ULB e BAF. O desenho experimental combina teste, validação por modelo, sete estratégias de desequilíbrio, quatro regras de limiar, transferência Base-para-Variant, comparações SHAP e diagnóstico de atenção. O CatBoost obteve o melhor PR-AUC no ULB (0,885); no BAF Base, FT-Transformer, CatBoost e LGBM atingiram 0,180, 0,180 e 0,177, respetivamente. Limiares validados melhoraram o F2 no BAF face ao limiar 0,5. No BAF Base, o SMOTE reduziu em 41\% o PR-AUC do FT-Transformer na implementação avaliada; o Random Forest liderou PR-AUC e F2 nas cinco variantes BAF. Os conjuntos SHAP das árvores foram estáveis; a atenção do FT-Transformer foi difusa. Os resultados sustentam avaliações sem fuga de dados e sensíveis ao limiar; árvores com boosting permanecem competitivas com transformers tabulares.
 
-No ULB, o CatBoost obtém o PR-AUC mais elevado (0,885) e o FT-Transformer atinge 0,856; no BAF Base, ambos arredondam para 0,180. No BAF, um limiar fixo de $\tau=0{,}5$ produz $F_2<0{,}05$ em todos os modelos supervisionados, enquanto os limiares max-$F_2$ selecionados na validação produzem valores entre 0,29 e 0,32. No percurso de reamostragem implementado, que não trata explicitamente as variáveis categóricas, o SMOTE reduz o PR-AUC do FT-Transformer em 41\% e o do CatBoost em 14\%. O Random Forest apresenta PR-AUC superior ao valor Base nas Variants I--IV e permanece praticamente inalterado na Variant V, embora o seu $F_2$ diminua em duas variantes. O LGBM e o CatBoost recuperam o mesmo conjunto das dez principais características SHAP, e o conjunto do LGBM treinado no Base mantém-se nas distribuições de teste das variantes. A atenção da última camada do FT-Transformer, agregada entre cabeças, é difusa (entropia normalizada 0,976); este resultado descreve o padrão do modelo ajustado, mas não demonstra um limite informativo.
-
-Os resultados fornecem um enquadramento de decisão orientado para profissionais e evidência delimitada sobre as condições em que os modelos de gradient boosting permanecem competitivos com um transformer tabular, explicitando simultaneamente os limites das interpretações causais e de explicabilidade.
-
-\section*{Palavras-Chave}
+\section*{Palavras-chave}
 \label{sec:palavras}
 
-Deteção de fraude financeira, aprendizagem automática, gradient boosted decision trees, transformers tabulares, desequilíbrio de classes, avaliação livre de fuga de dados, SHAP, diagnósticos de atenção, generalização entre domínios.
+Deteção de fraude financeira; desequilíbrio de classes; avaliação sem fuga de dados; limiares de decisão; aprendizagem automática tabular.
+
+\end{otherlanguage}

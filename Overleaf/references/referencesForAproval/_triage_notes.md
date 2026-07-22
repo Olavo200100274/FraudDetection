@@ -1,5 +1,11 @@
 # referencesForAproval/ Triage Notes
 
+> **Final project status (22 July 2026):** This queue is closed and this file is
+> retained only as an audit trail. The dissertation is complete and the V3 PDF
+> has been sent to the supervisors. The authoritative bibliography is
+> `Overleaf/references.bib`, with 46 entries and 41 cited keys. No triage or
+> conditional bibliography action remains pending for submission.
+
 **Triaged by**: Claude Opus 4.7 (1M context)
 **Date**: 2026-05-04
 **Total files triaged**: 46 (42 PDFs + 4 .url)

@@ -1,5 +1,13 @@
 # BAF Reference Curation Notes
 
+> **Final project status (22 July 2026):** This is an archival record of the
+> literature-curation stage. The dissertation is complete and the V3 PDF has
+> been sent to the supervisors. The authoritative final selection is
+> `Overleaf/references.bib`: it contains 46 entries, of which 41 are cited in
+> the dissertation. Suggested searches, conditional additions, and other
+> future actions below are historical notes and are not outstanding thesis
+> tasks. No additional literature expansion is required for submission.
+
 **Curated by**: Claude Opus 4.7 (1M context), in conversation with Olavo Caixeiro
 **Date**: 2026-05-03
 **Method**: Read first 10-12 pages of each PDF using PyMuPDF, classified against the 6 thesis contributions.

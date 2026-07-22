@@ -9,6 +9,10 @@ reports/
 .claude/
 .claude_context/
 
+# Local development and QA workspaces
+.venv/
+tmp/
+
 # archived old GridSearchCV results (large, superseded by Optuna runs)
 results_old_gridSearch/
 
@@ -29,4 +33,11 @@ thesis/Results_old*.tex
 
 # Overleaf download archive
 Overleaf.zip
+
+# Unused files from the full Elsevier CAS template distribution.
+# Article 2 keeps only the class/style/bibliography files required by main.tex.
+Article 2/els-cas-templates/
+Article 2/cas-sc-sample.tex
+Article 2/cas-dc.cls
+Article 2/figs/cas-*
 
