@@ -6,21 +6,23 @@ Olavo Caixeiro's MSc dissertation in Applied Informatics.
 
 ## Current status
 
-**Status date:** 22 July 2026
+**Status date:** 24 August 2026
 
-**Completion state:** Phases 1--6 completed
+**Completion state:** Dissertation finalised and fully validated
 
-**Submission state:** The final V3 dissertation was sent to the supervisors on
-22 July 2026. No scientific, editorial, structural, or visual correction is
-currently outstanding. The project is waiting only for possible final feedback
-and the formal institutional deposit.
+**Submission state:** The final dissertation incorporates the updated official
+institutional identity and has passed a complete final review. No scientific,
+editorial, structural, navigational, or visual correction is outstanding. The
+remaining activities are the formal institutional deposit and preparation of
+the defence presentation.
 
-The accepted submission candidate is:
+The authoritative final submission candidate is:
 
-- `deliverables/2026_22_07_Thesis_MSc_Olavo_V3.pdf`
+- `deliverables/2026_24_08_Thesis_MSc_Olavo_Final.pdf`
 
-The supervisor review and the accompanying change summary are preserved in the
-same directory. See `deliverables/README.md` for the exact file roles.
+The supervisor-reviewed V3, the review document, and the accompanying change
+summary remain preserved in the same directory. See `deliverables/README.md`
+for the exact file roles.
 
 ## Scientific scope
 
@@ -68,7 +70,7 @@ computer reset without publishing that private working material.
 
 ## Final dissertation validation
 
-The final V3 PDF passed a complete cover-to-cover review of all 111 physical
+The final PDF passed a complete cover-to-cover review of all 111 physical
 pages. The final checks confirmed:
 
 - coherent alignment between the five research questions, six contributions,
@@ -83,7 +85,7 @@ pages. The final checks confirmed:
   blank page;
 - only the expected `openright` and front-matter blank pages.
 
-The Abstract and Resumo each contain exactly 150 words. The current PDF contains
+The Abstract and Resumo each contain exactly 145 words. The current PDF contains
 Roman page labels `i`--`xx`, followed by Arabic page labels `1`--`91`.
 
 ## Restoring the project on a new computer
@@ -114,7 +116,7 @@ Roman page labels `i`--`xx`, followed by Arabic page labels `1`--`91`.
 
 4. Import the contents of `Overleaf/` into Overleaf and compile
    `Overleaf/main.tex` with pdfTeX. The versioned PDF in `deliverables/` remains
-   the authoritative submitted V3 candidate.
+   the authoritative final submission candidate.
 
 ## Writing and language policy
 
@@ -127,7 +129,8 @@ Roman page labels `i`--`xx`, followed by Arabic page labels `1`--`91`.
 
 ## Next action
 
-Wait for possible supervisor or institutional feedback. If feedback arrives,
+Use the authoritative final PDF for the formal institutional deposit and begin
+preparation of the defence presentation. If institutional feedback arrives,
 record it before changing the accepted source, make only evidence-supported
 changes, rebuild the PDF in Overleaf, and re-run the relevant textual, numeric,
-reference, pagination, and visual checks before formal deposit.
+reference, pagination, and visual checks.

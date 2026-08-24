@@ -17,6 +17,7 @@
 \usepackage{enumitem}
 \usepackage{ragged2e}
 \usepackage[utf8]{inputenc}
+\usepackage[T1,OT1]{fontenc}
 % Keep British English as the document default; enable Portuguese for
 % language-scoped front-matter sections.
 \usepackage[portuguese,british]{babel}
@@ -26,6 +27,13 @@
 %\usepackage[acronym,toc,style=tree,nonumberlist,automake]{glossaries}
 \usepackage[nopostdot,style=super,nonumberlist,toc]{glossaries}
 \usepackage{graphicx}
+% Load the cover's Helvetica-compatible font without changing the
+% sans-serif or bold defaults used by the rest of the dissertation.
+\let\ThesisOriginalSansDefault\sfdefault
+\let\ThesisOriginalBoldDefault\bfdefault
+\usepackage{tgheros}
+\let\sfdefault\ThesisOriginalSansDefault
+\let\bfdefault\ThesisOriginalBoldDefault
 \usepackage{rotating}
 \usepackage{tikz}
 \usepackage{mathtools}

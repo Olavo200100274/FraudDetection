@@ -1,15 +1,18 @@
 # Final Dissertation Deliverables
 
-**Status date:** 22 July 2026
+**Status date:** 24 August 2026
 
-**Status:** Final V3 sent to the supervisors; awaiting possible final feedback
-and formal institutional submission.
+**Status:** Final dissertation fully validated and ready for formal
+institutional submission.
 
 ## Files
 
-- `2026_22_07_Thesis_MSc_Olavo_V3.pdf` — authoritative 111-page submission
-  candidate generated from the final Overleaf source and sent to the
-  supervisors on 22 July 2026.
+- `2026_24_08_Thesis_MSc_Olavo_Final.pdf` — authoritative 111-page final
+  submission candidate. It incorporates the updated official institutional
+  identity, the native LaTeX cover, and the final Abstract/Resumo layout.
+- `2026_22_07_Thesis_MSc_Olavo_V3.pdf` — preserved supervisor-reviewed
+  submission candidate sent on 22 July 2026. Its scientific content remains
+  unchanged in the authoritative final version.
 - `Resumo_Ajustes_Apos_Revisao.docx` — one-page Portuguese summary of the
   changes applied after the supervisor review, sent with the V3 PDF.
 - `supervisor_feedback/Revisao_Dissertacao_Olavo_Caixeiro.pdf` — supervisor
@@ -17,10 +20,11 @@ and formal institutional submission.
 
 ## Validation state
 
-The V3 PDF passed complete scientific, numeric, linguistic, cross-reference,
-pagination, and visual validation. All 111 pages were read and inspected. No
-outstanding correction was identified before delivery to the supervisors.
+The authoritative final PDF passed complete scientific, numeric, linguistic,
+cross-reference, pagination, hyperlink, and visual validation. All 111 pages
+were read and inspected. The Abstract and Resumo each contain 145 words, and no
+outstanding correction was identified.
 
-Do not overwrite these files. If a later approved version is produced, preserve
-V3 and add the new deliverable under a new dated/versioned filename together
-with a short record of the feedback that caused the change.
+Do not overwrite these files. If a later institutionally requested version is
+produced, preserve the current final PDF and add the replacement under a new
+dated/versioned filename together with a short record of the requested change.
