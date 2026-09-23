@@ -263,7 +263,7 @@ against the final thesis before reusing it.
 | [results_thesis/](results_thesis/) | Generated tables and figures, including some exploratory or superseded outputs. |
 | [notebooks/](notebooks/) | Exploratory dataset analysis. |
 | [Overleaf/](Overleaf/) | Dissertation LaTeX source; `main.tex` is the entry point. |
-| [deliverables/](deliverables/README.md) | Final dissertation PDF and historical review documents, with file roles documented. |
+| [deliverables/](deliverables/README.md) | Final dissertation PDF and a preserved earlier thesis version, with file roles documented. |
 | [Article 1/](Article%201/) and [Article 2/](Article%202/) | Related draft manuscripts and template resources; not evidence of journal acceptance. |
 
 A typical experiment is stored under
@@ -297,6 +297,10 @@ year, and include the repository URL and the commit used for your analysis:
 
 Dataset authors and third-party methods should be cited separately; see the
 [dissertation bibliography](Overleaf/references.bib).
+
+The local literature library and academic review records are excluded from the
+current repository tree; they are not needed to compile the thesis or reproduce
+the experiments. Earlier commits may still contain historical copies.
 
 No project-wide open-source licence is currently declared. Public availability
 does not itself grant a blanket reuse licence; datasets, third-party papers,

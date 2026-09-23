@@ -41,3 +41,9 @@ Article 2/cas-sc-sample.tex
 Article 2/cas-dc.cls
 Article 2/figs/cas-*
 
+# Local literature library and academic review records (not public deliverables).
+# These exclusions do not remove files from earlier Git history.
+/Overleaf/references/
+/deliverables/supervisor_feedback/
+/deliverables/Resumo_Ajustes_Apos_Revisao.docx
+

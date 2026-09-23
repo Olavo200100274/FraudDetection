@@ -13,10 +13,11 @@ institutional submission.
 - `2026_22_07_Thesis_MSc_Olavo_V3.pdf` — preserved supervisor-reviewed
   submission candidate sent on 22 July 2026. Its scientific content remains
   unchanged in the authoritative final version.
-- `Resumo_Ajustes_Apos_Revisao.docx` — one-page Portuguese summary of the
-  changes applied after the supervisor review, sent with the V3 PDF.
-- `supervisor_feedback/Revisao_Dissertacao_Olavo_Caixeiro.pdf` — supervisor
-  review document that defined the final correction round.
+
+Academic review records and the accompanying change summary are excluded from
+the current public tree and retained locally. They are not required to read the
+dissertation or reproduce the experiments. This exclusion does not remove copies
+from earlier Git history.
 
 ## Validation state
 
